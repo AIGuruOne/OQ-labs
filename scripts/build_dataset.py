@@ -87,6 +87,16 @@ def build(args):
     train_examples, val_examples, unused_examples = du.split_train_val(
         pool, clean_train_size, clean_val_size, args.seed
     )
+    # A pool that is too small gives SHORT splits, not an error. Never
+    # write a dataset that is quietly smaller than the one asked for.
+    if len(train_examples) != clean_train_size or len(val_examples) != clean_val_size:
+        sys.exit(
+            f"Not enough tickets: {len(pool)} are left after the held-out 20, but this build needs "
+            f"{clean_train_size} train + {clean_val_size} val = {clean_train_size + clean_val_size} "
+            f"unplanted rows (got {len(train_examples)} + {len(val_examples)}).\n"
+            "Lower --train-size / --val-size. With --no-plant nothing is added by planting, so the "
+            f"two sizes together cannot exceed {len(pool)}."
+        )
 
     # --- 4. pair -------------------------------------------------------------
     heldout_pairs = [du.build_pair(e["ticket"], e["record"]) for e in heldout_examples]

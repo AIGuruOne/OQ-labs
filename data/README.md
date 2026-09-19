@@ -81,3 +81,27 @@ python scripts/build_dataset.py --seed 42 --no-plant --finetune-dir <dir> --eval
 ```
 
 The held-out 20 are identical with and without `--no-plant`.
+
+`--train-size` and `--val-size` exist, but only 580 tickets are left
+after the held-out 20. Ask for more than the corpus can supply (for
+example `--no-plant --train-size 500 --val-size 100`) and the builder
+stops with "Not enough tickets" rather than writing a short file.
+
+## Checking a dataset - `scripts/quality_checks.py`
+
+```
+python scripts/quality_checks.py --dataset data/finetune
+python scripts/quality_checks.py --dataset <train file> --val <val file>
+```
+
+Five checks: near-duplicates, train/val leakage and schema violations
+are hard failures (exit code 1); coverage gaps and class imbalance are
+warnings (exit code 0). Exit code 2 means the input could not be read.
+On the committed files it reports exactly the planted problems - 20
+pairs, 5 rows, 10 rows, each with file:line - and
+`tests/test_quality_checks.py` holds it to precision = recall = 1.0
+against `planted_problems.json`, down to the line, field and kind.
+
+**The class imbalance is reported and never corrected.** There is no
+rebalancing function anywhere in the repo, on purpose (BUILD_SPEC.md
+section 8B), and a test fails if one appears in `quality_checks.py`.

@@ -411,9 +411,12 @@ def text_similarity(first_text, second_text):
 def find_near_duplicates(pairs, threshold=NEAR_DUPLICATE_THRESHOLD):
     """Every two rows whose ticket text is suspiciously similar.
 
-    Returns [{"first": id, "second": id, "similarity": 0.91}, ...],
-    most similar first. Compares all rows with all rows - fine for a
-    few hundred rows, too slow for a few hundred thousand.
+    Returns [{"first": id, "second": id, "similarity": 0.91,
+              "first_row": 12, "second_row": 388}, ...],
+    most similar first. first_row / second_row are positions in
+    `pairs` (0-based), so a report can point at the exact rows.
+    Compares all rows with all rows - fine for a few hundred rows,
+    too slow for a few hundred thousand.
     """
     word_sets = [text_words(pair_user_text(pair)) for pair in pairs]
     found = []
@@ -427,6 +430,8 @@ def find_near_duplicates(pairs, threshold=NEAR_DUPLICATE_THRESHOLD):
                     "first": pairs[i]["ticket_id"],
                     "second": pairs[j]["ticket_id"],
                     "similarity": round(similarity, 3),
+                    "first_row": i,
+                    "second_row": j,
                 })
     found.sort(key=lambda item: -item["similarity"])
     return found
@@ -460,22 +465,50 @@ def find_leakage(train_pairs, val_pairs):
 def find_schema_violations(pairs, schema):
     """Rows whose completion is not a valid record.
 
-    Returns [{"ticket_id": ..., "problems": ["...", ...]}, ...].
+    Returns [{"ticket_id": ..., "row": 17, "problems": ["...", ...],
+              "errors": [{"field", "rule", "value", "message"}, ...]}, ...].
+
+    "row" is the position in `pairs` (0-based). "problems" is the
+    readable version; "errors" is the same thing in pieces, for code
+    that wants to group violations by field or by rule
+    (scripts/quality_checks.py does).
     """
     validator = Draft202012Validator(schema)
     found = []
-    for pair in pairs:
+    for row, pair in enumerate(pairs):
         try:
             record = parse_completion(pair)
         except json.JSONDecodeError as error:
-            found.append({"ticket_id": pair["ticket_id"],
-                          "problems": [f"completion is not JSON: {error}"]})
+            message = f"completion is not JSON: {error}"
+            found.append({
+                "ticket_id": pair["ticket_id"],
+                "row": row,
+                "problems": [message],
+                "errors": [{"field": "(record)", "rule": "json", "value": None, "message": message}],
+            })
             continue
 
-        problems = []
+        errors = []
         for error in validator.iter_errors(record):
-            field = error.path[0] if error.path else "(record)"
-            problems.append(f"{field}: {error.message}")
-        if problems:
-            found.append({"ticket_id": pair["ticket_id"], "problems": sorted(problems)})
+            if error.path:
+                field = error.path[0]
+                value = error.instance
+            elif error.validator == "required":
+                # "'impact' is a required property" -> name the field.
+                field = error.message.split("'")[1]
+                value = None
+            else:
+                field = "(record)"
+                value = None
+            errors.append({
+                "field": field,
+                "rule": error.validator,
+                "value": value,
+                "message": error.message,
+            })
+
+        if errors:
+            problems = sorted(f"{item['field']}: {item['message']}" for item in errors)
+            found.append({"ticket_id": pair["ticket_id"], "row": row,
+                          "problems": problems, "errors": errors})
     return found

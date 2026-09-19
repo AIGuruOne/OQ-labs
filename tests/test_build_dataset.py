@@ -272,6 +272,16 @@ def test_committed_files_match_the_builder(tmp_path):
         assert (rebuilt_dir / name).read_bytes() == (committed_dir / name).read_bytes(), f"{name}: {message}"
 
 
+def test_builder_refuses_sizes_the_corpus_cannot_supply(tmp_path):
+    # 580 tickets are left after the held-out 20, so 500 + 100 cannot be
+    # supplied. The builder must say so, not write a short val.jsonl.
+    result = run_builder(tmp_path, "--no-plant", "--train-size", "500", "--val-size", "100")
+    assert result.returncode != 0
+    assert "Not enough tickets" in result.stdout + result.stderr
+    assert "Traceback" not in result.stdout + result.stderr
+    assert not (tmp_path / "finetune" / "train.jsonl").exists(), "a short dataset was written anyway"
+
+
 def test_no_plant_build_is_clean_and_keeps_the_same_heldout(tmp_path, schema):
     result = run_builder(tmp_path, "--no-plant")
     assert result.returncode == 0, result.stdout + result.stderr
