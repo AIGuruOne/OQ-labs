@@ -1,0 +1,1532 @@
+"""Scenario bank for scripts/generate_tickets.py.
+
+This file is DATA, not logic. A scenario is one kind of service desk
+problem. It carries the ground-truth labels (category, queue, action,
+how urgent that kind of problem is) and several ways a user might
+describe it. The generator picks a scenario, picks a writer persona,
+and assembles a messy ticket body from these pieces.
+
+EVERYTHING HERE IS INVENTED (BUILD_SPEC.md section 9). The enterprise
+systems below do not exist. Commodity desktop products (Windows,
+Outlook, Excel...) are named because every service desk on earth sees
+them and they say nothing about any one company.
+
+Slots filled by the generator AFTER typos are applied, so they are
+never corrupted:
+    {system}     the affected system, as the user happens to write it
+    {asset}      an IT asset tag, as the user happens to write it
+    {device}     laptop / monitor / printer ... matching the asset
+    {name}       a colleague's first name
+    {dept}       a department
+    {site}       a three-letter site code
+    {plant_tag}  a plant equipment tag (a DISTRACTOR: never the label)
+    {wo}         a work order id       (a DISTRACTOR: never the label)
+    {old_inc}    an older ticket id    (a DISTRACTOR)
+    {date}       an ISO 8601 date shortly AFTER the ticket was created
+    {past_date}  an ISO 8601 date shortly BEFORE the ticket was created
+    {n}          a small number
+
+Scenario keys:
+    id         unique name, "<category>.<what>"
+    weight     relative frequency INSIDE its category
+    systems    candidate affected systems ([] = no system involved)
+    generic    what the user says when they do not name the system
+    unnamed    probability the user does not name the system
+    assets     asset prefixes that fit ([] = no device involved)
+    asset_p    probability the user quotes the asset tag
+    kind       blocked | degraded | request   (drives urgency, see
+               decide_urgency in generate_tickets.py)
+    no_troubleshooting   True where "I already restarted" or "maybe a
+               virus" would read as nonsense (a phishing report, a lost laptop)
+    deadline_ok / needed_by_ok   False where a "deadline today" or a
+               "needed by <date>" sentence would read as nonsense
+    urgency    optional fixed urgency that overrides the rule
+    scopes     impact -> weight
+    scope_in_text   True when the problem text itself states who is
+               affected, so the generator adds no separate scope sentence
+    queue      routing_queue label
+    action     requested_action label ({system} allowed)
+    action_generic   requested_action when the system is not named
+    problems   first-person descriptions, fluent English
+    problems_nn  first-person descriptions, non-native phrasing
+    notes      telegraphic one-liners (terse users, agent phone notes)
+    details / errors / guesses   optional extra fragments
+"""
+
+# ---------------------------------------------------------------------
+# Category mix. Deliberately imbalanced - DO NOT BALANCE. Access and
+# password tickets dominate, ERP and telecom are rare. The Day 2 quality
+# check is supposed to surface this.
+# ---------------------------------------------------------------------
+CATEGORY_WEIGHTS = {
+    "access": 34,
+    "software": 20,
+    "hardware": 17,
+    "network": 12,
+    "other": 7,
+    "erp": 6,
+    "telecom": 4,
+}
+
+ROUTING_QUEUES = [
+    "identity_access",
+    "end_user_computing",
+    "network_ops",
+    "erp_support",
+    "apps_support",
+    "telecom_voice",
+    "security_ops",
+    "service_desk_l1",
+]
+
+# canonical system name -> ways users actually write it.
+# The label is always the canonical name (the key).
+SYSTEM_ALIASES = {
+    # invented enterprise systems
+    "Tavrona ERP": ["Tavrona ERP", "Tavrona", "tavrona", "TAVRONA", "tavrona erp", "Tavorna"],
+    "StaffGate": ["StaffGate", "Staffgate", "staffgate", "Staff Gate", "staff gate portal"],
+    "DocHarbor": ["DocHarbor", "Docharbor", "docharbor", "Doc Harbor", "DocHarbour"],
+    "AssetHive": ["AssetHive", "Assethive", "assethive", "Asset Hive", "AssetHive CMMS"],
+    "ProcessLens": ["ProcessLens", "Processlens", "processlens", "Process Lens"],
+    "GateKey VPN": ["GateKey VPN", "GateKey", "gatekey", "Gatekey vpn", "gate key VPN"],
+    "KeyNest": ["KeyNest", "Keynest", "keynest app", "KeyNest authenticator", "key nest"],
+    "ClaimPoint": ["ClaimPoint", "Claimpoint", "claimpoint", "Claim Point"],
+    "MyPortal": ["MyPortal", "Myportal", "myportal", "My Portal intranet"],
+    "VoxLine": ["VoxLine", "Voxline", "voxline", "VoxLine softphone", "vox line"],
+    "PrintFlow": ["PrintFlow", "Printflow", "printflow"],
+    "SupplierLink": ["SupplierLink", "Supplierlink", "supplier link portal"],
+    "CORP-WIFI": ["CORP-WIFI", "corp-wifi", "CORP WIFI", "Corp-Wifi", "corp wifi"],
+    "GUEST-WIFI": ["GUEST-WIFI", "guest-wifi", "Guest WiFi", "guest wifi"],
+    "S: drive": ["S: drive", "S drive", "s drive", "S:\\ drive", "the S: drive"],
+    # commodity desktop software
+    "Windows": ["Windows", "windows", "WINDOWS", "Windows 11"],
+    "Outlook": ["Outlook", "outlook", "OUTLOOK", "MS Outlook", "outlok"],
+    "Excel": ["Excel", "excel", "EXCEL", "MS Excel"],
+    "Teams": ["Teams", "teams", "MS Teams", "TEAMS"],
+    "Chrome": ["Chrome", "chrome", "google chrome"],
+    "AutoCAD": ["AutoCAD", "Autocad", "autocad", "auto cad"],
+    "Power BI": ["Power BI", "PowerBI", "power bi", "Power Bi"],
+    "Acrobat": ["Acrobat", "acrobat", "Adobe Acrobat", "adobe"],
+}
+
+# If the user does not name the system, an error string that names it
+# must not be pasted either - otherwise the label affected_system=null
+# would be wrong. These substrings (lowercase) give a system away.
+SYSTEM_ERROR_HINTS = {
+    "Tavrona ERP": ["tvr", "tavrona"],
+    "StaffGate": ["sg-"],
+    "DocHarbor": ["docharbor", "dh-"],
+    "AssetHive": ["ah-"],
+    "ProcessLens": ["pl-"],
+    "GateKey VPN": ["gk-"],
+    "KeyNest": ["kn-"],
+    "VoxLine": ["vx-"],
+    "Outlook": ["outlook"],
+    "Excel": ["excel"],
+    "Windows": ["windows"],
+    "S: drive": ["net use s:"],
+}
+
+SCENARIOS = [
+    # =================================================================
+    # ACCESS - the bulk of any real service desk
+    # =================================================================
+    {
+        "id": "access.password_reset",
+        "category": "access", "weight": 28,
+        "systems": ["Tavrona ERP", "StaffGate", "ClaimPoint", "DocHarbor", "MyPortal"],
+        "generic": "the system", "unnamed": 0.30,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "identity_access",
+        "action": "Reset the user's {system} password",
+        "action_generic": "Reset the user's password",
+        "problems": [
+            "I forgot my password for {system} and the reset link never arrives in my inbox.",
+            "My password for {system} expired while I was on leave and now it won't let me set a new one.",
+            "I can't log in to {system}. It keeps saying the password is wrong but I am sure it is correct.",
+            "Need a password reset for {system} please, I've tried the self service option three times.",
+        ],
+        "problems_nn": [
+            "I am not able to login in {system} since yesterday, it is not accepting my password.",
+            "My password of {system} is expired. Kindly reset the same.",
+            "Please I need new password for {system}, the old one it is not working.",
+            "I try many times to enter {system} but always password wrong message is coming.",
+        ],
+        "notes": [
+            "pwd reset {system}",
+            "cant login {system} password expired",
+            "forgot password {system}",
+            "{system} login not working need reset",
+        ],
+        "details": [
+            "The self service reset asks security questions I never set up.",
+            "I changed it last month only.",
+            "Caps lock is off, I checked.",
+        ],
+        "errors": [
+            "Your password has expired and must be changed. Contact your administrator.",
+            "Login failed: invalid credentials (attempt 4 of 5)",
+            "ERR_AUTH_0113: credential rejected for user u{n}0{n}4{n}",
+            "POST /sso/login -> 401 Unauthorized\n{\"error\": \"invalid_grant\", \"error_description\": \"password expired\", \"trace_id\": \"7f3a{n}c{n}e-0b{n}{n}\"}",
+        ],
+        "guesses": [
+            "I think someone changed my password without telling me.",
+            "Maybe the server is down because my colleague also had problem last week.",
+        ],
+    },
+    {
+        "id": "access.account_locked",
+        "category": "access", "weight": 16,
+        "systems": ["Windows"],
+        "generic": "my account", "unnamed": 0.55,
+        "assets": ["LAP", "DSK"], "asset_p": 0.20,
+        "kind": "blocked", "scopes": {"single_user": 100},
+        "queue": "identity_access",
+        "action": "Unlock the user's {system} account",
+        "action_generic": "Unlock the user's account",
+        "problems": [
+            "I'm locked out of {system}. I can't get past the login screen so I can't do any work at all.",
+            "{system} locked me out after a few wrong tries this morning and I have nothing else to work on.",
+            "Locked out again. Second time this week. I can't sign in to {system} on my {device}.",
+        ],
+        "problems_nn": [
+            "{system} got locked for me, I am not able to do any work since morning.",
+            "I entered wrong password few times and now {system} is showing account locked. Kindly unlock.",
+            "{system} is not letting me to sign in, it says locked. I am sitting idle.",
+        ],
+        "notes": [
+            "account locked",
+            "locked out of {system} cant work",
+            "usr locked out, needs unlock",
+            "acct lockout {system}",
+        ],
+        "details": [
+            "I am using a colleague's machine to raise this.",
+            "It happened right after I changed my password on my phone.",
+        ],
+        "errors": [
+            "The referenced account is currently locked out and may not be logged on to.",
+        ],
+        "guesses": [
+            "I think the network is down because nothing accepts my login.",
+            "Probably my {device} has a virus.",
+            "I think my account got hacked.",
+        ],
+    },
+    {
+        "id": "access.mfa_problem",
+        "category": "access", "weight": 11,
+        "systems": ["KeyNest"],
+        "generic": "the authenticator app", "unnamed": 0.25,
+        "assets": ["MOB"], "asset_p": 0.10,
+        "kind": "blocked", "scopes": {"single_user": 100},
+        "queue": "identity_access",
+        "action": "Re-enrol the user's device in {system}",
+        "action_generic": "Re-enrol the user's device for multi-factor authentication",
+        "problems": [
+            "I got a new phone and {system} is not set up on it, so I can't approve any sign-in.",
+            "{system} stopped sending me the approval prompt. Without it I can't get into anything from home.",
+            "The codes from {system} are rejected every time, I'm completely stuck outside the office.",
+        ],
+        "problems_nn": [
+            "I changed my mobile and now {system} is not working in new mobile. I cannot login anywhere.",
+            "The approval notification from {system} is not coming to my phone. Kindly check.",
+            "{system} code is always showing invalid, I am not able to enter any application.",
+        ],
+        "notes": [
+            "new phone need {system} setup",
+            "{system} codes rejected cant sign in",
+            "mfa not working after phone change",
+        ],
+        "details": [
+            "The old phone is already wiped so I cannot transfer anything.",
+            "Phone time is set to automatic.",
+        ],
+        "errors": [
+            "KN-2207: Verification failed. The code you entered is not valid for this device.",
+        ],
+        "guesses": ["I think my number was removed from the system when I renewed my SIM."],
+    },
+    {
+        "id": "access.new_joiner_account",
+        "deadline_ok": False,
+        "category": "access", "weight": 11,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "identity_access",
+        "action": "Create user accounts for the new joiner",
+        "action_generic": "Create user accounts for the new joiner",
+        "problems": [
+            "We have a new joiner, {name}, starting in {dept}. Please create the usual accounts and email.",
+            "Please set up login and mailbox for {name} who joins {dept}.",
+            "New starter in my team ({name}). Needs a network account, email and the standard access.",
+        ],
+        "problems_nn": [
+            "One new staff {name} is joining in {dept}. Kindly create the ID and email for the same.",
+            "Requesting you to kindly arrange user account for our new colleague {name}.",
+        ],
+        "notes": [
+            "new joiner {name} {dept} needs account + email",
+            "create accounts for new starter {name}",
+        ],
+        "details": [
+            "Same access as the rest of the team is fine.",
+            "HR onboarding form is already approved.",
+        ],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "access.shared_folder_permission",
+        "category": "access", "weight": 12,
+        "systems": ["S: drive"],
+        "generic": "the shared drive", "unnamed": 0.35,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 85, "team": 15},
+        "queue": "identity_access",
+        "action": "Grant the user access to the requested folder on {system}",
+        "action_generic": "Grant the user access to the requested shared folder",
+        "problems": [
+            "I need access to the {dept} folder on {system}. My manager {name} has approved.",
+            "I moved to {dept} and still can't open their folder on {system}. It says access denied.",
+            "Can you give me read/write on the {dept} project folder in {system}?",
+        ],
+        "problems_nn": [
+            "Kindly provide me the access for {dept} folder in {system}. Approval from {name} is there.",
+            "I am transferred to {dept} but the folder in {system} it is not opening for me.",
+            "Please I need permission for {dept} folder, I didn't get yet the access.",
+        ],
+        "notes": [
+            "need access {dept} folder {system}",
+            "access denied on {dept} share",
+            "folder permission request - {dept}",
+        ],
+        "details": ["{name} can confirm if you need it in writing."],
+        "errors": ["You don't currently have permission to access this folder."],
+        "guesses": ["Maybe the folder is corrupted because others can open it and only me not."],
+    },
+    {
+        "id": "access.app_role_request",
+        "category": "access", "weight": 9,
+        "systems": ["DocHarbor", "AssetHive", "ProcessLens", "Power BI"],
+        "generic": "the application", "unnamed": 0.15,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 80, "team": 20},
+        "queue": "identity_access",
+        "action": "Grant the user access to {system}",
+        "action_generic": "Grant the user access to the requested application",
+        "problems": [
+            "I need a login for {system} for my new role in {dept}.",
+            "Please add me as a user in {system}. {name} said to raise it here.",
+            "Requesting access to {system}, view only is enough for now.",
+        ],
+        "problems_nn": [
+            "Kindly create for me user in {system}, it is required for my work in {dept}.",
+            "I am requesting the access of {system}. My line manager {name} already approved by email.",
+        ],
+        "notes": [
+            "need {system} access",
+            "{system} user request for {dept}",
+            "pls add me to {system}",
+        ],
+        "details": [], "errors": [], "guesses": [],
+    },
+    {
+        "id": "access.leaver_disable",
+        "deadline_ok": False,
+        "category": "access", "weight": 4,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "urgency": "medium", "scopes": {"single_user": 100},
+        "queue": "identity_access",
+        "action": "Disable the leaver's user accounts",
+        "action_generic": "Disable the leaver's user accounts",
+        "problems": [
+            "{name} from {dept} has left the company. Please disable all accounts and forward the mailbox to me.",
+            "Please deactivate the accounts of {name}, last working day was {past_date}.",
+        ],
+        "problems_nn": [
+            "{name} is resigned from {dept} and last day was {past_date}. Kindly disable the ID.",
+        ],
+        "notes": ["leaver {name} {dept} - disable accounts", "disable ID of {name}, left {past_date}"],
+        "details": ["We noticed the account is still active which is not good."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "access.mailbox_delegate",
+        "category": "access", "weight": 5,
+        "systems": ["Outlook"],
+        "generic": "email", "unnamed": 0.30,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 75, "team": 25},
+        "queue": "identity_access",
+        "action": "Grant the user access to the shared mailbox",
+        "action_generic": "Grant the user access to the shared mailbox",
+        "problems": [
+            "Please give me access to the {dept} shared mailbox in {system}.",
+            "I need to send from the {dept} group mailbox. It doesn't show up in my {system}.",
+        ],
+        "problems_nn": [
+            "Kindly add me in {dept} shared mailbox, it is not appearing in my {system}.",
+            "I want to request the access for common mailbox of {dept}.",
+        ],
+        "notes": ["add me to {dept} shared mailbox", "shared mailbox access {dept}"],
+        "details": ["{name} used to handle it but has moved to another team."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "access.vpn_access_request",
+        "category": "access", "weight": 4,
+        "systems": ["GateKey VPN"],
+        "generic": "remote access", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 70, "team": 30},
+        "queue": "identity_access",
+        "action": "Grant the user {system} access",
+        "action_generic": "Grant the user remote access",
+        "problems": [
+            "Our contractor {name} needs {system} to work from their office.",
+            "Please enable {system} for me, I will be working remotely.",
+        ],
+        "problems_nn": [
+            "Kindly enable {system} for our contractor staff {name}, approval is attached.",
+            "I need the {system} to be activated in my ID for work from home.",
+        ],
+        "notes": ["{system} for contractor {name}", "enable {system} on my account"],
+        "details": ["Contract runs until {date}."],
+        "errors": [], "guesses": [],
+    },
+
+    # =================================================================
+    # SOFTWARE
+    # =================================================================
+    {
+        "id": "software.outlook_crash",
+        "category": "software", "weight": 14,
+        "systems": ["Outlook"],
+        "generic": "my email", "unnamed": 0.25,
+        "assets": ["LAP", "DSK"], "asset_p": 0.15,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Repair the user's {system} profile",
+        "action_generic": "Repair the user's email client",
+        "problems": [
+            "{system} crashes a few seconds after opening. Webmail works, so I'm surviving on that.",
+            "{system} is stuck on 'loading profile' forever. I can still read mail on my phone.",
+            "Every time I search in {system} it freezes and I have to kill it.",
+        ],
+        "problems_nn": [
+            "{system} is getting closed automatically after opening. From the web I can see the mails.",
+            "{system} is hanged on loading profile since morning. Kindly check.",
+        ],
+        "notes": [
+            "{system} keeps crashing",
+            "{system} stuck loading profile",
+            "{system} freezes on search",
+        ],
+        "details": ["It started after the restart last night.", "Mailbox is quite big, around 40 GB."],
+        "errors": [
+            "Faulting application name: OUTLOOK.EXE, Faulting module name: mso40uiwin32client.dll, Exception code: 0xc0000005",
+            "Cannot start Microsoft Outlook. Cannot open the Outlook window. The set of folders cannot be opened.",
+            "Log Name: Application\nSource: Application Error\nEvent ID: 1000\nFaulting application name: OUTLOOK.EXE, version: 16.0.17328.20162\nFaulting module name: mso40uiwin32client.dll\nException code: 0xc0000005\nFault offset: 0x00000000001a{n}f{n}c",
+        ],
+        "guesses": [
+            "I think my mailbox is full.",
+            "Must be the update that was pushed last night.",
+        ],
+    },
+    {
+        "id": "software.email_outage",
+        "category": "software", "weight": 5,
+        "systems": ["Outlook"],
+        "generic": "email", "unnamed": 0.35,
+        "assets": [], "asset_p": 0.0,
+        "kind": "blocked", "scopes": {"site": 45, "enterprise": 55},
+        "queue": "apps_support",
+        "action": "Restore the email service",
+        "action_generic": "Restore the email service",
+        "problems": [
+            "{system} shows 'disconnected' and no mail has come in or gone out for the last hour. Webmail is dead too.",
+            "Nothing is sending or receiving in {system}. Webmail gives an error page as well, so it is not my machine.",
+        ],
+        "problems_nn": [
+            "{system} is showing disconnected and no any mail is coming or going since one hour. Webmail is also not opening.",
+        ],
+        "notes": ["{system} disconnected - no mail in or out", "email down, webmail too"],
+        "details": ["We are using phones to reach each other."],
+        "errors": ["503 Service Unavailable - mailbox service is not responding"],
+        "guesses": ["Maybe my mailbox is full."],
+    },
+    {
+        "id": "software.install_request",
+        "category": "software", "weight": 16,
+        "systems": ["AutoCAD", "Power BI", "Acrobat"],
+        "generic": "the software", "unnamed": 0.10,
+        "assets": ["LAP", "DSK"], "asset_p": 0.35,
+        "kind": "request", "scopes": {"single_user": 85, "team": 15},
+        "queue": "end_user_computing",
+        "action": "Install {system} on the user's machine",
+        "action_generic": "Install the requested software on the user's machine",
+        "problems": [
+            "Please install {system} on my {device}. I don't have admin rights to do it myself.",
+            "I need {system} for a project starting soon. Licence was approved by {name}.",
+            "Can someone install {system}? The software centre shows it but the install button is greyed out.",
+        ],
+        "problems_nn": [
+            "Kindly install {system} in my {device}, it is required for my daily work.",
+            "I am requesting for {system} installation. The approval of {name} is already there.",
+        ],
+        "notes": [
+            "install {system}",
+            "need {system} on my {device}",
+            "{system} install request approved by {name}",
+        ],
+        "details": [], "errors": [], "guesses": [],
+    },
+    {
+        "id": "software.excel_freeze",
+        "category": "software", "weight": 10,
+        "systems": ["Excel"],
+        "generic": "the spreadsheet program", "unnamed": 0.20,
+        "assets": ["LAP", "DSK"], "asset_p": 0.15,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Troubleshoot {system} freezing on large files",
+        "action_generic": "Troubleshoot the application freezing on large files",
+        "problems": [
+            "{system} hangs for minutes whenever I open the monthly budget file. Smaller files are fine.",
+            "{system} goes 'not responding' every time I refresh the pivot tables in the cost report.",
+        ],
+        "problems_nn": [
+            "{system} is getting hang when I open big file, small files are opening normal.",
+            "When I refresh the pivot in {system} it is going not responding for long time.",
+        ],
+        "notes": ["{system} not responding on big files", "{system} hangs on budget workbook"],
+        "details": ["The file is about 180 MB with macros.", "My colleague opens the same file with no problem."],
+        "errors": ["Excel cannot complete this task with available resources. Choose less data or close other applications."],
+        "guesses": ["I think I need a new laptop.", "Probably the file has a virus."],
+    },
+    {
+        "id": "software.teams_audio",
+        "category": "software", "weight": 10,
+        "systems": ["Teams"],
+        "generic": "video calls", "unnamed": 0.25,
+        "assets": ["LAP"], "asset_p": 0.15,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Fix the user's microphone in {system}",
+        "action_generic": "Fix the user's microphone in video calls",
+        "problems": [
+            "Nobody can hear me on {system}. The mic works in other apps.",
+            "On {system} my audio cuts out every few seconds. I dial in from my mobile as a workaround.",
+        ],
+        "problems_nn": [
+            "In {system} the other side is not hearing my voice. Mic is OK in other application.",
+            "My voice is breaking in {system}, I am joining from mobile for now.",
+        ],
+        "notes": ["no mic in {system}", "{system} audio cutting out"],
+        "details": ["Headset is the standard issue one."],
+        "errors": [], "guesses": ["I think the headset is broken.", "Maybe the wifi is weak in my area."],
+    },
+    {
+        "id": "software.license_expired",
+        "category": "software", "weight": 7,
+        "systems": ["AutoCAD", "Acrobat"],
+        "generic": "the software", "unnamed": 0.10,
+        "assets": ["LAP", "DSK"], "asset_p": 0.20,
+        "kind": "blocked", "scopes": {"single_user": 55, "team": 45},
+        "queue": "end_user_computing",
+        "action": "Renew the {system} licence",
+        "action_generic": "Renew the software licence",
+        "problems": [
+            "{system} says the licence has expired and refuses to open. I can't open any of my project files.",
+            "{system} shows a licence error on startup and closes. This is my main tool, I'm stuck.",
+        ],
+        "problems_nn": [
+            "{system} is showing license expired and it is not opening. My all work is stopped.",
+            "I am not able to open {system}, message of license is coming. Kindly renew.",
+        ],
+        "notes": ["{system} licence expired, cant open", "{system} license error on start"],
+        "details": [],
+        "errors": [
+            "License checkout failed. Error [-18.147.0]: license server does not support this feature.",
+            "Your licence for this product expired on {past_date}.",
+        ],
+        "guesses": ["Maybe I installed something wrong."],
+    },
+    {
+        "id": "software.docharbor_upload_fail",
+        "category": "software", "weight": 8,
+        "systems": ["DocHarbor"],
+        "generic": "the document system", "unnamed": 0.15,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 60, "team": 40},
+        "queue": "apps_support",
+        "action": "Investigate the {system} upload failure",
+        "action_generic": "Investigate the document upload failure",
+        "problems": [
+            "Uploading to {system} fails for any file over about 20 MB. Small files go through.",
+            "{system} throws an error when I check in a revised drawing. The old revision stays locked.",
+        ],
+        "problems_nn": [
+            "When I upload the file in {system} error is coming. Small file is going but big file not.",
+            "I am not able to check in the document in {system}, it is showing locked by me only.",
+        ],
+        "notes": ["{system} upload fails on large files", "{system} check-in error, doc stays locked"],
+        "details": ["Tried two browsers, same result."],
+        "errors": [
+            "com.docharbor.store.UploadException: chunk 14/32 rejected (HTTP 413)\n    at com.docharbor.store.ChunkWriter.flush(ChunkWriter.java:188)\n    at com.docharbor.api.UploadResource.put(UploadResource.java:77)",
+            "DH-5012 Check-in failed: object is locked by another session",
+        ],
+        "guesses": ["I think the server disk is full."],
+    },
+    {
+        "id": "software.staffgate_leave_error",
+        "category": "software", "weight": 8,
+        "systems": ["StaffGate"],
+        "generic": "the HR portal", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 80, "team": 20},
+        "queue": "apps_support",
+        "action": "Fix the leave request error in {system}",
+        "action_generic": "Fix the leave request error in the HR portal",
+        "problems": [
+            "{system} gives an error when I submit my annual leave. The dates are correct and I have balance.",
+            "My leave request in {system} is stuck on 'submitting' and never reaches my manager.",
+            "Payslip page in {system} is blank for last month. Other months open fine.",
+        ],
+        "problems_nn": [
+            "I am applying the leave in {system} but it is giving error, my balance is there.",
+            "My leave request in {system} is not going to my manager {name}, it is only rotating.",
+        ],
+        "notes": ["{system} leave request error", "cant submit leave in {system}"],
+        "details": ["{name} in HR told me to log it with IT."],
+        "errors": [
+            "An unexpected error occurred. Reference: SG-{n}{n}4{n}-LV",
+            "Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'balanceDays')\n    at LeaveForm.submit (leave.bundle.js:2:48113)\n    at HTMLButtonElement.onClick (leave.bundle.js:2:51877)\n    at sg-runtime.min.js:1:20944\nPOST /api/leave/v2/requests 500 (Internal Server Error)",
+        ],
+        "guesses": ["Maybe HR blocked my leave."],
+    },
+    {
+        "id": "software.assethive_wo_wont_open",
+        "category": "software", "weight": 6,
+        "systems": ["AssetHive"],
+        "generic": "the maintenance system", "unnamed": 0.15,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 50, "team": 50},
+        "queue": "apps_support",
+        "action": "Investigate why work orders fail to open in {system}",
+        "action_generic": "Investigate why work orders fail to open in the maintenance system",
+        "problems": [
+            "{system} won't open work order {wo} for {plant_tag}. Other work orders open, this one spins forever.",
+            "In {system} any work order against {plant_tag} shows a blank screen, for example {wo}.",
+        ],
+        "problems_nn": [
+            "I am not able to open the work order {wo} of {plant_tag} in {system}, it is only loading.",
+            "{system} is showing blank page for work orders of {plant_tag}, other equipment is opening fine.",
+        ],
+        "notes": ["{system} - {wo} wont open ({plant_tag})", "blank screen on WOs for {plant_tag} in {system}"],
+        "details": ["The job itself is already finished in the field, only the paperwork is pending."],
+        "errors": [
+            "AH-3309: Failed to load work order {wo}: attachment index out of range",
+            "System.IndexOutOfRangeException: Index was outside the bounds of the array.\n   at AssetHive.WorkOrders.AttachmentList.Load(Int32 workOrderId)\n   at AssetHive.WorkOrders.WorkOrderView.Open(String number) in WorkOrderView.cs:line 212\n   at AssetHive.App.Navigator.Go(String route)",
+        ],
+        "guesses": ["I think someone deleted the equipment record."],
+    },
+    {
+        "id": "software.windows_update_stuck",
+        "category": "software", "weight": 7,
+        "systems": ["Windows"],
+        "generic": "system", "unnamed": 0.40,
+        "assets": ["LAP", "DSK"], "asset_p": 0.40,
+        "kind": "blocked", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Recover the machine from the failed {system} update",
+        "action_generic": "Recover the machine from the failed update",
+        "problems": [
+            "My {device} has been on 'working on updates 30%' for two hours. I can't use it at all.",
+            "After the {system} update my {device} restarts in a loop and never reaches the desktop.",
+        ],
+        "problems_nn": [
+            "My {device} is stuck in {system} update since two hours, I am not able to work.",
+            "After update the {device} is restarting again and again, desktop is not coming.",
+        ],
+        "notes": ["{device} stuck on updates", "boot loop after {system} update"],
+        "details": ["I did not switch it off because the screen says not to."],
+        "errors": ["We couldn't complete the updates. Undoing changes. Don't turn off your computer. (0x800f0922)"],
+        "guesses": ["I think the hard disk is dead."],
+    },
+    {
+        "id": "software.browser_cert",
+        "category": "software", "weight": 6,
+        "systems": ["MyPortal"],
+        "generic": "the intranet", "unnamed": 0.25,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 30, "team": 25, "site": 25, "enterprise": 20},
+        "queue": "apps_support",
+        "action": "Renew the certificate on {system}",
+        "action_generic": "Renew the certificate on the intranet site",
+        "problems": [
+            "{system} shows a 'your connection is not private' warning since this morning.",
+            "The browser blocks {system} with a certificate warning. You can click through but it looks wrong.",
+        ],
+        "problems_nn": [
+            "{system} is showing the connection not private from today morning. Is it safe to continue?",
+        ],
+        "notes": ["cert warning on {system}", "{system} - connection not private"],
+        "details": [],
+        "errors": ["NET::ERR_CERT_DATE_INVALID"],
+        "guesses": ["I think we got hacked.", "Maybe my browser is too old."],
+    },
+    {
+        "id": "software.processlens_trend",
+        "category": "software", "weight": 4,
+        "systems": ["ProcessLens"],
+        "generic": "the trending tool", "unnamed": 0.15,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 40, "team": 60},
+        "queue": "apps_support",
+        "action": "Restore trend data loading in {system}",
+        "action_generic": "Restore trend data loading in the trending tool",
+        "problems": [
+            "{system} office client shows no trend data for {plant_tag} after {past_date}. Older data loads.",
+            "Trends in {system} time out for anything longer than a day, like the {plant_tag} discharge pressure.",
+        ],
+        "problems_nn": [
+            "In {system} the trend of {plant_tag} is not coming after {past_date}, before that date it is fine.",
+        ],
+        "notes": ["{system} trends not loading ({plant_tag})", "{system} timeout on long trends"],
+        "details": ["This is the office read-only client, not the control room."],
+        "errors": ["PL-QRY-408: query exceeded 30000 ms (tagset={plant_tag}.*)"],
+        "guesses": ["I guess the instrument is faulty."],
+    },
+    {
+        "id": "software.how_to",
+        "deadline_ok": False,
+        "needed_by_ok": False,
+        "category": "software", "weight": 8,
+        "systems": ["Outlook", "Excel", "Teams"],
+        "generic": "it", "unnamed": 0.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "service_desk_l1",
+        "action": "Provide how-to guidance for {system}",
+        "action_generic": "Provide how-to guidance",
+        "problems": [
+            "How do I set an out of office reply in {system}? I can't find the option.",
+            "Is there a guide for sharing my calendar in {system} with someone outside my department?",
+            "How can I recover an earlier version of a file in {system}?",
+        ],
+        "problems_nn": [
+            "I have a doubt, how to put the automatic reply in {system}? Kindly guide.",
+            "Please guide me how I can share the calendar in {system} with other department.",
+        ],
+        "notes": ["how to set out of office in {system}", "how to share calendar {system}"],
+        "details": [], "errors": [], "guesses": [],
+    },
+
+    # =================================================================
+    # HARDWARE - no "system"; the device is captured by asset_tag
+    # =================================================================
+    {
+        "id": "hardware.laptop_wont_boot",
+        "category": "hardware", "weight": 14,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP"], "asset_p": 0.60,
+        "kind": "blocked", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Repair or replace the laptop that will not power on",
+        "action_generic": "Repair or replace the laptop that will not power on",
+        "problems": [
+            "My laptop won't turn on at all. No lights, nothing, even on the charger.",
+            "Laptop shows the logo then a black screen. I've got no other machine to work on.",
+            "Laptop died in the middle of a meeting and won't come back on.",
+        ],
+        "problems_nn": [
+            "My laptop is not getting on. I pressed the power button many times but nothing is coming.",
+            "Laptop is showing only black screen after logo. I don't have other machine for working.",
+        ],
+        "notes": ["laptop dead wont power on", "laptop black screen after logo", "laptop not switching on"],
+        "details": ["Charger light is on.", "It was fine yesterday evening."],
+        "errors": ["No bootable device found. Press any key to reboot."],
+        "guesses": ["I think the battery is finished.", "Probably the windows update killed it."],
+    },
+    {
+        "id": "hardware.laptop_slow",
+        "category": "hardware", "weight": 13,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP", "DSK"], "asset_p": 0.45,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Diagnose the slow machine",
+        "action_generic": "Diagnose the slow machine",
+        "problems": [
+            "My {device} is painfully slow. It takes ten minutes to boot and the fan never stops.",
+            "The {device} freezes whenever I have more than a few things open. It's over four years old.",
+        ],
+        "problems_nn": [
+            "My {device} is very slow since many days, for opening one file it is taking too much time.",
+            "The {device} is hanging always and fan is making noise. Kindly check or replace.",
+        ],
+        "notes": ["{device} very slow", "{device} freezing, fan loud", "slow pc"],
+        "details": ["Disk shows 100% in task manager most of the time."],
+        "errors": [],
+        "guesses": ["I think it has a virus.", "Maybe the internet is slow."],
+    },
+    {
+        "id": "hardware.screen_damage",
+        "category": "hardware", "weight": 8,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP"], "asset_p": 0.55,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Replace the damaged laptop screen",
+        "action_generic": "Replace the damaged laptop screen",
+        "problems": [
+            "My laptop screen has a crack in the corner and lines across it. Still usable on the external monitor.",
+            "Laptop display flickers badly whenever I move the lid. I'm working off a monitor for now.",
+        ],
+        "problems_nn": [
+            "The screen of my laptop is having lines and one crack is there. With external monitor it is working.",
+        ],
+        "notes": ["laptop screen cracked", "laptop display flickering"],
+        "details": ["It was in my bag, I did not drop it."],
+        "errors": [], "guesses": ["Maybe it's a driver problem."],
+    },
+    {
+        "id": "hardware.battery",
+        "category": "hardware", "weight": 8,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP"], "asset_p": 0.50,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Replace the laptop battery",
+        "action_generic": "Replace the laptop battery",
+        "problems": [
+            "Laptop battery lasts about fifteen minutes. It's fine on mains but useless in meetings.",
+            "Battery shows 'plugged in, not charging' and the laptop dies the moment I unplug it.",
+        ],
+        "problems_nn": [
+            "Battery of my laptop is finishing in 15 minutes only. With charger it is working.",
+            "Laptop is showing plugged in not charging. Without charger it is switching off.",
+        ],
+        "notes": ["laptop battery dead", "battery not charging"],
+        "details": [], "errors": [],
+        "guesses": ["I think the charger is fake."],
+    },
+    {
+        "id": "hardware.monitor_dead",
+        "category": "hardware", "weight": 8,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["MON"], "asset_p": 0.50,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Replace the faulty monitor",
+        "action_generic": "Replace the faulty monitor",
+        "problems": [
+            "My second monitor shows 'no signal' even with a different cable. I'm down to the laptop screen.",
+            "One of my monitors went black and has a burning smell. I unplugged it.",
+        ],
+        "problems_nn": [
+            "My monitor is showing no signal, I changed the cable also but same. Now I work in laptop screen only.",
+        ],
+        "notes": ["monitor no signal", "2nd monitor dead"],
+        "details": [], "errors": [], "guesses": ["Maybe the laptop graphics card is gone."],
+    },
+    {
+        "id": "hardware.docking_station",
+        "category": "hardware", "weight": 7,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP"], "asset_p": 0.35,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Replace the faulty docking station",
+        "action_generic": "Replace the faulty docking station",
+        "problems": [
+            "The docking station at my desk doesn't detect the monitors or keyboard. Plugging in directly works.",
+            "Dock keeps disconnecting every few minutes, screens go black and come back.",
+        ],
+        "problems_nn": [
+            "My docking station is not detecting the screens and keyboard. If I connect direct then it is working.",
+        ],
+        "notes": ["dock not detecting monitors", "docking station disconnects"],
+        "details": ["Same dock works with my colleague's laptop sometimes, sometimes not."],
+        "errors": [], "guesses": ["I think my laptop port is damaged."],
+    },
+    {
+        "id": "hardware.printer_offline",
+        "category": "hardware", "weight": 12,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["PRN"], "asset_p": 0.45,
+        "kind": "degraded", "scopes": {"single_user": 20, "team": 55, "site": 25},
+        "queue": "end_user_computing",
+        "action": "Restore the offline printer",
+        "action_generic": "Restore the offline printer",
+        "problems": [
+            "The printer on our floor shows offline. Jobs just sit in the queue.",
+            "Printer keeps jamming on every second page and now shows a service error on its panel.",
+            "Nothing prints. The printer display says 'replace fuser unit'.",
+        ],
+        "problems_nn": [
+            "The printer is not taking print. It is showing offline.",
+            "Printer near {dept} is giving paper jam every time and now some error is on the display.",
+        ],
+        "notes": ["printer offline", "printer jam + service error", "printer not printing again"],
+        "details": ["We are walking to another floor to print for now."],
+        "errors": ["59.F0 ERROR - turn off then on", "Service error C-2557"],
+        "guesses": ["Probably someone changed the wifi password."],
+    },
+    {
+        "id": "hardware.peripheral_request",
+        "deadline_ok": False,
+        "needed_by_ok": False,
+        "category": "hardware", "weight": 8,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Provide a replacement keyboard or mouse",
+        "action_generic": "Provide a replacement keyboard or mouse",
+        "problems": [
+            "My mouse double-clicks on its own. Can I get a replacement?",
+            "A few keys on my keyboard have stopped working. Please send a new one.",
+            "Could I get a headset? Mine has a broken mic arm.",
+        ],
+        "problems_nn": [
+            "Some keys of my keyboard are not working. Kindly provide new one.",
+            "My mouse is not working proper, requesting for replacement.",
+        ],
+        "notes": ["need new mouse", "keyboard keys dead, replace", "headset broken"],
+        "details": [], "errors": [], "guesses": [],
+    },
+    {
+        "id": "hardware.new_laptop_request",
+        "deadline_ok": False,
+        "category": "hardware", "weight": 7,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "end_user_computing",
+        "action": "Provision a laptop for the new joiner",
+        "action_generic": "Provision a laptop for the new joiner",
+        "problems": [
+            "{name} joins {dept} soon and needs a laptop with the standard build.",
+            "Please arrange a laptop for our new starter {name}.",
+        ],
+        "problems_nn": [
+            "One new joiner {name} is coming in {dept}. Kindly arrange one laptop for the same.",
+        ],
+        "notes": ["laptop for new joiner {name}", "new starter {dept} needs laptop"],
+        "details": ["Standard spec is fine."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "hardware.lost_laptop",
+        "no_troubleshooting": True,
+        "category": "hardware", "weight": 3,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["LAP", "MOB"], "asset_p": 0.50,
+        "kind": "blocked", "urgency": "high", "scopes": {"single_user": 100},
+        "queue": "security_ops",
+        "action": "Remotely lock the lost device",
+        "action_generic": "Remotely lock the lost device",
+        "problems": [
+            "My work {device} was stolen from my car last night. Police report is in progress.",
+            "I left my {device} in a taxi and can't get hold of the driver. It has company data on it.",
+        ],
+        "problems_nn": [
+            "My office {device} is lost during travelling. Company files are inside. Please advise what to do.",
+        ],
+        "notes": ["{device} stolen", "lost {device} - has company data"],
+        "details": ["It was switched off at the time."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "hardware.label_printer",
+        "category": "hardware", "weight": 4,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["PRN"], "asset_p": 0.40,
+        "kind": "degraded", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "end_user_computing",
+        "action": "Fix the misaligned label printer",
+        "action_generic": "Fix the misaligned label printer",
+        "problems": [
+            "The warehouse label printer prints equipment labels shifted to the right, so {plant_tag} comes out as '-{n}{n}0{n}A'. The whole stores team uses it.",
+            "Label printer in stores cuts off the first characters of every tag. A label for {plant_tag} is unreadable.",
+        ],
+        "problems_nn": [
+            "The label printer of warehouse is printing the tag shifted, like {plant_tag} is coming half only. All stores team is using this printer.",
+        ],
+        "notes": ["label printer misaligned, stores team", "warehouse label printer cutting off tags like {plant_tag}, whole stores team stuck"],
+        "details": ["We recalibrated from the panel, no change."],
+        "errors": [], "guesses": ["I think the label roll is the wrong size."],
+    },
+    {
+        "id": "hardware.field_office_pc",
+        "category": "hardware", "weight": 4,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": ["DSK"], "asset_p": 0.50,
+        "kind": "blocked", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "end_user_computing",
+        "action": "Repair the overheating field office desktop",
+        "action_generic": "Repair the overheating field office desktop",
+        "problems": [
+            "The shared desktop in the field office next to {plant_tag} shuts itself down after ten minutes. The shift team has no other PC out there.",
+            "Field office PC by the {plant_tag} shelter overheats and powers off. It's the only machine the shift crew has for permits and logs.",
+        ],
+        "problems_nn": [
+            "The common PC in field office near {plant_tag} is switching off by itself after some minutes. Shift team is not having any other PC there.",
+        ],
+        "notes": ["field office pc near {plant_tag} shuts down, only pc for shift crew"],
+        "details": ["It is very dusty inside the vents."],
+        "errors": [], "guesses": ["I think the power supply in that building is bad."],
+    },
+    {
+        "id": "hardware.meeting_room_display",
+        "category": "hardware", "weight": 4,
+        "systems": [], "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "end_user_computing",
+        "action": "Repair the meeting room display",
+        "action_generic": "Repair the meeting room display",
+        "problems": [
+            "The big screen in the main meeting room won't show anything from the HDMI cable. Everyone who books the room hits this.",
+            "Meeting room display turns on but says 'no input' whatever we plug in. It affects every team that uses the room.",
+        ],
+        "problems_nn": [
+            "The display of meeting room is not showing the laptop, no input is coming. All people using the room have same problem.",
+        ],
+        "notes": ["meeting room screen no input, every booking affected", "mtg room display dead - affects all bookings"],
+        "details": [], "errors": [], "guesses": ["Maybe our laptops are not compatible."],
+    },
+
+    # =================================================================
+    # NETWORK
+    # =================================================================
+    {
+        "id": "network.wifi_drops",
+        "category": "network", "weight": 28,
+        "systems": ["CORP-WIFI"],
+        "generic": "the wifi", "unnamed": 0.35,
+        "assets": ["LAP"], "asset_p": 0.10,
+        "kind": "degraded", "scopes": {"single_user": 45, "team": 35, "site": 20},
+        "queue": "network_ops",
+        "action": "Investigate the unstable {system} connection",
+        "action_generic": "Investigate the unstable wifi connection",
+        "problems": [
+            "{system} drops every few minutes. It reconnects by itself but calls keep breaking.",
+            "{system} signal is very weak in our area since the office move. Cable works fine.",
+        ],
+        "problems_nn": [
+            "{system} is disconnecting again and again. With cable it is fine.",
+            "The signal of {system} is very weak in our side, net is very slow since morning.",
+        ],
+        "notes": ["{system} keeps dropping", "weak {system} signal", "wifi unstable"],
+        "details": ["It is worse after lunch for some reason."],
+        "errors": [],
+        "guesses": ["I think my laptop wifi card is broken.", "Maybe too many people are using it."],
+    },
+    {
+        "id": "network.vpn_wont_connect",
+        "category": "network", "weight": 22,
+        "systems": ["GateKey VPN"],
+        "generic": "the vpn", "unnamed": 0.25,
+        "assets": ["LAP"], "asset_p": 0.15,
+        "kind": "blocked", "scopes": {"single_user": 85, "team": 15},
+        "queue": "network_ops",
+        "action": "Restore the user's {system} connection",
+        "action_generic": "Restore the user's VPN connection",
+        "problems": [
+            "{system} fails to connect from home. I'm remote all week, so I can't reach anything internal.",
+            "{system} connects then drops after ten seconds, every time. I can't work remotely.",
+        ],
+        "problems_nn": [
+            "{system} is not connecting from my home. I am working remote so all my work is stopped.",
+            "I am on business trip and {system} is not getting connected, I tried from hotel and from mobile hotspot also.",
+        ],
+        "notes": ["{system} wont connect", "{system} drops after 10 sec", "vpn not connecting from home"],
+        "details": ["Home internet is fine, I can browse normally."],
+        "errors": [
+            "GK-417: Secure tunnel negotiation failed (peer not responding)",
+            "Connection attempt failed: unable to enable virtual adapter (reason 0x1F4)",
+            "{past_date}T07:52:11 [gk-client] resolving gateway gk-gw-01\n{past_date}T07:52:12 [gk-client] TLS handshake ok\n{past_date}T07:52:14 [gk-client] auth ok, requesting tunnel\n{past_date}T07:52:44 [gk-client] ERROR tunnel setup timed out after 30s (GK-417)\n{past_date}T07:52:44 [gk-client] disconnecting",
+        ],
+        "guesses": ["I think my password expired.", "Maybe my home router is blocking it."],
+    },
+    {
+        "id": "network.site_outage",
+        "category": "network", "weight": 13,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "blocked", "scopes": {"site": 65, "enterprise": 35},
+        "queue": "network_ops",
+        "action": "Restore network connectivity",
+        "action_generic": "Restore network connectivity",
+        "problems": [
+            "No network at all. Wired and wireless are both dead and nobody can reach email or any system.",
+            "Internet and all internal systems went down about twenty minutes ago. Phones too.",
+        ],
+        "problems_nn": [
+            "Network is totally down, no any system is opening, wired and wireless both.",
+        ],
+        "notes": ["network down", "total outage - no network"],
+        "details": ["Raising this from my mobile."],
+        "errors": [], "guesses": ["Someone said there is construction work outside, maybe they cut a cable."],
+    },
+    {
+        "id": "network.slow_internet",
+        "category": "network", "weight": 16,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 35, "team": 30, "site": 27, "enterprise": 8},
+        "queue": "network_ops",
+        "action": "Investigate the slow network",
+        "action_generic": "Investigate the slow network",
+        "problems": [
+            "Everything on the network is crawling today. Pages take a minute to load.",
+            "File copies to the server that took seconds last week now take ten minutes.",
+        ],
+        "problems_nn": [
+            "Net is very slow since morning, every page is taking too much time.",
+            "The speed of network is very less today, file copying is taking very long.",
+        ],
+        "notes": ["network very slow", "slow internet"],
+        "details": [], "errors": [],
+        "guesses": ["I think my computer is too old.", "Maybe someone is downloading movies."],
+    },
+    {
+        "id": "network.lan_port_dead",
+        "category": "network", "weight": 9,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": ["DSK", "LAP"], "asset_p": 0.20,
+        "kind": "degraded", "scopes": {"single_user": 100},
+        "queue": "network_ops",
+        "action": "Repair the dead network port",
+        "action_generic": "Repair the dead network port",
+        "problems": [
+            "The network socket at my new desk is dead. No link light. I'm on wifi for now.",
+            "Wall port at my desk stopped working after the electricians were in. Wifi is OK meanwhile.",
+        ],
+        "problems_nn": [
+            "The network point of my desk is not working, no light is coming. For now I am using wifi.",
+        ],
+        "notes": ["lan port dead at desk", "wall socket no link"],
+        "details": ["Port label says D-2-{n}{n}."],
+        "errors": [], "guesses": ["Maybe my cable is bad but I tried two."],
+    },
+    {
+        "id": "network.shared_drive_unreachable",
+        "category": "network", "weight": 10,
+        "systems": ["S: drive"],
+        "generic": "the shared drive", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "blocked", "scopes": {"team": 70, "site": 30},
+        "queue": "network_ops",
+        "action": "Restore connectivity to {system}",
+        "action_generic": "Restore connectivity to the shared drive",
+        "problems": [
+            "{system} has disappeared for all of us. The path can't be found from any machine, so nobody can reach their files.",
+            "None of us can open {system} since this morning, it just says the network path was not found.",
+        ],
+        "problems_nn": [
+            "{system} is not opening for anyone, it is showing network path not found. All our files are there only.",
+        ],
+        "notes": ["{system} unreachable - path not found", "cant reach {system}, path not found"],
+        "details": ["Other internal sites open fine."],
+        "errors": [
+            "Error code: 0x80070035. The network path was not found.",
+            "C:\\>net use S: \\\\fs-{n}{n}\\dept\nSystem error 53 has occurred.\n\nThe network path was not found.",
+        ],
+        "guesses": ["I think IT removed our permissions.", "I think someone deleted the folder."],
+    },
+    {
+        "id": "network.guest_wifi_request",
+        "deadline_ok": False,
+        "category": "network", "weight": 6,
+        "systems": ["GUEST-WIFI"],
+        "generic": "guest internet", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "network_ops",
+        "action": "Issue {system} vouchers for the visitors",
+        "action_generic": "Issue guest wifi vouchers for the visitors",
+        "problems": [
+            "We have {n} vendor visitors coming for a workshop and they need {system} codes.",
+            "Please arrange {system} access for an audit team of {n} people.",
+        ],
+        "problems_nn": [
+            "Kindly provide {system} vouchers for {n} visitors who are coming for meeting.",
+        ],
+        "notes": ["{system} codes for {n} visitors", "guest wifi for vendor workshop"],
+        "details": [], "errors": [], "guesses": [],
+    },
+
+    # =================================================================
+    # ERP - rare
+    # =================================================================
+    {
+        "id": "erp.posting_error",
+        "category": "erp", "weight": 30,
+        "systems": ["Tavrona ERP"],
+        "generic": "the finance system", "unnamed": 0.10,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 50, "team": 50},
+        "queue": "erp_support",
+        "action": "Resolve the invoice posting error in {system}",
+        "action_generic": "Resolve the invoice posting error",
+        "problems": [
+            "{system} rejects every vendor invoice I try to post today. Parking them works, posting doesn't.",
+            "Posting invoices in {system} fails with a period error even though the period is open.",
+        ],
+        "problems_nn": [
+            "I am not able to post the vendor invoice in {system}, error is coming. Park is working but post not.",
+            "{system} is giving period error in invoice posting but period is already open from finance side.",
+        ],
+        "notes": ["{system} invoice posting error", "cant post invoices {system} - period error"],
+        "details": ["Vendor payments will be late if this continues."],
+        "errors": [
+            "TVR-FI-2041: Posting period 009/2026 is not open for account type K",
+            "PostingException: balance check failed for document 51000{n}{n}{n}{n}\n    at tavrona.fi.posting.DocumentPoster.validate(DocumentPoster.java:214)\n    at tavrona.fi.posting.DocumentPoster.post(DocumentPoster.java:96)\n    at tavrona.fi.ap.InvoiceService.postInvoice(InvoiceService.java:341)\n    at tavrona.web.ap.InvoiceController.submit(InvoiceController.java:88)\n    at java.base/java.lang.reflect.Method.invoke(Method.java:580)\nCaused by: tavrona.fi.ledger.PeriodClosedException: period 009/2026 locked by job FI_CLOSE_{n}{n}\n    at tavrona.fi.ledger.PeriodGuard.check(PeriodGuard.java:57)\n    ... 23 more",
+        ],
+        "guesses": ["I think my authorisation was removed."],
+    },
+    {
+        "id": "erp.role_authorisation",
+        "category": "erp", "weight": 25,
+        "systems": ["Tavrona ERP"],
+        "generic": "the ERP system", "unnamed": 0.10,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 85, "team": 15},
+        "queue": "erp_support",
+        "action": "Assign the missing {system} role to the user",
+        "action_generic": "Assign the missing ERP role to the user",
+        "problems": [
+            "I get 'not authorised' in {system} when I open the purchase requisition screen. I need the requisitioner role.",
+            "Since moving to {dept} I can log in to {system} but every screen I need says no authorisation.",
+        ],
+        "problems_nn": [
+            "In {system} it is showing you are not authorised when I open purchase requisition. Kindly add the role for me.",
+            "I can login to {system} but the screens of {dept} are not opening for me, authorisation is missing.",
+        ],
+        "notes": ["{system} not authorised - need requisitioner role", "missing {system} role after move to {dept}"],
+        "details": ["{name} approved the role form already."],
+        "errors": ["TVR-AUTH-4031: User not authorised for function PRQ-210 (org unit {site})"],
+        "guesses": ["I think my password is wrong."],
+    },
+    {
+        "id": "erp.workflow_stuck",
+        "category": "erp", "weight": 20,
+        "systems": ["Tavrona ERP"],
+        "generic": "the ERP system", "unnamed": 0.10,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 60, "team": 40},
+        "queue": "erp_support",
+        "action": "Reroute the stuck approval workflow in {system}",
+        "action_generic": "Reroute the stuck approval workflow",
+        "problems": [
+            "My purchase requisition in {system} is stuck with an approver who left the company. It needs rerouting.",
+            "Approval workflow in {system} has been sitting at 'in process' for a week, the approver says nothing is in their inbox.",
+        ],
+        "problems_nn": [
+            "My PR in {system} is pending with {name} but he already left the company. Kindly route to new approver.",
+        ],
+        "notes": ["{system} PR stuck with departed approver", "workflow stuck {system}"],
+        "details": [], "errors": [],
+        "guesses": ["Maybe the system lost my request."],
+    },
+    {
+        "id": "erp.system_down",
+        "category": "erp", "weight": 12,
+        "systems": ["Tavrona ERP"],
+        "generic": "the ERP system", "unnamed": 0.10,
+        "assets": [], "asset_p": 0.0,
+        "kind": "blocked", "scopes": {"site": 40, "enterprise": 60},
+        "queue": "erp_support",
+        "action": "Restore {system} service",
+        "action_generic": "Restore ERP service",
+        "problems": [
+            "{system} is down. The login page gives a gateway error and nobody can get in.",
+            "{system} throws everyone out with a session error and won't let anyone back in.",
+        ],
+        "problems_nn": [
+            "{system} is not opening for anybody, gateway error is coming. All work is stopped.",
+        ],
+        "notes": ["{system} down - gateway error", "{system} outage"],
+        "details": ["Warehouse cannot issue materials without it."],
+        "errors": ["502 Bad Gateway - tvr-app-02 upstream unavailable"],
+        "guesses": ["I think the internet is down."],
+    },
+    {
+        "id": "erp.vendor_master",
+        "category": "erp", "weight": 13,
+        "systems": ["Tavrona ERP", "SupplierLink"],
+        "generic": "the ERP system", "unnamed": 0.10,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "erp_support",
+        "action": "Update the vendor record in {system}",
+        "action_generic": "Update the vendor record",
+        "problems": [
+            "A vendor's bank details changed and I can't edit the record in {system}. The field is greyed out.",
+            "Please unblock vendor 30{n}{n}{n}{n} in {system}, it was blocked by mistake during cleanup.",
+        ],
+        "problems_nn": [
+            "Kindly update the bank details of vendor in {system}, from my side the field is not editable.",
+        ],
+        "notes": ["vendor record update {system}", "unblock vendor in {system}"],
+        "details": ["Supporting letter from the vendor is with me."],
+        "errors": [], "guesses": [],
+    },
+
+    # =================================================================
+    # TELECOM - rarest
+    # =================================================================
+    {
+        "id": "telecom.deskphone_dead",
+        "category": "telecom", "weight": 30,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": ["PHN"], "asset_p": 0.45,
+        "kind": "degraded", "scopes": {"single_user": 80, "team": 20},
+        "queue": "telecom_voice",
+        "action": "Repair the dead desk phone",
+        "action_generic": "Repair the dead desk phone",
+        "problems": [
+            "My desk phone has no dial tone and the display is blank. Extension {n}{n}{n}{n}.",
+            "Desk phone rings but when I pick up there's silence. Callers can't hear me either.",
+        ],
+        "problems_nn": [
+            "My desk phone is not working, no tone is coming. My extension is {n}{n}{n}{n}.",
+        ],
+        "notes": ["desk phone dead ext {n}{n}{n}{n}", "no dial tone"],
+        "details": ["I am using my mobile meanwhile."],
+        "errors": [], "guesses": ["Maybe the cleaner pulled the cable."],
+    },
+    {
+        "id": "telecom.softphone",
+        "category": "telecom", "weight": 25,
+        "systems": ["VoxLine"],
+        "generic": "the softphone", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "scopes": {"single_user": 75, "team": 25},
+        "queue": "telecom_voice",
+        "action": "Fix the {system} registration failure",
+        "action_generic": "Fix the softphone registration failure",
+        "problems": [
+            "{system} says 'registration failed' and I can't make or receive calls on my extension.",
+            "{system} shows me as offline. Calls to my extension go straight to voicemail.",
+        ],
+        "problems_nn": [
+            "{system} is showing registration failed, calls are not coming and not going.",
+        ],
+        "notes": ["{system} registration failed", "{system} offline, calls to voicemail"],
+        "details": [],
+        "errors": ["SIP/2.0 403 Forbidden (registrar vx-reg-01)"],
+        "guesses": ["I think it's my headset."],
+    },
+    {
+        "id": "telecom.mobile_roaming",
+        "deadline_ok": False,
+        "category": "telecom", "weight": 20,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": ["MOB"], "asset_p": 0.35,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "telecom_voice",
+        "action": "Enable roaming on the user's company mobile",
+        "action_generic": "Enable roaming on the user's company mobile",
+        "problems": [
+            "I'm travelling for a vendor visit and need roaming switched on for my company mobile.",
+            "Please activate international roaming on my work SIM.",
+        ],
+        "problems_nn": [
+            "I am going for business travel, kindly activate the roaming in my company mobile.",
+        ],
+        "notes": ["enable roaming on company mobile", "roaming activation request"],
+        "details": ["Travel approval is done."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "telecom.conference_phone",
+        "category": "telecom", "weight": 15,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": ["PHN"], "asset_p": 0.25,
+        "kind": "degraded", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "telecom_voice",
+        "action": "Repair the conference room phone",
+        "action_generic": "Repair the conference room phone",
+        "problems": [
+            "The conference phone in the {dept} meeting room has terrible echo. Remote people can't understand us. The whole department uses that room.",
+            "Conference room speakerphone cuts out mid-call. Every team meeting this week has been affected.",
+        ],
+        "problems_nn": [
+            "The conference phone of {dept} meeting room is giving too much echo, other side is not understanding. All department is using this room.",
+        ],
+        "notes": ["conf room phone echo - {dept} room, whole dept uses it", "speakerphone cutting out, team meetings affected"],
+        "details": [], "errors": [], "guesses": ["Maybe the room is too big."],
+    },
+    {
+        "id": "telecom.site_phones_down",
+        "category": "telecom", "weight": 10,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "blocked", "scopes": {"site": 100},
+        "queue": "telecom_voice",
+        "action": "Restore the site telephone service",
+        "action_generic": "Restore the site telephone service",
+        "problems": [
+            "All desk phones are dead. No internal or external calls possible, including the gate and the control room admin line.",
+        ],
+        "problems_nn": [
+            "All the phones are not working, no any call is going inside or outside.",
+        ],
+        "notes": ["all phones down", "site telephony outage"],
+        "details": ["Computers and internet are working normally."],
+        "errors": [], "guesses": ["I think the telecom bill was not paid."],
+    },
+
+    # =================================================================
+    # OTHER
+    # =================================================================
+    {
+        "id": "other.phishing_report",
+        "no_troubleshooting": True,
+        "category": "other", "weight": 28,
+        "systems": ["Outlook"],
+        "generic": "my inbox", "unnamed": 0.20,
+        "assets": [], "asset_p": 0.0,
+        "kind": "degraded", "urgency": "medium",
+        "scopes": {"single_user": 60, "team": 25, "enterprise": 15},
+        "queue": "security_ops",
+        "action": "Investigate the reported phishing email",
+        "action_generic": "Investigate the reported phishing email",
+        "problems": [
+            "I received a suspicious email asking me to confirm my password through a link. I did not click it.",
+            "Got a mail in {system} pretending to be from the CEO office asking for gift cards. Reporting it, I haven't replied.",
+        ],
+        "problems_nn": [
+            "One suspicious mail came asking to verify my password in one link. I did not open the link. Kindly check.",
+        ],
+        "notes": ["suspicious email - not clicked", "phishing mail reporting"],
+        "details": ["Sender address looks like our domain but with an extra letter."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "other.phishing_clicked",
+        "no_troubleshooting": True,
+        "category": "other", "weight": 12,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": ["LAP"], "asset_p": 0.30,
+        "kind": "blocked", "urgency": "high", "scopes": {"single_user": 100},
+        "queue": "security_ops",
+        "action": "Contain the possible credential compromise",
+        "action_generic": "Contain the possible credential compromise",
+        "problems": [
+            "I clicked a link in an email and entered my password before I realised it was fake. What should I do?",
+            "I opened an attachment called invoice.zip and a black window flashed. Now I'm worried.",
+        ],
+        "problems_nn": [
+            "By mistake I clicked one link in mail and I put my password there. After that I understood it is fake. Please advise.",
+        ],
+        "notes": ["clicked phishing link + entered pwd", "opened suspicious attachment"],
+        "details": ["It happened about half an hour ago."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "other.not_it",
+        "no_troubleshooting": True,
+        "category": "other", "weight": 20,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "urgency": "low", "scopes": {"single_user": 100},
+        "queue": "service_desk_l1",
+        "action": "Redirect the request to the facilities team",
+        "action_generic": "Redirect the request to the facilities team",
+        "problems": [
+            "The AC in our office has been leaking onto the carpet for two days.",
+            "My office chair is broken, the gas lift doesn't hold. Who do I ask?",
+            "The door badge reader on our floor doesn't beep anymore and the door stays unlocked.",
+        ],
+        "problems_nn": [
+            "The AC of our room is not cooling and water is dropping. Kindly send someone.",
+        ],
+        "notes": ["AC leaking in office", "broken chair", "door reader not working"],
+        "details": ["I did not know where else to log this."],
+        "errors": [], "guesses": [],
+    },
+    {
+        "id": "other.status_followup",
+        "deadline_ok": False,
+        "needed_by_ok": False,
+        "category": "other", "weight": 22,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "scopes": {"single_user": 100},
+        "queue": "service_desk_l1",
+        "action": "Provide a status update on the earlier ticket",
+        "action_generic": "Provide a status update on the earlier ticket",
+        "problems": [
+            "Any update on {old_inc}? It's been over a week and nobody has contacted me.",
+            "Following up on {old_inc}. The ticket was closed but nothing was actually fixed.",
+        ],
+        "problems_nn": [
+            "What is the status of my ticket {old_inc}? Still I didn't get any reply.",
+            "Kindly update me regarding {old_inc}, it is pending since long time.",
+        ],
+        "notes": ["status of {old_inc}?", "chasing {old_inc} - no response"],
+        "details": [], "errors": [], "guesses": [],
+    },
+    {
+        "id": "other.event_support",
+        "deadline_ok": False,
+        "category": "other", "weight": 10,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "urgency": "medium", "scopes": {"team": 100}, "scope_in_text": True,
+        "queue": "service_desk_l1",
+        "action": "Arrange on-site IT support for the event",
+        "action_generic": "Arrange on-site IT support for the event",
+        "problems": [
+            "{dept} is hosting a town hall on {date} for about {n}0 people. We need someone from IT for the projector and microphones.",
+            "We have a management workshop on {date} and would like IT standby for the AV setup.",
+        ],
+        "problems_nn": [
+            "{dept} is having one event on {date}, kindly arrange one IT person for projector and mic support.",
+        ],
+        "notes": ["IT support for {dept} event {date}", "AV standby request {date}"],
+        "details": [], "errors": [], "guesses": [],
+    },
+    {
+        "id": "other.close_ticket",
+        "category": "other", "weight": 8,
+        "systems": [],
+        "generic": "", "unnamed": 1.0,
+        "assets": [], "asset_p": 0.0,
+        "kind": "request", "urgency": "low", "scopes": {"single_user": 100},
+        "queue": "service_desk_l1",
+        "action": "Close the earlier ticket as resolved",
+        "action_generic": "Close the earlier ticket as resolved",
+        "problems": [
+            "The issue in {old_inc} sorted itself out after a restart. You can close it, thanks.",
+            "{name} from IT fixed my problem at my desk, please close {old_inc}.",
+        ],
+        "problems_nn": [
+            "My issue of {old_inc} is solved now, you can close the same. Thanks for support.",
+        ],
+        "notes": ["pls close {old_inc}, fixed", "{old_inc} resolved - close"],
+        "details": [], "errors": [], "guesses": [],
+    },
+]

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ticket_record",
+  "title": "Service desk ticket record (BUILD_SPEC.md section 8B)",
+  "description": "DO NOT MODIFY. Every dataset, eval and comparison depends on this schema. Changing it is a raise-with-Ritesh change.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "category",
+    "affected_system",
+    "asset_tag",
+    "urgency",
+    "impact",
+    "requested_action",
+    "routing_queue"
+  ],
+  "properties": {
+    "category": {
+      "enum": ["access", "hardware", "software", "network", "erp", "telecom", "other"]
+    },
+    "affected_system": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "asset_tag": {
+      "description": "IT asset tag, prefix plus five digits (LAP-04412), or null.",
+      "type": ["string", "null"],
+      "pattern": "^[A-Z]{3}-[0-9]{5}$"
+    },
+    "urgency": {
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "impact": {
+      "enum": ["single_user", "team", "site", "enterprise"]
+    },
+    "requested_action": {
+      "description": "One short imperative clause. One line, no trailing prose.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 90,
+      "pattern": "^[A-Z][^\\n.]*$"
+    },
+    "routing_queue": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

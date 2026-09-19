@@ -48,6 +48,9 @@ every time.
 - Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
 - Data quality: `python scripts/quality_checks.py --dataset <path>`
 - Mock ERP: `uvicorn services.mock_erp.main:app --reload`
+- Tickets: `python scripts/generate_tickets.py --count 600 --seed 42`
+- Ticket checks: `python scripts/check_tickets.py --tickets corpus/tickets/tickets_raw.jsonl --labels data/finetune/ticket_labels.jsonl --schema data/finetune/ticket_schema.json`
+- Tests: `python -m pytest tests/`
 
 ---
 
@@ -102,3 +105,25 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   docs/notebook_conventions.md; keep all three in sync).
 - `notebooks/_template.ipynb` must always run top-to-bottom clean; it
   is the reference for Contract #2.
+
+### Ticket corpus (P1)
+- `corpus/tickets/tickets_raw.jsonl` + `data/finetune/ticket_labels.jsonl`
+  are GENERATED (seed 42, count 600). Never hand-edit them. The
+  generator is stdlib-only and byte-deterministic across OS and Python
+  3.11-3.14; `tests/test_generate_tickets.py` fails if the committed
+  files and the generator disagree.
+- Editing `scripts/ticket_scenarios.py` or `scripts/ticket_phrases.py`
+  changes the corpus. After any edit: regenerate, run
+  `check_tickets.py` (must end "All checks passed", including the
+  real-name denylist), update the two SHA-256 values in
+  `corpus/README.md`, then rebuild everything downstream (dataset,
+  adapter, eval tables).
+- Label rules live in `corpus/README.md` ("Labelling rules"). The one
+  people get wrong: urgency follows the stated business effect, never
+  the tone; a two-problem ticket is labelled for its FIRST problem.
+- People in tickets are first names only, on purpose (no generated
+  name can match a real employee). Enterprise system names are
+  invented; OQ's real ERP (SAP, project "e-Symphony") is on the
+  denylist.
+- `.gitattributes` forces LF on `*.jsonl` so the hashes survive a
+  Windows checkout.

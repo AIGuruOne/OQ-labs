@@ -66,12 +66,47 @@ line:
 }
 ```
 
-- `ticket_id` is unique, `INC-` + 6 digits.
+- `ticket_id` is unique, `INC-` + 6 digits, rising with `created`.
+- `created` is ISO 8601 local time, no offset.
+- `site` is one of the invented codes `MRB SHZ KTF WQR ZFL HBT TMQ`.
 - `channel` is one of `portal | email | phone | walk_in`.
-- `subject` may be empty (`""`); `body` never is.
+- `subject` may be empty (`""`); `body` never is. Both are input text:
+  anything that feeds a model a ticket feeds it `subject` + `body`.
 - The structured LABELS for a ticket (category, urgency...) live in
   `data/finetune/*.jsonl`, NOT here — the corpus holds raw inputs only,
   so retrieval labs can ingest tickets without seeing answers.
+- Generated, never hand-edited:
+  `python scripts/generate_tickets.py --count 600 --seed 42`.
+  Deterministic; the committed files are the seed-42 output and
+  `tests/test_generate_tickets.py` enforces that.
+
+### Ticket ground truth (data/finetune/ticket_labels.jsonl)
+
+One line per ticket, same order as `tickets_raw.jsonl`, joined on
+`ticket_id`:
+
+```json
+{
+  "ticket_id": "INC-004412",
+  "record": { "...the seven BUILD_SPEC 8B fields, in spec order..." },
+  "meta": {"scenario": "access.password_reset", "persona": "terse",
+           "features": ["system_unnamed"], "word_count": 6}
+}
+```
+
+- `record` validates against `data/finetune/ticket_schema.json`, the
+  machine-readable form of the section 8B schema (enums, nullable
+  strings, `asset_tag` pattern `^[A-Z]{3}-[0-9]{5}$`, one-line
+  `requested_action`). The schema file is frozen with the schema.
+- `routing_queue` is one of: `identity_access, end_user_computing,
+  network_ops, erp_support, apps_support, telecom_voice, security_ops,
+  service_desk_l1`.
+- `meta` is generator bookkeeping for error analysis. It is never a
+  training target and never shown to a model.
+- The labelling rules (how each field follows from the text) are in
+  `corpus/README.md`. `train.jsonl`, `val.jsonl` and
+  `data/eval/heldout_20.jsonl` are all built from this file by the
+  dataset builder — nothing else is a source of labels.
 
 ### Naming conventions (both slices)
 
@@ -81,7 +116,7 @@ line:
 | Site code | three invented letters | `MRB`, `SHZ` |
 | Ticket ID | `INC-` + 6 digits | `INC-004412` |
 | Work order | `WO-` + 6 digits | `WO-118305` |
-| IT asset | prefix + 5 digits | `LAP-04412` |
+| IT asset | 3-letter prefix + 5 digits (`LAP DSK MON PRN PHN MOB`) | `LAP-04412` |
 | Dates | ISO 8601 | `2026-08-14` |
 
 ---
