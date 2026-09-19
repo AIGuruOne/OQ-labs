@@ -1,0 +1,25 @@
+# Secrets — never committed. .env.example is the committed template.
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Model checkpoints: ignore everything EXCEPT the pre-baked adapter,
+# which ships in the repo so Day 2 S12 and Day 4 S19 work even if
+# nobody's training run completes.
+checkpoints/*
+!checkpoints/adapter_prebaked/
+!checkpoints/adapter_prebaked/**
+
+# OS noise
+.DS_Store
+Thumbs.db

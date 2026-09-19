@@ -1,0 +1,103 @@
+# OQ Advanced AI for IT: lab repo
+
+Teaching material for a 5-day onsite program with OQ (Oman energy company) IT
+practitioners, 27 Sept to 1 Oct 2026. Read BUILD_SPEC.md before doing anything.
+
+## What this repo is
+Notebooks, synthetic data, eval scripts and services for hands-on labs.
+This is teaching material, not production code. Legibility beats elegance
+every time.
+
+## Hard rules
+- NEVER run `pip install -U` or add unpinned dependencies. The stack freezes
+  24 Sept. Ask before adding any dependency.
+- NEVER change the ticket schema in data/finetune. Every eval depends on it.
+- NEVER change lab durations or session order. The schedule is time-budgeted.
+- NEVER move to a bigger model or accelerator to make something work. Fix the
+  approach or raise it.
+- NEVER commit secrets, or notebook outputs containing them.
+- All synthetic data only. No real OQ material, names, sites or asset tags.
+
+## Notebook style
+- One idea per cell. Explicit intermediate variables. Plain names.
+- A markdown cell before every code cell explaining why, not what.
+- Print the shape or a sample of what just happened. No silent success.
+- Helpers go in utils.py and get imported, not inlined at 80 lines.
+- Test: can a participant read a cell and modify it in under a minute?
+
+## Two versions of every notebook
+- notebooks/ has TODO gaps for participants. Outputs cleared before commit.
+- solutions/ runs clean end to end. Outputs retained as the reference.
+
+## Every notebook must
+- Detect Colab versus local in the first code cell and branch accordingly.
+- Save to Drive at every milestone. Runtimes disconnect.
+- Resume from the last checkpoint after a reconnect.
+- Declare at the top: expected runtime, requirements, what correct looks like.
+- Run on a cold free-tier Colab runtime within its declared budget.
+
+## Conventions
+- Equipment tags: P-1201A. Site codes: three invented letters. Tickets:
+  INC-004412. Work orders: WO-118305. IT assets: LAP-04412. Dates: ISO 8601.
+- Scripts take arguments. No hardcoded paths.
+- Pinned versions only, exact, no ranges.
+
+## Commands
+- Environment check: `python setup/setup_check.py`
+- Eval: `python scripts/run_eval.py --dataset <path> --endpoint <name>`
+- Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
+- Data quality: `python scripts/quality_checks.py --dataset <path>`
+- Mock ERP: `uvicorn services.mock_erp.main:app --reload`
+
+---
+
+## Session knowledge (added during the build — keep current)
+
+### Interface contracts
+The five contracts live in `docs/contracts.md` and are binding:
+corpus layout + frontmatter (#1), notebook conventions (#2, full text
+in `docs/notebook_conventions.md`, reference in
+`notebooks/_template.ipynb`), endpoint config (#3, implemented in
+`config/endpoints.py`), eval output format (#4), index interface (#5).
+Do not change a contract silently — that is a raise-with-Ritesh change.
+
+### Endpoints and env vars
+- The hosted API key is `OPENAI_API_KEY` — exactly that name, in a
+  repo-root `.env` (template: `setup/.env.example`). A common failure
+  is a misspelled variable name; `setup_check.py` detects near-misses.
+- All three endpoints (local Ollama, hosted, tuned adapter) speak
+  OpenAI-compatible `POST {base}/v1/chat/completions`.
+  `config/endpoints.py` is the only place that protocol lives —
+  notebooks never hand-roll HTTP to a model.
+- `config/endpoints.py` and `setup/setup_check.py` parse `.env`
+  themselves (stdlib) so both work before `pip install`.
+
+### Python versions (verified 2026-09-19)
+- Colab is mid-rollout: new default image is Python 3.13.15 /
+  Ubuntu 24.04; the pinnable previous runtime "2026.07" is Python
+  3.12.13 / Ubuntu 22.04. Colab preinstalls torch 2.11.0+cu128,
+  transformers 5.16.1, numpy 2.1.3, pandas 2.2.3, requests 2.32.4,
+  pydantic 2.13.5, accelerate 1.14.0, datasets 4.8.5, httpx 0.28.1.
+  Authority: github.com/googlecolab/backend-info (pip-freeze.gpu.txt).
+- `requirements.txt` pins match Colab's preinstalled versions where
+  Colab ships the package. Do not "upgrade" a pin to the newest PyPI
+  version — matching Colab is the point.
+- Local work targets Python 3.11/3.12. Do NOT use 3.13/3.14 locally:
+  the fine-tuning stack does not support them. The build machine has
+  3.14 as default `python` — use the uv-managed 3.11 for venvs.
+- The GPU fine-tuning stack lives in `requirements-finetune.txt`
+  (Linux/Colab T4 only), installed by the Day 2 notebooks' pinned
+  install cell — NOT in base `requirements.txt`, because it cannot
+  install on participants' Windows laptops.
+
+### setup_check.py behaviour
+- stdlib only, on purpose. PASS/WARN/FAIL/INFO rows; exits non-zero
+  only on FAIL. Ollama missing = WARN (only needed Day 2). GPU absent
+  = INFO, never a failure.
+
+### Repo state notes
+- No git remote configured yet. The notebook environment-detection
+  cell carries `REPO_URL` with a `FIXME: real URL before freeze`
+  marker — set it when the GitHub repo exists, before Thu 24 freeze.
+- `notebooks/_template.ipynb` must always run top-to-bottom clean; it
+  is the reference for Contract #2.

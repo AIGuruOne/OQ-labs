@@ -1,0 +1,38 @@
+# Day 2 fine-tuning stack — Colab T4 / Linux GPU runtimes ONLY.
+#
+# DO NOT install this on a participant laptop, and do not add it to
+# base requirements.txt. It deliberately pins transformers/datasets
+# OLDER than Colab preinstalls, because unsloth 2026.9.7 caps
+# transformers<=5.5.0, trl<=0.24.0 and datasets<4.4.0 (verified from
+# unsloth's published wheel metadata and its own T4 Colab notebooks,
+# 2026-09-19). Installing this file downgrades those packages inside
+# the fine-tune runtime — expected, and exactly what unsloth's own
+# notebooks do. Restart the Colab runtime after installing.
+#
+# Installed by the pinned install cell of notebooks 05/06:
+#     %pip install -q -r requirements-finetune.txt
+#
+# Relies on Colab's preinstalled torch 2.11.0+cu128 and triton 3.6.0
+# (inside unsloth's supported range torch>=2.4,<2.13) — torch is
+# deliberately NOT listed so pip never touches it.
+#
+# T4 note: T4 is sm_75 — fp16, no bf16. unsloth selects fp16
+# automatically; supported per unsloth's requirements docs.
+
+unsloth==2026.9.7         # pure-Python wheel
+unsloth_zoo==2026.9.6     # required companion package
+transformers==4.56.2      # unsloth's own T4 notebook pin (cap is <=5.5.0)
+trl==0.22.2               # unsloth's own T4 notebook pin (cap is <=0.24.0)
+peft==0.20.0              # Colab preinstalled version; unsloth needs >=0.18.0
+bitsandbytes==0.50.2      # prebuilt wheels incl. Windows; needed on T4 for 4-bit
+accelerate==1.14.0        # Colab preinstalled version
+datasets==4.3.0           # unsloth cap is <4.4.0 (Colab ships 4.8.5 — downgrade expected)
+xformers==0.0.35          # matches torch 2.11
+torchao==0.16.0           # unsloth's notebooks require >=0.16.0
+sentencepiece==0.2.2      # Colab preinstalled version; tokenizer support
+protobuf==5.29.6          # Colab preinstalled version
+
+# --- Apple Silicon variant (notebook 05b, learner machines) ----------
+# Not installed here — recorded so the pins live in one place:
+#   mlx==0.32.2
+#   mlx-lm==0.31.3

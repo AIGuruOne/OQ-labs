@@ -1,0 +1,44 @@
+# OQ Advanced AI for IT — base requirements. Fully pinned, no ranges.
+#
+# THE PINNING RULE: where Colab preinstalls a package, we pin to
+# Colab's exact preinstalled version (source of truth:
+# github.com/googlecolab/backend-info, pip-freeze.gpu.txt, verified
+# 2026-09-19). On Colab these lines are then no-ops; locally you get
+# the same versions the demos run on. Do NOT "upgrade" a pin to the
+# newest PyPI release — matching Colab is the point.
+#
+# Installs on: cold free-tier Colab (Python 3.12/3.13 images) and
+# local Python 3.11/3.12. No compiled or system-package dependencies.
+#
+# The Day 2 GPU fine-tuning stack is NOT here — it lives in
+# requirements-finetune.txt (Colab T4 / Linux only, installed by the
+# Day 2 notebooks). It needs older transformers/datasets than Colab
+# preinstalls and cannot go on participants' Windows laptops.
+#
+# Adding a dependency to this file is a raise-with-Ritesh change.
+
+# --- HTTP + config ---------------------------------------------------
+requests==2.32.4          # Colab preinstalled version
+httpx==0.28.1             # Colab preinstalled version; also an mcp dependency
+python-dotenv==1.2.3      # Colab preinstalled version
+
+# --- Data handling ---------------------------------------------------
+numpy==2.1.3              # Colab preinstalled version
+pandas==2.2.3             # Colab preinstalled version
+tqdm==4.67.3              # Colab preinstalled version
+jsonschema==4.26.0        # Colab preinstalled version; ticket-schema validation
+
+# --- Notebook runtime (local; Colab ships its own) -------------------
+notebook==6.5.7           # Colab preinstalled version
+ipykernel==6.17.1         # Colab preinstalled version
+nbformat==5.11.1          # Colab preinstalled version
+nbconvert==7.17.1         # Colab preinstalled version; headless notebook runs in testing
+
+# --- Services: mock ERP + MCP server (Day 5) -------------------------
+fastapi==0.141.1          # Colab preinstalled version
+uvicorn==0.52.4           # Colab preinstalled version; plain (no [standard] extras)
+pydantic==2.13.5          # Colab preinstalled version
+mcp==2.2.0                # official MCP Python SDK, implements the 2026-07-28 spec
+
+# --- Testing ---------------------------------------------------------
+pytest==8.4.2             # Colab preinstalled version
