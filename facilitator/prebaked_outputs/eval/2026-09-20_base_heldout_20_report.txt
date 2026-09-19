@@ -1,0 +1,100 @@
+====================================================================================================
+EVAL  2026-09-20_base_heldout_20
+  label     base
+  endpoint  local  ->  llama3.2:3b
+  dataset   data/eval/heldout_20.jsonl   20 tickets   questions 9f92ad8c9de71479
+  settings  temperature 0.0, max_tokens 512, json_mode off
+  time      93.4 s in model calls, median 4.65 s per ticket
+====================================================================================================
+
+1. FORMAT - did a usable record arrive?        (says nothing about the content being right)
+     schema-valid             17 / 20   85%   json.loads(reply) works AND passes ticket_schema.json
+     clean JSON               20 / 20
+     JSON only after repair    0 / 20         fence or prose stripped: content scored, format failed
+     no JSON at all            0 / 20         wrong on every field below
+     endpoint gave no reply    0 / 20         wrong on every field below
+       schema problem x3: impact: null_not_allowed
+
+2. FIELDS - is each field right?               ('readable' = the 20 replies with a record in them)
+     field               right     of all     of readable
+     category           14 / 20      70%         70%
+     affected_system    15 / 20      75%         75%
+     asset_tag          20 / 20     100%        100%
+     urgency            13 / 20      65%         65%
+     impact             14 / 20      70%         70%
+     routing_queue       8 / 20      40%         40%
+     requested_action    2 / 20      10%         10%     NOT exact match - see below
+       a match = similarity >= 0.50; mean similarity 0.14
+       measure: word-set Jaccard similarity (shared words / all words, case and punctuation ignored)
+         - the same measure as the near-duplicate check
+
+3. WHOLE RECORD - all six exact-match fields right at once   (requested_action not included)
+       2 / 20    10%
+
+4. INVENTED - values that exist nowhere        (a separate count, never part of accuracy)
+     outside the allowed list     0
+     keys not in the schema       0
+     asset tags not in ticket     1
+       INC-005546  requested_action = "LAP-04412"   (asset_tag_not_in_ticket)
+
+5. PER CLASS - counts, not percentages         ('thin' = fewer than 5 tickets: an anecdote)
+     category         n   category right   whole record right
+       access         5          2                0           
+       hardware       3          3                1           thin
+       software       3          3                0           thin
+       network        3          3                1           thin
+       erp            2          1                0           thin
+       telecom        2          1                0           thin
+       other          2          1                0           thin
+     urgency          n   urgency right    whole record right
+       low           10          9                0           
+       medium         4          0                0           thin
+       high           4          3                1           thin
+       critical       2          1                1           thin
+     impact           n   impact right     whole record right
+       single_user   14         11                1           
+       team           4          1                0           thin
+       site           1          1                1           thin
+       enterprise     1          1                0           thin
+
+6. URGENCY MISSES - for rubric H1              (+ = the model escalated higher than the label)
+     over by 1: 4   over by 2+: 0   under by 1: 2   under by 2+: 1
+     not a real level: 0   no usable reply: 0     (neither goes to H1: nothing to argue about)
+     * INC-004454  label "medium"    model "low"        -1
+     * INC-005354  label "critical"  model "high"       -1
+     * INC-005370  label "high"      model "low"        -2
+       INC-005480  label "medium"    model "high"       +1
+       INC-005783  label "medium"    model "high"       +1
+       INC-006087  label "medium"    model "high"       +1
+       INC-006285  label "low"       model "medium"     +1
+
+7. REQUESTED_ACTION BELOW 0.50 - for rubric H2       (18 below; read these 5)
+       INC-004183  0.00  label: Fix the user's microphone in Teams
+                         model: "CHECK MIC PROPERLY"
+       INC-004603  0.00  label: Provide a status update on the earlier ticket
+                         model: "Find"
+       INC-005354  0.00  label: Restore Tavrona ERP service
+                         model: "RESOLVE IMMEDIATELY"
+       INC-005546  0.00  label: Repair or replace the laptop that will not power on
+                         model: "REBOOT LAP-04412 NOW"
+       INC-005962  0.17  label: Grant the user access to AssetHive
+                         model: "GRANT"
+
+READ THIS BEFORE QUOTING A NUMBER
+  - 20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two
+    tickets - do not read it as a trend.
+  - Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3),
+    category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2),
+    urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site
+    (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file
+    in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included.
+  - requested_action: It compares WORDS, not meaning, and the expected clauses are written in one
+    house style. 'Reset password' vs 'Reset the user's MyPortal password' scores 0.33 though a desk
+    agent would do the same thing; 'Reset the password' vs 'Do not reset the password' scores 0.60.
+    Treat the match rate as a floor - it rewards house wording - and read the sample below the
+    threshold (rubric H2).
+  - Labels follow written rules (corpus/README.md, 'Labelling rules'). Where a rule is arguable -
+    mostly urgency - a 'miss' may be a defensible answer. Rubric H1 handles that.
+  - One run at temperature 0. Local models can still vary slightly between runs and machines; hosted
+    models change under you. Re-run before quoting a number.
+====================================================================================================

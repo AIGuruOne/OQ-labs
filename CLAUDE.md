@@ -44,7 +44,8 @@ every time.
 
 ## Commands
 - Environment check: `python setup/setup_check.py`
-- Eval: `python scripts/run_eval.py --dataset <path> --endpoint <name>`
+- Eval: `python scripts/run_eval.py --dataset <path> --endpoint <name>` (`--label`, `--out`, `--json-mode`, `--resume`, `--replies <file>`, `--limit`, `--all`)
+- Compare runs: `python scripts/run_eval.py --compare <a_summary.json> <b_summary.json> [...]`
 - Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
 - Data quality: `python scripts/quality_checks.py --dataset data/finetune` (a folder, or `--dataset <train file> --val <val file>`; `--all` lists every finding)
 - Mock ERP: `uvicorn services.mock_erp.main:app --reload`
@@ -62,7 +63,8 @@ The five contracts live in `docs/contracts.md` and are binding:
 corpus layout + frontmatter (#1), notebook conventions (#2, full text
 in `docs/notebook_conventions.md`, reference in
 `notebooks/_template.ipynb`), endpoint config (#3, implemented in
-`config/endpoints.py`), eval output format (#4), index interface (#5).
+`config/endpoints.py`), eval output format (#4, final, implemented in
+`scripts/run_eval.py`), index interface (#5).
 Do not change a contract silently — that is a raise-with-Ritesh change.
 
 ### Endpoints and env vars
@@ -199,3 +201,67 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
 - After any change to the dataset or the checker: run the tests, then
   re-execute `solutions/04_dataset_builder.ipynb` (its retained output
   contains the full report).
+
+### Eval harness (P4)
+- Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring
+  rule (pure functions, no network, no files); `scripts/run_eval.py`
+  asks the model, writes the Contract 4 files, renders tables and does
+  `--compare`. A rule change goes in `eval_scoring.py` AND
+  `data/eval/rubric.md` - they must say the same thing.
+- `data/eval/rubric.md` is a DRAFT until Ritesh signs it (the block at
+  its end). It carries one open question for him: the system prompt
+  does not define the urgency levels, so untuned models are marked
+  against a convention they never saw. Do not "fix" that by editing
+  `SYSTEM_PROMPT` - it means a full rebuild and it is his call.
+- Four measurements, never folded together: format
+  (`schema_valid_rate`), fields (`per_field_accuracy`), record
+  (`overall_exact_match`, six exact fields, no requested_action),
+  invented values (a count). Do not add a blended score;
+  `tests/test_run_eval.py` checks each has its own report heading.
+- Schema-valid is STRICT: `json.loads(raw reply)` works AND the schema
+  passes. Fenced / prose-wrapped JSON is "recovered": content scored,
+  format failed. `null` in an enum is a schema problem, not an
+  invented value.
+- `requested_action` = word-set Jaccard (`du.text_similarity`), match
+  at >= 0.5. Calibrated on 40 real replies: no false matches at >= 0.5,
+  but plenty of adequate answers below it - so it is reported as a
+  FLOOR and rubric H2 samples below it. Changing the threshold or the
+  measure invalidates every saved summary.
+- The harness has no model-specific code. `ask(messages) -> str` is the
+  whole model interface (`run_eval.run_evaluation`), which is how Day 4
+  S19 adds retrieval without touching the harness.
+- JSON mode is OFF by default so the score shows the model unaided;
+  `--json-mode` is a talking point, not the baseline.
+- A run always calls the model again unless `--resume` is given
+  (stale replies after a retrain would be silent and wrong).
+  `--replies <file>` re-scores a saved run with no model call - use it
+  after any scoring change to refresh
+  `facilitator/prebaked_outputs/eval/`.
+- `--compare` reads summary files only and REFUSES runs whose
+  `dataset_sha256` differ (e.g. one run used `--limit`).
+- Rows whose EXPECTED answer is broken are skipped, not scored - so
+  the harness can be pointed at `val.jsonl` (it skips the planted
+  schema violations and says so).
+- Small-sample honesty is built in: per-class output is counts, never
+  percentages; classes under 5 are flagged `thin`; the limitations
+  block is in the summary JSON, the report and the comparison. Do not
+  remove it. A class with n = 0 is listed as NOT TESTED, never
+  omitted (tested).
+- KNOWN DATA GAP (P2, not fixed here): `val.jsonl` has exactly ONE
+  `critical` / `enterprise` row (INC-004736, line 38) and the planter
+  put a schema violation on it, so the cleaned val set (72 rows) has
+  zero of either. The split stratifies by category only. Fixing it
+  means changing the builder or the planter, which changes the
+  byte-pinned dataset, notebook 04's numbers and everything
+  downstream - a decision for Utkarsh / Ritesh, not a quiet edit.
+- Report output is ASCII only and at most 100 columns (tested). Model
+  output is escaped before printing.
+- Reference runs (2026-09-20, held-out 20): llama3.2:3b 17/20
+  schema-valid, 2/20 whole record, ~95 s on the build machine's CPU;
+  gpt-4o-mini 20/20 schema-valid, 6/20 whole record, ~27 s, urgency
+  8/20 with all 12 misses over-escalations.
+- Build-machine gotcha: the Ollama desktop app here is set to a
+  262144-token context, so llama3.2:3b asks for 15.9 GiB and fails to
+  load. Run a second server instead of touching the app:
+  `OLLAMA_HOST=127.0.0.1:11435 OLLAMA_CONTEXT_LENGTH=4096 ollama serve`
+  and set `OLLAMA_BASE_URL=http://localhost:11435` for the run.

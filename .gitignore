@@ -20,6 +20,10 @@ checkpoints/*
 !checkpoints/adapter_prebaked/
 !checkpoints/adapter_prebaked/**
 
+# Eval harness output (scripts/run_eval.py default --out). The reference
+# runs we DO keep live in facilitator/prebaked_outputs/eval/.
+eval_runs/
+
 # Local tool state (not lab material)
 .claude/settings.local.json
 .kilo/

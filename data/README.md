@@ -105,3 +105,22 @@ against `planted_problems.json`, down to the line, field and kind.
 **The class imbalance is reported and never corrected.** There is no
 rebalancing function anywhere in the repo, on purpose (BUILD_SPEC.md
 section 8B), and a test fails if one appears in `quality_checks.py`.
+
+## Scoring a model - `scripts/run_eval.py` and `eval/rubric.md`
+
+```
+python scripts/run_eval.py --dataset data/eval/heldout_20.jsonl --endpoint local
+python scripts/run_eval.py --compare eval_runs/<a>_summary.json eval_runs/<b>_summary.json
+```
+
+`eval/rubric.md` says how every field is scored and what the two
+human-judged steps are (draft until Ritesh signs it). The output
+format is Contract 4 in `docs/contracts.md`. Reference runs against
+the base model and the hosted API are in
+`facilitator/prebaked_outputs/eval/`.
+
+The harness skips any row whose EXPECTED answer is not a valid record,
+so it can be pointed at `finetune/val.jsonl` as well: it reports the
+planted schema violations as skipped lines instead of marking a model
+against a broken answer key.
+

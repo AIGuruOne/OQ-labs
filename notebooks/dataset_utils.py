@@ -462,6 +462,35 @@ def find_leakage(train_pairs, val_pairs):
     return sorted(train_ids & val_ids)
 
 
+def record_schema_errors(record, validator):
+    """Every way ONE parsed record breaks the schema, as a list of
+    {"field", "rule", "value", "message"}. Empty list = valid record.
+
+    `validator` is Draft202012Validator(schema). Shared by the dataset
+    checks (a training completion) and the eval harness (a model's
+    reply), so "schema-valid" means the same thing all day.
+    """
+    errors = []
+    for error in validator.iter_errors(record):
+        if error.path:
+            field = error.path[0]
+            value = error.instance
+        elif error.validator == "required":
+            # "'impact' is a required property" -> name the field.
+            field = error.message.split("'")[1]
+            value = None
+        else:
+            field = "(record)"
+            value = None
+        errors.append({
+            "field": field,
+            "rule": error.validator,
+            "value": value,
+            "message": error.message,
+        })
+    return errors
+
+
 def find_schema_violations(pairs, schema):
     """Rows whose completion is not a valid record.
 
@@ -488,24 +517,7 @@ def find_schema_violations(pairs, schema):
             })
             continue
 
-        errors = []
-        for error in validator.iter_errors(record):
-            if error.path:
-                field = error.path[0]
-                value = error.instance
-            elif error.validator == "required":
-                # "'impact' is a required property" -> name the field.
-                field = error.message.split("'")[1]
-                value = None
-            else:
-                field = "(record)"
-                value = None
-            errors.append({
-                "field": field,
-                "rule": error.validator,
-                "value": value,
-                "message": error.message,
-            })
+        errors = record_schema_errors(record, validator)
 
         if errors:
             problems = sorted(f"{item['field']}: {item['message']}" for item in errors)

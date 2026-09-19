@@ -1,0 +1,409 @@
+{
+  "contract": "eval-comparison/1",
+  "dataset": "data/eval/heldout_20.jsonl",
+  "dataset_sha256": "9f92ad8c9de71479",
+  "n_items": 20,
+  "runs": [
+    {
+      "name": "base",
+      "run_id": "2026-09-20_base_heldout_20",
+      "endpoint": "local",
+      "model": "llama3.2:3b",
+      "json_mode": false
+    },
+    {
+      "name": "hosted",
+      "run_id": "2026-09-20_hosted_heldout_20",
+      "endpoint": "hosted",
+      "model": "gpt-4o-mini",
+      "json_mode": false
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "schema_valid_rate",
+      "kind": "rate",
+      "values": {
+        "base": 0.85,
+        "hosted": 1.0
+      }
+    },
+    {
+      "metric": "category",
+      "kind": "rate",
+      "values": {
+        "base": 0.7,
+        "hosted": 0.95
+      }
+    },
+    {
+      "metric": "affected_system",
+      "kind": "rate",
+      "values": {
+        "base": 0.75,
+        "hosted": 0.75
+      }
+    },
+    {
+      "metric": "asset_tag",
+      "kind": "rate",
+      "values": {
+        "base": 1.0,
+        "hosted": 1.0
+      }
+    },
+    {
+      "metric": "urgency",
+      "kind": "rate",
+      "values": {
+        "base": 0.65,
+        "hosted": 0.4
+      }
+    },
+    {
+      "metric": "impact",
+      "kind": "rate",
+      "values": {
+        "base": 0.7,
+        "hosted": 0.95
+      }
+    },
+    {
+      "metric": "requested_action",
+      "kind": "rate",
+      "values": {
+        "base": 0.1,
+        "hosted": 0.3
+      }
+    },
+    {
+      "metric": "routing_queue",
+      "kind": "rate",
+      "values": {
+        "base": 0.4,
+        "hosted": 0.85
+      }
+    },
+    {
+      "metric": "requested_action_mean_similarity",
+      "kind": "score",
+      "values": {
+        "base": 0.139,
+        "hosted": 0.377
+      }
+    },
+    {
+      "metric": "overall_exact_match",
+      "kind": "rate",
+      "values": {
+        "base": 0.1,
+        "hosted": 0.3
+      }
+    },
+    {
+      "metric": "invented_values",
+      "kind": "count",
+      "values": {
+        "base": 1,
+        "hosted": 0
+      }
+    },
+    {
+      "metric": "seconds_per_item_median",
+      "kind": "seconds",
+      "values": {
+        "base": 4.65,
+        "hosted": 1.25
+      }
+    }
+  ],
+  "per_class": {
+    "category": [
+      {
+        "class": "access",
+        "n": 5,
+        "thin": false,
+        "field_correct": {
+          "base": 2,
+          "hosted": 5
+        }
+      },
+      {
+        "class": "hardware",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 3,
+          "hosted": 3
+        }
+      },
+      {
+        "class": "software",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 3,
+          "hosted": 3
+        }
+      },
+      {
+        "class": "network",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 3,
+          "hosted": 3
+        }
+      },
+      {
+        "class": "erp",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 1
+        }
+      },
+      {
+        "class": "telecom",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 2
+        }
+      },
+      {
+        "class": "other",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 2
+        }
+      }
+    ],
+    "urgency": [
+      {
+        "class": "low",
+        "n": 10,
+        "thin": false,
+        "field_correct": {
+          "base": 9,
+          "hosted": 2
+        }
+      },
+      {
+        "class": "medium",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "hosted": 1
+        }
+      },
+      {
+        "class": "high",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 3,
+          "hosted": 3
+        }
+      },
+      {
+        "class": "critical",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 2
+        }
+      }
+    ],
+    "impact": [
+      {
+        "class": "single_user",
+        "n": 14,
+        "thin": false,
+        "field_correct": {
+          "base": 11,
+          "hosted": 13
+        }
+      },
+      {
+        "class": "team",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 4
+        }
+      },
+      {
+        "class": "site",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 1
+        }
+      },
+      {
+        "class": "enterprise",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "hosted": 1
+        }
+      }
+    ]
+  },
+  "per_item": [
+    {
+      "item_id": "INC-004183",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-004454",
+      "exact_fields_correct": {
+        "base": 3,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-004467",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 4
+      }
+    },
+    {
+      "item_id": "INC-004603",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-004682",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 4
+      }
+    },
+    {
+      "item_id": "INC-004872",
+      "exact_fields_correct": {
+        "base": 3,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-005132",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 4
+      }
+    },
+    {
+      "item_id": "INC-005354",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-005370",
+      "exact_fields_correct": {
+        "base": 3,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-005480",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-005546",
+      "exact_fields_correct": {
+        "base": 6,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-005700",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-005716",
+      "exact_fields_correct": {
+        "base": 3,
+        "hosted": 2
+      }
+    },
+    {
+      "item_id": "INC-005783",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-005962",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-006080",
+      "exact_fields_correct": {
+        "base": 6,
+        "hosted": 6
+      }
+    },
+    {
+      "item_id": "INC-006087",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-006126",
+      "exact_fields_correct": {
+        "base": 4,
+        "hosted": 5
+      }
+    },
+    {
+      "item_id": "INC-006255",
+      "exact_fields_correct": {
+        "base": 5,
+        "hosted": 4
+      }
+    },
+    {
+      "item_id": "INC-006285",
+      "exact_fields_correct": {
+        "base": 2,
+        "hosted": 4
+      }
+    }
+  ],
+  "limitations": [
+    "20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two tickets - do not read it as a trend.",
+    "Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3), category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2), urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included."
+  ]
+}

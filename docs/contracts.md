@@ -9,7 +9,7 @@ anything here is a raise-with-Ritesh change, not a quiet edit.
 | 1 | Corpus layout and document frontmatter | **Final** (tickets final; Preety may extend document families the same way) |
 | 2 | Notebook conventions | **Final** — full text in `docs/notebook_conventions.md` |
 | 3 | Endpoint config | **Final** — implemented in `config/endpoints.py` |
-| 4 | Eval output format | **Shape fixed now; finalised in P4** (eval harness build) |
+| 4 | Eval output format | **Final** — implemented in `scripts/run_eval.py` + `scripts/eval_scoring.py`; rubric in `data/eval/rubric.md` awaits Ritesh's sign-off |
 | 5 | Index interface | **Shape fixed now; finalised in P13** (Day 5 capstone build) |
 
 ---
@@ -134,8 +134,10 @@ share one row shape:
   keeps training and inference in step.
 - `messages[0]` is always `dataset_utils.SYSTEM_PROMPT`
   (`notebooks/dataset_utils.py`). It is the ONLY copy of the prompt:
-  training, `run_eval.py` and the Day 4 three-way comparison import it.
-  Editing it means rebuilding the dataset and the adapter.
+  training and the Day 4 three-way comparison import it; `run_eval.py`
+  sends the copy inside each dataset row and warns if that copy no
+  longer matches. Editing it means rebuilding the dataset and the
+  adapter.
 - `messages[1]` is `dataset_utils.format_ticket_text(ticket)`:
   `"Subject: <subject or (none)>\n\n<body>"`.
 - `messages[2]` is the seven-field record as one line of JSON
@@ -217,59 +219,214 @@ list_endpoints() -> dict[str, str]                  # no secrets
 
 ## Contract 4 — eval output format
 
-**Shape fixed now; finalised in P4 (eval harness).** Everything that
-scores anything emits this shape, so Day 2 S12 (base vs tuned) and
+**Final (P4).** Implemented by `scripts/run_eval.py` (running, files,
+tables) and `scripts/eval_scoring.py` (every scoring rule); enforced by
+`tests/test_run_eval.py`. The human-facing rules are
+`data/eval/rubric.md` (Ritesh signs that off). Everything that scores
+the ticket task emits this shape, so Day 2 S12 (base vs tuned) and
 Day 4 S19 (three-way) compose from the same files.
 
-CLI:
+### Running
 
 ```
-python scripts/run_eval.py --dataset <path.jsonl> --endpoint <local|hosted|tuned> --out <dir>
+python scripts/run_eval.py --dataset <pairs.jsonl> --endpoint <local|hosted|tuned>
+                           [--label NAME] [--out DIR] [--json-mode] [--resume]
+                           [--replies FILE] [--limit N] [--all] [--run-id ID]
+python scripts/run_eval.py --compare A_summary.json B_summary.json [C_summary.json] [--out DIR]
 ```
 
-Input: `--dataset` is a file in the fine-tuning pair format (Contract
-1). For each row the harness sends `messages[:2]` to the endpoint,
-parses the reply as JSON, and compares it field by field with
-`json.loads(messages[2]["content"])`. `item_id` is the row's
-`ticket_id`.
+- `--dataset` is a file in the fine-tuning pair format (Contract 1).
+  For each row the harness sends `messages[:2]` through
+  `get_endpoint(name).chat(messages=..., temperature=0.0,
+  max_tokens=512)` (Contract 3) and compares the reply with
+  `json.loads(messages[2]["content"])`. `item_id` is the row's
+  `ticket_id`. A row whose *expected* answer is not a valid record is
+  skipped and listed in `skipped_dataset_lines`, never scored.
+- `--endpoint` is the ONLY model-specific input. There is no
+  model-specific code in the harness.
+- `--label` names the run in a comparison (default: the endpoint
+  name). `run_id` is `<YYYY-MM-DD>_<label>_<dataset stem>`.
+- `--out` defaults to `eval_runs/` (git-ignored). Notebooks pass
+  `CHECKPOINT_DIR / "eval"` so results land on Drive.
+- JSON mode is OFF unless `--json-mode` is given, and the setting is
+  recorded in the summary.
+- Exit code 0 = the run completed (whatever the scores); 2 = it could
+  not run, with a sentence, never a stack trace.
 
-Two output files per run, written to `--out`:
+From a notebook (a sketch) — this is how a run with retrieval in front of the
+model (Day 4 S19) uses the same harness with no change to it:
 
-`<run_id>_rows.jsonl` — one line per (item, field):
+```python
+import run_eval                                  # scripts/ on sys.path
+
+def ask(messages):                               # [system, user] -> reply text
+    context = my_index.search(messages[1]["content"], k=3)      # Contract 5
+    return llm.chat(messages=add_context(messages, context), temperature=0.0)
+
+summary = run_eval.run_evaluation(
+    dataset_path, ask, endpoint_name="local", model=llm.model,
+    label="base+retrieval", out_dir=CHECKPOINT_DIR / "eval")
+```
+
+`ask(messages) -> str` is the whole interface. It may raise; a failed
+call is retried once, then recorded as `no_reply`. The questions
+fingerprint is taken from the dataset rows, not from what `ask` does
+with them, so a retrieval run still composes with the plain runs.
+
+### Files per run, written to `--out`
+
+| File | Content |
+|---|---|
+| `<run_id>_summary.json` | one object, every number in the report. **The only file a comparison reads** |
+| `<run_id>_rows.jsonl` | one line per (ticket, field), for drill-down |
+| `<run_id>_replies.jsonl` | raw model replies, appended as each arrives. Input to `--resume` and `--replies` |
+| `<run_id>_report.txt` | the rendered table: ASCII, at most 100 columns |
+
+`<run_id>_rows.jsonl` — 8 lines per ticket: the seven fields plus one
+`"(schema)"` line, so format is a column like any other
+(`rows.pivot(index="item_id", columns="field", values="correct")`):
+
+```json
+{"run_id": "2026-09-20_hosted_heldout_20", "label": "hosted",
+ "endpoint": "hosted", "model": "gpt-4o-mini",
+ "item_id": "INC-004467", "field": "urgency",
+ "expected": "high", "predicted": "critical",
+ "score": 0.0, "correct": false, "score_type": "exact"}
+```
+
+- `score_type`: `exact` (six fields; `score` is 1.0 or 0.0),
+  `similarity` (`requested_action`; `score` is the similarity,
+  `correct` is `score >= 0.5`), `schema` (the `"(schema)"` line:
+  `expected` is `"valid"`, `predicted` is `"valid"` or the list of
+  schema problems).
+- `predicted` is `null` when the reply had no such field or no
+  readable record.
+
+`<run_id>_replies.jsonl`:
+
+```json
+{"item_id": "INC-004467", "model": "gpt-4o-mini", "messages_sha": "5b1c...",
+ "reply": "{\"category\": ...}", "error": null, "seconds": 1.12}
+```
+
+`<run_id>_summary.json` — keys (all always present):
 
 ```json
 {
-  "run_id": "2026-09-21_hosted_heldout20",
-  "endpoint": "hosted",
-  "model": "gpt-4o-mini",
-  "item_id": "INC-004412",
-  "field": "urgency",
-  "expected": "high",
-  "predicted": "medium",
-  "correct": false,
-  "score_type": "exact"        // exact | judged
-}
-```
-
-`<run_id>_summary.json` — one object per run:
-
-```json
-{
-  "run_id": "2026-09-21_hosted_heldout20",
-  "endpoint": "hosted",
-  "model": "gpt-4o-mini",
+  "contract": "eval-summary/1",
+  "run_id": "2026-09-20_hosted_heldout_20",
+  "label": "hosted", "endpoint": "hosted", "model": "gpt-4o-mini",
   "dataset": "data/eval/heldout_20.jsonl",
+  "dataset_sha256": "9f92ad8c9de71479",
+  "system_prompt_matches": true,
+  "created": "2026-09-20T01:26:57",
+  "settings": {"temperature": 0.0, "max_tokens": 512, "json_mode": false},
+  "item_ids": ["INC-004183", "..."],
+  "skipped_dataset_lines": [],
+
   "n_items": 20,
-  "per_field_accuracy": {"category": 0.95, "urgency": 0.80},
-  "schema_valid_rate": 0.90,
-  "overall_exact_match": 0.71
+  "n_parsed": 20,
+  "parse": {"clean": 20, "recovered": 0, "failed": 0, "no_reply": 0},
+  "schema_valid_rate": 1.0,
+
+  "per_field_accuracy": {"category": 0.95, "affected_system": 0.75, "asset_tag": 1.0,
+                         "urgency": 0.4, "impact": 0.95, "requested_action": 0.3,
+                         "routing_queue": 0.85},
+  "per_field_accuracy_when_parsed": {"...same seven keys...": 0.0},
+  "requested_action": {"measure": "word-set Jaccard ...", "match_threshold": 0.5,
+                       "mean_similarity": 0.377, "limits": "It compares WORDS ..."},
+
+  "overall_exact_match": 0.3,
+  "overall_exact_match_fields": ["category", "affected_system", "asset_tag",
+                                 "urgency", "impact", "routing_queue"],
+
+  "invented": {"total": 0,
+               "by_kind": {"not_in_allowed_list": 0, "unexpected_field": 0,
+                           "asset_tag_not_in_ticket": 0},
+               "examples": [{"item_id": "...", "field": "...", "value": "...", "kind": "..."}]},
+
+  "per_class": {"category": {"erp": {"n": 2, "field_correct": 1, "record_exact": 1,
+                                     "thin": true}}, "urgency": {}, "impact": {}},
+  "urgency_errors": {"shape": {"over_by_1": 10, "over_by_2_or_more": 2, "under_by_1": 0,
+                               "under_by_2_or_more": 0, "not_a_level": 0,
+                               "no_usable_reply": 0},
+                     "misses": [{"item_id": "INC-004467", "expected": "high",
+                                 "predicted": "critical", "step": 1}]},
+  "review": {"H1_urgency": ["INC-005962", "INC-006285", "INC-004467"],
+             "H1_arguable_total": 12, "H1_direction": "over-escalates",
+             "H2_requested_action": ["...at most 5 ids..."],
+             "H2_below_threshold_total": 14},
+
+  "seconds_total": 25.8,
+  "seconds_per_item_median": 1.25,
+  "items": [{"item_id": "INC-004183", "parse": "clean", "schema_valid": true,
+             "exact_fields_correct": 5, "record_exact": false,
+             "action_similarity": 0.333,
+             "wrong_fields": ["requested_action", "routing_queue"]}],
+  "limitations": ["20 tickets: one ticket is 5 percentage points. ...", "..."]
 }
 ```
 
-Composition rule: a comparison table (S12, S19) is a concat of
-summaries — one row per `run_id`, columns from `per_field_accuracy` +
-`schema_valid_rate`. Nothing downstream parses `rows` files to build
-the comparison; they exist for drill-down.
+What the numbers mean (the binding part):
+
+- **Four measurements, never folded together:** `schema_valid_rate`
+  (format), `per_field_accuracy` (fields), `overall_exact_match`
+  (record), `invented` (a count).
+- `schema_valid_rate`: `json.loads()` on the raw reply gives an object
+  AND it passes `ticket_schema.json`. `parse: "recovered"` (JSON found
+  only after stripping a fence or prose) has its content scored but is
+  NOT schema-valid.
+- Every rate is over **all** `n_items`; an unreadable reply is wrong on
+  every field. `per_field_accuracy_when_parsed` is over the `n_parsed`
+  readable replies only.
+- `overall_exact_match`: all six exact-match fields right on one
+  ticket. `requested_action` is excluded.
+- `per_class` holds counts, not rates; `thin` = fewer than 5 tickets.
+  Every allowed class is listed, including classes with `n: 0` - a
+  class the dataset never tested is reported ("NOT TESTED"), not
+  omitted. Cleaned `val.jsonl` has no `critical` and no `enterprise`
+  ticket at all.
+- `dataset_sha256` fingerprints the questions and expected answers
+  actually used (so `--limit 5` gives a different fingerprint).
+- `system_prompt_matches`: every row's system message equals
+  `dataset_utils.SYSTEM_PROMPT`. `false` means the file is stale.
+- `limitations` must be shown wherever the numbers are shown.
+
+### Composition rule
+
+A comparison (S12, S19) is built from **summary files only** —
+`run_eval.compare_summaries([summary, ...])` or `--compare`. Two to
+four runs; one column per run, named by `label` (by `run_id` if two
+labels collide). It **refuses** runs whose `dataset_sha256` differ: a
+table comparing different exams is worse than no table. With `--out`
+it writes `comparison.json` and `comparison.txt`:
+
+```json
+{
+  "contract": "eval-comparison/1",
+  "dataset": "data/eval/heldout_20.jsonl", "dataset_sha256": "9f92ad8c9de71479",
+  "n_items": 20,
+  "runs": [{"name": "base", "run_id": "...", "endpoint": "local",
+            "model": "llama3.2:3b", "json_mode": false}],
+  "metrics": [{"metric": "schema_valid_rate", "kind": "rate",
+               "values": {"base": 0.85, "hosted": 1.0}}],
+  "per_class": {"urgency": [{"class": "low", "n": 10, "thin": false,
+                             "field_correct": {"base": 9, "hosted": 2}}]},
+  "per_item": [{"item_id": "INC-004183",
+                "exact_fields_correct": {"base": 5, "hosted": 5}}],
+  "limitations": ["..."]
+}
+```
+
+`metrics` rows, in order: `schema_valid_rate`, the seven fields,
+`requested_action_mean_similarity`, `overall_exact_match`,
+`invented_values`, `seconds_per_item_median`. `kind` is `rate`,
+`score`, `count` or `seconds`. In `per_item`, `null` means no readable
+reply.
+
+Additive changes (new keys) are allowed and keep `eval-summary/1`.
+Renaming or redefining a key is a raise-with-Ritesh change and bumps
+the contract string.
 
 ---
 
