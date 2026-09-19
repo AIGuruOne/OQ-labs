@@ -20,6 +20,10 @@ checkpoints/*
 !checkpoints/adapter_prebaked/
 !checkpoints/adapter_prebaked/**
 
+# Local tool state (not lab material)
+.claude/settings.local.json
+.kilo/
+
 # OS noise
 .DS_Store
 Thumbs.db

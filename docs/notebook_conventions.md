@@ -41,7 +41,7 @@ from pathlib import Path
 IN_COLAB = "google.colab" in sys.modules
 
 # The repo URL participants clone in Colab. Set once, here.
-REPO_URL = "https://github.com/OWNER/oq-advanced-ai.git"  # FIXME: real URL before freeze
+REPO_URL = "https://github.com/Utkarsh-09/AI_GURU_labs.git"
 
 if IN_COLAB:
     # Drive first: checkpoints survive a runtime disconnect.

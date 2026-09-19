@@ -96,8 +96,9 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   = INFO, never a failure.
 
 ### Repo state notes
-- No git remote configured yet. The notebook environment-detection
-  cell carries `REPO_URL` with a `FIXME: real URL before freeze`
-  marker — set it when the GitHub repo exists, before Thu 24 freeze.
+- Remote: https://github.com/Utkarsh-09/AI_GURU_labs.git — this is the
+  URL the notebooks' environment-detection cell clones in Colab
+  (`REPO_URL` in notebooks/_template.ipynb and
+  docs/notebook_conventions.md; keep all three in sync).
 - `notebooks/_template.ipynb` must always run top-to-bottom clean; it
   is the reference for Contract #2.
