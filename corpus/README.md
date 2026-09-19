@@ -156,5 +156,19 @@ tickets, train/validation leakage, and schema violations. If you find
 one, that is the corpus working as designed.
 
 Note: the near-duplicates, leakage and schema violations are planted
-by the Day 2 dataset builder into `data/finetune/{train,val}.jsonl`.
-`ticket_labels.jsonl` itself is clean: all 600 records validate.
+by the Day 2 dataset builder (`scripts/build_dataset.py`) into
+`data/finetune/{train,val}.jsonl`. `ticket_labels.jsonl` itself is
+clean: all 600 records validate, and so do the 20 rows of
+`data/eval/heldout_20.jsonl`.
+
+What was planted, and exactly where, is recorded in
+`data/finetune/planted_problems.json`. **That file is the facilitator
+answer key - it is for us, not for participants.** Details, and how the
+held-out 20 are chosen, are in `data/README.md`.
+
+One consequence for `corpus/tickets/`: the 20 planted near-duplicates
+carry ticket ids that do **not** exist in `tickets_raw.jsonl` (a
+resubmitted ticket gets a new id - each one is the first free number
+after its source, e.g. `INC-004107` after `INC-004106`). They exist
+only in `train.jsonl`. The corpus file itself is never modified by the
+dataset builder.

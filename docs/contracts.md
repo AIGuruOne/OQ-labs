@@ -108,6 +108,54 @@ One line per ticket, same order as `tickets_raw.jsonl`, joined on
   `data/eval/heldout_20.jsonl` are all built from this file by the
   dataset builder — nothing else is a source of labels.
 
+### Fine-tuning pair format (train.jsonl, val.jsonl, heldout_20.jsonl)
+
+Built by `python scripts/build_dataset.py --seed 42`. All three files
+share one row shape:
+
+```json
+{
+  "ticket_id": "INC-004412",
+  "messages": [
+    {"role": "system",    "content": "<dataset_utils.SYSTEM_PROMPT>"},
+    {"role": "user",      "content": "Subject: cant login\n\n<ticket body>"},
+    {"role": "assistant", "content": "{\"category\": \"access\", ...}"}
+  ]
+}
+```
+
+- **Model-neutral on purpose.** Rows hold role/content messages, never
+  a model's special tokens. The chat template is applied by whatever
+  owns it: the tokenizer at training time
+  (`tokenizer.apply_chat_template`; TRL's `SFTTrainer` does it
+  automatically for a `messages` column, Unsloth and mlx-lm accept the
+  same shape), and Ollama at inference time through
+  `/v1/chat/completions`. Same three roles both times - that is what
+  keeps training and inference in step.
+- `messages[0]` is always `dataset_utils.SYSTEM_PROMPT`
+  (`notebooks/dataset_utils.py`). It is the ONLY copy of the prompt:
+  training, `run_eval.py` and the Day 4 three-way comparison import it.
+  Editing it means rebuilding the dataset and the adapter.
+- `messages[1]` is `dataset_utils.format_ticket_text(ticket)`:
+  `"Subject: <subject or (none)>\n\n<body>"`.
+- `messages[2]` is the seven-field record as one line of JSON
+  (`json.dumps(record, ensure_ascii=False)`, keys in section 8B order)
+  and nothing else - no prose, no code fence.
+- To run a model on a row: send `messages[:2]` via
+  `get_endpoint(...).chat(messages=...)` (Contract 3); the expected
+  answer is `json.loads(messages[2]["content"])`.
+- A trainer that rejects extra columns should select `messages` only.
+- `data/eval/heldout_20.jsonl` is exactly 20 rows, never in train or
+  val, stratified (all 7 categories, >= 1 critical, >= 1 enterprise,
+  several arguable-urgency tickets) and has no lookalike (word-set
+  Jaccard >= 0.6) anywhere in train/val. It is byte-stable: seed 42,
+  enforced by `tests/test_build_dataset.py`. Day 2 S12 and Day 4 S19
+  both score against it.
+- `train.jsonl` / `val.jsonl` carry **planted** quality problems for
+  the Day 2 S10 lab; the answer key is
+  `data/finetune/planted_problems.json` (facilitators only). A clean
+  build is `--no-plant`. See `data/README.md`.
+
 ### Naming conventions (both slices)
 
 | Thing | Format | Example |
@@ -178,6 +226,12 @@ CLI:
 ```
 python scripts/run_eval.py --dataset <path.jsonl> --endpoint <local|hosted|tuned> --out <dir>
 ```
+
+Input: `--dataset` is a file in the fine-tuning pair format (Contract
+1). For each row the harness sends `messages[:2]` to the endpoint,
+parses the reply as JSON, and compares it field by field with
+`json.loads(messages[2]["content"])`. `item_id` is the row's
+`ticket_id`.
 
 Two output files per run, written to `--out`:
 

@@ -63,6 +63,7 @@ in this repo requires Colab Pro.
 ```bash
 python setup/setup_check.py                                  # environment check
 python scripts/run_eval.py --dataset <path> --endpoint <name>  # eval
+python scripts/build_dataset.py --seed 42                      # rebuild train/val/heldout
 python scripts/quality_checks.py --dataset <path>              # data quality
 uvicorn services.mock_erp.main:app --reload                    # mock ERP
 ```

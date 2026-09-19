@@ -1,1 +1,3 @@
 *.jsonl text eol=lf
+# Built by scripts/build_dataset.py and byte-compared by the tests.
+data/finetune/*.json text eol=lf

@@ -1,0 +1,307 @@
+{
+  "note": "FACILITATOR ANSWER KEY. Problems planted on purpose by scripts/plant_problems.py for the Day 2 S10 lab. Not for participants.",
+  "seed": 42,
+  "near_duplicate_measure": "Jaccard similarity of lowercase word sets, subject + body (dataset_utils.text_similarity)",
+  "near_duplicate_threshold": 0.8,
+  "near_duplicates": [
+    {
+      "split": "train",
+      "ticket_id": "INC-005686",
+      "duplicate_of": "INC-005684",
+      "similarity": 0.86,
+      "line": 215,
+      "duplicate_of_line": 266
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006142",
+      "duplicate_of": "INC-006141",
+      "similarity": 0.904,
+      "line": 207,
+      "duplicate_of_line": 100
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004943",
+      "duplicate_of": "INC-004942",
+      "similarity": 0.862,
+      "line": 355,
+      "duplicate_of_line": 123
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006160",
+      "duplicate_of": "INC-006159",
+      "similarity": 0.891,
+      "line": 134,
+      "duplicate_of_line": 333
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005696",
+      "duplicate_of": "INC-005695",
+      "similarity": 0.953,
+      "line": 141,
+      "duplicate_of_line": 122
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004554",
+      "duplicate_of": "INC-004553",
+      "similarity": 0.875,
+      "line": 298,
+      "duplicate_of_line": 257
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006336",
+      "duplicate_of": "INC-006335",
+      "similarity": 0.836,
+      "line": 275,
+      "duplicate_of_line": 254
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005152",
+      "duplicate_of": "INC-005151",
+      "similarity": 0.854,
+      "line": 176,
+      "duplicate_of_line": 13
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004996",
+      "duplicate_of": "INC-004995",
+      "similarity": 0.881,
+      "line": 391,
+      "duplicate_of_line": 229
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005724",
+      "duplicate_of": "INC-005723",
+      "similarity": 0.877,
+      "line": 292,
+      "duplicate_of_line": 343
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006226",
+      "duplicate_of": "INC-006224",
+      "similarity": 0.902,
+      "line": 33,
+      "duplicate_of_line": 277
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004654",
+      "duplicate_of": "INC-004653",
+      "similarity": 0.867,
+      "line": 111,
+      "duplicate_of_line": 342
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004661",
+      "duplicate_of": "INC-004660",
+      "similarity": 0.852,
+      "line": 82,
+      "duplicate_of_line": 381
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005772",
+      "duplicate_of": "INC-005770",
+      "similarity": 0.882,
+      "line": 49,
+      "duplicate_of_line": 399
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004540",
+      "duplicate_of": "INC-004539",
+      "similarity": 0.898,
+      "line": 117,
+      "duplicate_of_line": 224
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006266",
+      "duplicate_of": "INC-006265",
+      "similarity": 0.887,
+      "line": 75,
+      "duplicate_of_line": 371
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005757",
+      "duplicate_of": "INC-005755",
+      "similarity": 0.905,
+      "line": 132,
+      "duplicate_of_line": 335
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006308",
+      "duplicate_of": "INC-006307",
+      "similarity": 0.864,
+      "line": 268,
+      "duplicate_of_line": 113
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004534",
+      "duplicate_of": "INC-004533",
+      "similarity": 0.891,
+      "line": 237,
+      "duplicate_of_line": 194
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004107",
+      "duplicate_of": "INC-004106",
+      "similarity": 0.905,
+      "line": 39,
+      "duplicate_of_line": 160
+    }
+  ],
+  "leakage": [
+    {
+      "ticket_id": "INC-005188",
+      "in_splits": [
+        "train",
+        "val"
+      ],
+      "train_line": 360,
+      "val_line": 64
+    },
+    {
+      "ticket_id": "INC-004409",
+      "in_splits": [
+        "train",
+        "val"
+      ],
+      "train_line": 158,
+      "val_line": 40
+    },
+    {
+      "ticket_id": "INC-006428",
+      "in_splits": [
+        "train",
+        "val"
+      ],
+      "train_line": 142,
+      "val_line": 76
+    },
+    {
+      "ticket_id": "INC-006408",
+      "in_splits": [
+        "train",
+        "val"
+      ],
+      "train_line": 241,
+      "val_line": 30
+    },
+    {
+      "ticket_id": "INC-004557",
+      "in_splits": [
+        "train",
+        "val"
+      ],
+      "train_line": 206,
+      "val_line": 33
+    }
+  ],
+  "schema_violations": [
+    {
+      "split": "train",
+      "ticket_id": "INC-005029",
+      "kind": "invalid_enum_value",
+      "field": "urgency",
+      "original": "low",
+      "planted": "urgent",
+      "line": 251
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004721",
+      "kind": "invalid_enum_value",
+      "field": "category",
+      "original": "access",
+      "planted": "password",
+      "line": 273
+    },
+    {
+      "split": "val",
+      "ticket_id": "INC-004572",
+      "kind": "invalid_enum_value",
+      "field": "impact",
+      "original": "single_user",
+      "planted": "department",
+      "line": 70
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005374",
+      "kind": "missing_field",
+      "field": "impact",
+      "original": "team",
+      "planted": "<field removed>",
+      "line": 231
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004319",
+      "kind": "stray_prose",
+      "field": "requested_action",
+      "original": "Grant the user access to the requested shared folder",
+      "planted": "Grant the user access to the requested shared folder. The user has raised this before, so please check the earlier ticket as well.",
+      "line": 172
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-004347",
+      "kind": "stray_prose",
+      "field": "urgency",
+      "original": "medium",
+      "planted": "medium - the user sounded quite stressed on the phone",
+      "line": 60
+    },
+    {
+      "split": "val",
+      "ticket_id": "INC-004736",
+      "kind": "stray_prose",
+      "field": "requested_action",
+      "original": "Restore network connectivity",
+      "planted": "Not sure, maybe this one: Restore network connectivity. Someone please confirm.",
+      "line": 38
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-006211",
+      "kind": "malformed_asset_tag",
+      "field": "asset_tag",
+      "original": "LAP-01682",
+      "planted": "LAP01682",
+      "line": 359
+    },
+    {
+      "split": "train",
+      "ticket_id": "INC-005568",
+      "kind": "malformed_asset_tag",
+      "field": "asset_tag",
+      "original": "LAP-09134",
+      "planted": "lap-09134",
+      "line": 236
+    },
+    {
+      "split": "val",
+      "ticket_id": "INC-006330",
+      "kind": "malformed_asset_tag",
+      "field": "asset_tag",
+      "original": "LAP-09743",
+      "planted": "LAP-0974",
+      "line": 34
+    }
+  ]
+}
