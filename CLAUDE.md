@@ -52,6 +52,8 @@ every time.
 - Tickets: `python scripts/generate_tickets.py --count 600 --seed 42`
 - Ticket checks: `python scripts/check_tickets.py --tickets corpus/tickets/tickets_raw.jsonl --labels data/finetune/ticket_labels.jsonl --schema data/finetune/ticket_schema.json`
 - Dataset: `python scripts/build_dataset.py --seed 42` (add `--no-plant --finetune-dir <dir> --eval-dir <dir>` for a clean copy)
+- Register the tuned adapter with Ollama: `python scripts/register_adapter.py --adapter <folder>` (`--name`, `--base`, `--print-modelfile`)
+- Fine-tune plumbing test, any machine, ~5 min: `OQ_SMOKE_TEST=1 python -m nbconvert --to notebook --execute --output <out.ipynb> solutions/05_finetune.ipynb` (write the output ELSEWHERE, never over the solution)
 - Tests: `python -m pytest tests/`
 
 ---
@@ -201,6 +203,75 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
 - After any change to the dataset or the checker: run the tests, then
   re-execute `solutions/04_dataset_builder.ipynb` (its retained output
   contains the full report).
+
+### Fine-tune lab (P5)
+- Stack is plain transformers 5.16.1 + peft 0.20.0 + bitsandbytes
+  0.50.2, NOT unsloth. Reasons, sources, timing arithmetic and the T4
+  checklist: `docs/finetune_stack.md`. unsloth 2026.9.7 caps
+  transformers<=5.5.0, so it would downgrade a cold Colab runtime and
+  force a restart. On Colab notebook 05 installs bitsandbytes ONLY -
+  `tests/test_notebook_05.py` fails if it ever installs torch,
+  transformers, peft, accelerate or unsloth.
+- transformers 5.x renamed Trainer arguments: `warmup_ratio`,
+  `group_by_length`, `evaluation_strategy` are GONE (now
+  `warmup_steps=0.1`, `train_sampling_strategy="group_by_length"`,
+  `eval_strategy`, `processing_class=`). 4.x tutorial code crashes.
+- Default model is Llama 3.2 **1B** via the ungated mirror
+  `unsloth/Llama-3.2-1B-Instruct` (Meta's repo is gated). Measured on a
+  free T4 2026-09-20: 7.1 min training for 72 steps (budget 25). 3B is
+  selectable (`MODEL_NAME`) but only ~1.4x inside the budget, unmeasured.
+  Because tuned is 1B, the fair "base" for S12 is `llama3.2:1b`, not
+  the `llama3.2:3b` that P4 scored.
+- `finetune_utils.LLAMA3_SERVING_TEMPLATE` exists because HF's Llama
+  3.2 chat template writes "Today Date: <today>" into the system block
+  and Ollama's does not. Training uses Ollama's exact text (tested byte
+  for byte). Do not "simplify" it back to the tokenizer's own template.
+- `generate_reply` sets temperature/top_p to 1.0 and an explicit total
+  `max_length` on a COPY of the model's generation config. Setting them
+  to None does not work in 5.16.1 (refilled from Llama's defaults, with
+  warnings on every call).
+- The 25-minute budget is enforced in code: `ProgressCallback` stops at
+  23 min of accumulated training time (across resumes) and saves.
+- Resume safety: `check_run_folder` refuses to resume a run folder whose
+  settings differ (new `RUN_NAME` instead). `find_last_checkpoint`
+  skips a checkpoint folder with no `trainer_state.json`.
+- `solutions/05_finetune.ipynb` outputs are Utkarsh's real T4 run. The
+  two TODO cells were hand-filled participant cells with identical
+  values; only their wording was swapped to the solution text. Never
+  re-execute it on CPU - the retained output must stay a T4 run.
+- The untuned 1B returns VALID JSON; it fails on content (copies the
+  prompt's example tag LAP-04412 into every ticket, wrong queues). Do
+  not write lab text that promises a schema-validity win.
+- `routing_queue` is a free string in the locked schema: an invented
+  queue is the eval harness's "invented values", not a schema failure.
+- Build-machine gotchas: run notebooks with `python -m nbconvert`, NOT
+  `python -m jupyter nbconvert` (the latter dispatches to whichever
+  `jupyter-nbconvert.exe` is first on PATH - the base `.venv`), and
+  with `env -u VIRTUAL_ENV`. The fine-tune venv is `.venv-finetune`.
+  mlx's Windows wheel has no backend; use `mlx[cpu]` in a Linux
+  container. Do not run a CPU training job and the MLX container at
+  the same time - 27 GB RAM is not enough and background jobs get killed.
+- Pre-baked adapter: `checkpoints/adapter_prebaked/` is Utkarsh's real
+  T4 run (README there has hyperparameters, sha256, scores, and the
+  urgency discussion). Tuned vs its own base on the held-out 20:
+  routing 7->16, requested_action 1->16, whole record 2->4, urgency
+  4->7, invented values 3->0. Urgency 7/20 is BELOW the untuned 3B's
+  13/20 - explained in that README and playbook entry 8; on the 72
+  validation tickets urgency is 55/72. Do NOT retrain to lift the
+  held-out urgency number: that is tuning to the exam.
+- Ollama serving costs a little: the same adapter through PyTorch
+  scores 1 to 3 tickets higher on three fields (Ollama applies it on
+  its Q8 base). Reference numbers are the Ollama ones on purpose.
+- Notebook 05b (MLX): one epoch per call + `mlx_progress.json`, because
+  mlx-lm resumes weights only. `finetune_utils.convert_mlx_adapter_to_
+  peft` makes its output the SAME PEFT format as notebook 05 (verified
+  against PyTorch to 0.0013 in logits). Executed only on MLX's Linux
+  CPU backend in a container - NEVER on a Mac. `solutions/05b` has no
+  retained outputs on purpose; a Linux smoke run is not a reference.
+- STILL OWED for P5 (all need hardware this machine lacks): second
+  timed T4 run of 05 with the whole-notebook stopwatch; the Colab
+  disconnect test; any run of 05b on Apple Silicon (speed, memory, the
+  real 1B model). Steps: `docs/finetune_stack.md` sections 4 and 5.
 
 ### Eval harness (P4)
 - Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring

@@ -33,10 +33,11 @@ section 3 - none of them is a bigger accelerator.
 
 ## 2. T4 training-time estimate (arithmetic shown)
 
-Measured, not guessed: the 373 clean training rows are **154,070 tokens
-per epoch** under the serving template (mean 413, longest 799, so
-`MAX_LENGTH = 1024` truncates nothing). 250 of those 413 are the fixed
-system prompt - it is paid for in compute on every row even though the
+Measured, not guessed: the 373 clean training rows are **150,340 tokens
+per epoch** under the serving template (mean 403, longest 789, so
+`MAX_LENGTH = 1024` truncates nothing; the estimate below was made with
+the Hugging Face template's 154,070, 2.5 percent more). About 250 of the
+403 tokens in an average row are the fixed system prompt - it is paid for in compute on every row even though the
 loss ignores it.
 
 Work per token for LoRA with gradient checkpointing is about
@@ -77,6 +78,42 @@ training at 23 minutes of accumulated training time (25 minus a
 saves the adapter it has. The budget is enforced by the code, not
 hoped for.
 
+## 2b. Measured on a real T4 (2026-09-20)
+
+Utkarsh ran the participant notebook on a Colab free-tier T4 with the
+TODOs filled with the hinted values. The retained output is
+`solutions/05_finetune.ipynb`.
+
+| | Estimate | Measured |
+|---|---|---|
+| Training, 72 steps, incl. 7 Drive checkpoints + 3 validation passes | 7 to 14 min | **7.1 min** |
+| Base model in GPU memory, 4-bit | about 1 GB | 1.01 GB |
+| Install | one 43 MB wheel | 43.1 MB, no restart prompt |
+| Trainable parameters | about 1% | 11,272,192 (1.48%) |
+| Training loss | - | 0.742 -> 0.020 |
+| Validation loss per epoch | - | 0.136, 0.055, 0.047 (still falling: no sign of memorising at 3 epochs) |
+| Preview replies schema-valid, before -> after | - | 5 of 5 -> 5 of 5 |
+
+That is about 1,060 tokens per second, the fast end of the band, and a
+3.5x margin under the 25-minute budget. By the same arithmetic the 3B
+would take about 18 minutes of training on this T4 - inside the budget,
+but with 1.4x margin instead of 3.5x, and not measured.
+
+All four "known unknowns" at the end of section 4 came back clean:
+bitsandbytes 0.50.2 loads against Colab's torch, fp16 + 4-bit trains
+under transformers 5.16.1, Drive checkpoints cost little, and batch 4
+fits.
+
+What the run did NOT measure: the whole-notebook wall-clock, a second
+run, and the disconnect test on Colab (steps 9 to 12 below).
+
+What the replies showed: the untuned 1B already returns valid JSON. It
+fails on CONTENT - it copied the system prompt's example asset tag
+`LAP-04412` into all five tickets, wrote the string `"null"` for a
+null, and routed a Teams microphone fault to `erp_support`. After
+tuning, three of five records match the expected record exactly and
+the other two differ in one arguable field each (`impact`, `urgency`).
+
 ## 3. If the T4 run is slower than estimated
 
 In this order. None is a bigger accelerator or Colab Pro.
@@ -116,3 +153,36 @@ can be exercised without a T4: bitsandbytes 0.50.2 loading against
 Colab's torch 2.11.0+cu128; fp16 mixed precision with 4-bit weights
 under transformers 5.16.1; Drive write latency for a ~135 MB
 checkpoint every 10 steps; peak GPU memory at batch 4.
+
+## 5. Notebook 05b (Apple Silicon / MLX): what was and was not verified
+
+No Mac was available. MLX ships a Linux CPU backend (`mlx[cpu]`), so
+05b was executed for real in a Linux container - same Python API, same
+mlx-lm 0.31.3, only the device differs. (The plain Windows mlx wheel
+has no backend: `ImportError: DLL load failed`.)
+
+| Verified (2026-09-20, container, smoke mode) | Result |
+|---|---|
+| Whole solution notebook, top to bottom | no errors |
+| Hard kill mid-epoch 3, then Run all | `status: resume`, `epochs done: 2 of 3 (adapter weights restored from disk)`; only iterations 5 and 6 trained; "before" replies loaded, not regenerated; loss log continuous |
+| It learns | loss 1.318 -> 0.420; validation 0.909, 0.585, 0.457 |
+| Same adapter shape as notebook 05 | 4,884,480 trainable parameters in MLX - exactly PEFT's count for the same settings on the same model |
+| **Converted adapter == MLX adapter** | strong random adapter, both sides float32: PyTorch+PEFT loading the converted folder matches MLX's logits to 0.0013 (the adapter moves them by 5.7 and changes the top token); correlation of the adapter's effect 1.000000; the two base models agree to 0.0002 |
+| In-notebook converter check | 1.3e-05 difference on an output of 3.0e-02 |
+
+| NOT verified - needs a real Mac | |
+|---|---|
+| Speed, and therefore the 25-minute budget | The container backend is ~70 s per training row on one core; it proves nothing about Apple Silicon |
+| The real model | Only the 135M smoke model ran under MLX. `mlx-community/Llama-3.2-1B-Instruct-bf16` exists and is ungated (HF API), but was not downloaded or trained here |
+| Memory on an 8 GB Mac | unknown |
+| `%pip install` of the pins on macOS | the pins resolve on Linux; macOS wheels exist on PyPI for all four |
+| Registering an MLX-trained adapter in Ollama on a Mac | the same script and the same adapter format were verified with the notebook 05 adapter |
+
+Design notes. mlx-lm reloads adapter WEIGHTS only - no optimizer
+state, no step count - so 05b trains one epoch per call and writes the
+adapter and a progress file after each: a crash costs at most one
+epoch, and the 25-minute budget is checked between epochs. The
+optimizer's momentum is kept across epochs in an uninterrupted run and
+starts fresh after a crash. mlx-lm's LoRA `scale` is a raw multiplier;
+the converter writes `lora_alpha = scale * rank` so PEFT's
+`alpha / rank` gives the same number, and transposes both matrices.

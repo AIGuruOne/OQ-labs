@@ -17,6 +17,11 @@ this table, it has not been timed.
 | 04_dataset_builder (solution) | 2026-09-20 | local, Windows 11, Python 3.11.15, cold kernel, checkpoints deleted first (`jupyter nbconvert --execute`). After P3: real `quality_checks.py` wired in (one subprocess run + one module run), dataset unchanged at 400/80 | none | 0.11 (6.8 s) | 40 | run 1 of 2. No retries. Machine time only |
 | 04_dataset_builder (solution) | 2026-09-20 | same | none | 0.11 (6.7 s) | 40 | run 2 of 2. Within 20% of run 1. Supersedes the 2026-09-19 rows |
 | 04_dataset_builder | — | Colab free-tier CPU, cold | none | **not yet measured** | 40 | needs the P2 + P3 commits pushed (the Colab cell clones `main`) and a Google login; adds Drive mount + clone + one pip no-op to the local figure |
+| 05_finetune (participant version, TODOs filled with the hinted values) | 2026-09-20 | Colab free tier, run by Utkarsh. Data rebuilt from `data/finetune` (no notebook 04 output on that Drive). Llama 3.2 1B, 4-bit, r=16 all seven layers, 3 epochs, 72 steps | T4 | **training: 7.1** (from the notebook's own clock: `Starting at step 0` to step 72, including 7 Drive checkpoints and 3 validation passes). **Whole notebook: NOT measured** - no stopwatch figure was recorded and Colab saved no per-cell timings | training 25; block 90 | run 1 of 2. No retries, no restart prompt, no errors. Loss 0.742 -> 0.020; validation 0.136 / 0.055 / 0.047. 5 of 5 replies schema-valid after load-back. Whether the runtime was cold (first open on that account) is not recorded |
+| 05_finetune | - | Colab free tier, **cold**, stopwatch from first cell | T4 | **not yet measured** | training 25; block 90 | run 2 of 2 still owed (spec section 11), with the whole-notebook wall-clock this time. Steps: `docs/finetune_stack.md` section 4 |
+| 05_finetune (solution, `OQ_SMOKE_TEST=1`: 135M model, 20 rows) | 2026-09-20 | local, Windows 11, Python 3.11.15, CPU, cold kernel (`python -m nbconvert --execute`) | none | 5.0 whole notebook (3.2 training) | - | plumbing test, not a lab timing. Kill-and-resume run: 2.0 min, resumed at step 4 of 6 |
+| 05b_finetune_mlx | - | **Apple Silicon Mac** | Apple GPU | **not yet measured** | training 25 | no Mac on the build side. First Mac to run it: time it and replace this row |
+| 05b_finetune_mlx (solution, `OQ_SMOKE_TEST=1`: 135M model, 4 rows, 3 epochs) | 2026-09-20 | Linux container (python:3.12-slim, `mlx[cpu]==0.32.2`, mlx-lm 0.31.3) on the Windows build machine | none (MLX CPU backend, one core) | 17.8 training; about 30 whole notebook across two sittings | - | plumbing test ONLY - says nothing about Mac speed (this backend needs ~70 s per training row). Hard-killed mid-epoch 3, re-run resumed at `epochs done: 2 of 3` |
 
 ## Scripts (not notebooks, no section 2 budget of their own)
 
@@ -32,7 +37,10 @@ budgets. Measured with `time`, whole command, held-out 20, temperature
 | `run_eval.py --endpoint hosted` (gpt-4o-mini) | 2026-09-20 | local, home broadband | 28.2 s | run 1 of 2. Median 1.3 s per ticket |
 | same | 2026-09-20 | same | 26.8 s | run 2 of 2. Within 5%. Identical scores to run 1 |
 | `run_eval.py --endpoint local` | — | Colab free-tier T4, cold | **not yet measured** | needs notebook 02/06's Ollama-in-Colab install cell. Add the model load (first call) to the figure |
-| `run_eval.py --endpoint tuned` | — | — | **not yet measured** | needs the adapter from notebook 05 |
+| `run_eval.py --endpoint tuned` (`oq-ticket-tuned` = llama3.2:1b + pre-baked adapter, Ollama 0.12.10, 4096 ctx) | 2026-09-20 | local, Windows 11, **CPU only**, model NOT loaded yet | 48.0 s | run 1 of 2. Median 2.1 s per ticket. Includes the first-call model load |
+| same | 2026-09-20 | same, model already loaded | 39.9 s | run 2 of 2. 17% faster (no load). Identical scores to run 1 |
+| `run_eval.py --endpoint local` with `OLLAMA_MODEL=llama3.2:1b` | 2026-09-20 | same | 76.8 s | one run. Median 3.5 s per ticket - slower than tuned because the untuned model writes longer, pretty-printed replies |
+| `run_eval.py --endpoint tuned` | — | Colab free-tier T4, cold | **not yet measured** | needs notebook 06's Ollama-in-Colab install cell |
 
 A first call against a model that is not loaded yet adds the load
 time (about 8 s for llama3.2:3b on the build machine).

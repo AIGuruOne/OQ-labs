@@ -215,6 +215,41 @@ list_endpoints() -> dict[str, str]                  # no secrets
 - Additive changes (new kwargs with defaults) are allowed; changing an
   existing signature is a raise-with-Ritesh change.
 
+### What `"tuned"` is, and how it comes to exist (P5)
+
+`get_endpoint("tuned")` is an Ollama model named `oq-ticket-tuned`
+(`TUNED_MODEL` in `.env`). It does not exist until an adapter is
+registered:
+
+```
+python scripts/register_adapter.py --adapter checkpoints/adapter_prebaked
+```
+
+- **Adapter format (binding):** a folder holding
+  `adapter_model.safetensors` + `adapter_config.json` in Hugging Face
+  PEFT LoRA layout. Notebook 05 writes it directly; notebook 05b (MLX)
+  converts to it. Anything that produces this folder can be the tuned
+  model; nothing downstream knows which notebook made it.
+- **Where adapters live:** `checkpoints/adapter_prebaked/` (committed,
+  the insurance copy, scores in its README) and
+  `checkpoints/adapter_<model>_<run>/` (a participant's own, git-ignored;
+  also in their run folder under `CHECKPOINT_DIR/05_finetune/`).
+- The script reads `base_model_name_or_path` from the adapter config
+  and picks the SAME model in Ollama through
+  `finetune_utils.MODEL_CHOICES` (`unsloth/Llama-3.2-1B-Instruct` ->
+  `llama3.2:1b`). An adapter on any other base model is noise.
+- The Modelfile it writes is `FROM <base>`, `ADAPTER <folder>`,
+  `PARAMETER num_ctx 4096`. No `TEMPLATE`: the adapter was trained on
+  the text Ollama's own llama3.2 template produces
+  (`finetune_utils.LLAMA3_SERVING_TEMPLATE`), so the base model's
+  template is already the right one.
+- The tuned model is Llama 3.2 **1B**. A like-for-like "base" column is
+  therefore `llama3.2:1b` (`OLLAMA_MODEL=llama3.2:1b`), not the default
+  local model `llama3.2:3b`. Both reference runs are in
+  `facilitator/prebaked_outputs/eval/`.
+- A consumer (Day 4 S19, the capstone) needs only: Ollama running, the
+  registration command above run once, then `get_endpoint("tuned")`.
+
 ---
 
 ## Contract 4 — eval output format

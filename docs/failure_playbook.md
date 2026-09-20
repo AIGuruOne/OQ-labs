@@ -38,8 +38,90 @@ Format per entry: symptom → cause → fix → seen on.
 - **Seen on:** 2026-09-20 (build machine, Ollama 0.12.10, Windows 11,
   27.6 GB RAM with 3.2 GB free).
 
-*(Remaining entries — Colab blocked, runtime disconnect, GPU
-unavailable, Ollama won't start, model pull too slow, pip blocked,
+### 3. Fine-tune notebook: `TypeError: TrainingArguments.__init__() got an unexpected keyword argument 'warmup_ratio'`
+- **Symptom:** a participant pastes training arguments from a tutorial
+  or a chatbot into notebook 05 and the `trainer` cell dies with an
+  unexpected keyword: `warmup_ratio`, `group_by_length`,
+  `evaluation_strategy`, or `tokenizer=` on `Trainer(...)`.
+- **Cause:** Colab ships transformers 5.x. Those names are from 4.x
+  and were removed. Almost everything on the web is still 4.x.
+- **Fix:** use the 5.x names the notebook already has:
+  `warmup_steps=0.1` (a float is a fraction), `train_sampling_strategy=
+  "group_by_length"`, `eval_strategy=`, `processing_class=`. Do NOT
+  `pip install` an older transformers to make the pasted code work.
+- **Seen on:** 2026-09-20 (build machine, transformers 5.16.1 -
+  found by introspecting the installed package before writing the cell).
+
+### 4. Fine-tune notebook: `RuntimeError: The run folder ... was started with different settings (changed: lora_rank)`
+- **Symptom:** the `runfolder` cell stops after a participant changes a
+  TODO value and re-runs.
+- **Cause:** by design. The run folder on Drive holds checkpoints made
+  with the OLD settings; resuming them under new settings would
+  produce a model nobody can describe.
+- **Fix:** give the experiment a new `RUN_NAME` in the settings cell
+  (`"run2"`) and Run all - the first run stays intact next to it. To
+  really start over, delete the run folder it names.
+- **Seen on:** 2026-09-20 (build machine; covered by
+  `tests/test_finetune_utils.py`).
+
+### 5. Fine-tune notebook: `GPU : NONE` and training crawls
+- **Symptom:** the settings cell prints `GPU : NONE. A full run on a
+  CPU takes hours`; the first training step takes minutes.
+- **Cause:** the Colab runtime is a CPU runtime (the default), or the
+  free GPU quota for that Google account is used up.
+- **Fix:** *Runtime > Change runtime type > T4 GPU*, then Run all -
+  nothing is lost, nothing had trained yet. Quota gone: pair up with a
+  group that has a GPU, or skip training and use
+  `checkpoints/adapter_prebaked/` in notebook 06 - that is what it is
+  for. Measured for scale: 7.1 min on a T4, about 3.5 HOURS on a
+  12-core laptop CPU. Do NOT reach for a paid tier.
+- **Seen on:** 2026-09-20 (build machine has no GPU: ~40 tokens/s).
+
+### 6. `ModuleNotFoundError: No module named 'torch'` when running a notebook headless, though torch IS installed
+- **Symptom:** `python -m jupyter nbconvert --execute ...` fails on
+  `import torch` inside the notebook, while `python -c "import torch"`
+  works in the same terminal.
+- **Cause:** two virtual environments. `python -m jupyter nbconvert`
+  does not run nbconvert from the current interpreter - it launches
+  the first `jupyter-nbconvert` on `PATH`, which belongs to whichever
+  environment is *activated*, and the kernel starts there.
+- **Fix:** call the module directly: `python -m nbconvert --to notebook
+  --execute ...` using the interpreter of the environment you mean. If
+  a stale `VIRTUAL_ENV` is set, clear it for the command
+  (`env -u VIRTUAL_ENV ...`).
+- **Seen on:** 2026-09-20 (build machine, `.venv` activated while
+  running `.venv-finetune`).
+
+### 7. Background work dies, or Ollama/Docker stop answering: the machine is out of RAM
+- **Symptom:** long jobs vanish or stall with no error; everything is
+  slow; Task Manager shows under 1 GB free.
+- **Cause:** a killed notebook run can leave its kernel process alive,
+  holding the whole model (9 GB seen here), and a Docker container
+  left running holds its VM's memory. They do not show up as "the
+  notebook", so they are easy to miss.
+- **Fix:** Task Manager > Details > sort by memory > end orphaned
+  `python.exe` processes; `docker ps` then `docker stop <id>`; in
+  Ollama, `ollama stop <model>` unloads a model without stopping the
+  server. One heavy job at a time on a 16 to 32 GB laptop.
+- **Seen on:** 2026-09-20 (build machine, 27.6 GB RAM: a CPU training
+  run and a container test together left 0.6 GB free).
+
+### 8. Tuned model scores WORSE on urgency than the untuned 3B
+- **Symptom:** in the S12 table the tuned 1B gets urgency 7/20 and the
+  untuned `llama3.2:3b` gets 13/20. Somebody concludes fine-tuning
+  made it worse.
+- **Cause:** not a bug. The held-out 20 is half `low` and the 3B says
+  `low` almost every time; the tuned model escalates by one level, as
+  `gpt-4o-mini` does. Against its OWN base (`llama3.2:1b`, 4/20) the
+  tuned model improved, and on the 72 validation tickets it gets 76%.
+- **Fix:** show `comparison_base1b_vs_tuned.txt` (same model, before
+  and after) first, then the four-way table, and use the per-class
+  urgency rows to make the point. Full reasoning:
+  `checkpoints/adapter_prebaked/README.md`, "Urgency".
+- **Seen on:** 2026-09-20 (first run of `run_eval.py --endpoint tuned`).
+
+*(Remaining entries — Colab blocked, runtime disconnect on Colab
+itself, Ollama won't start, model pull too slow, pip blocked,
 OOM, port in use, Drive not mounting — get filled in as they are
 actually hit during dry runs. Owner: both slices, whoever hits it
 first writes it up.)*

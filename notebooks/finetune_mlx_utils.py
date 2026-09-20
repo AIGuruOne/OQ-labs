@@ -18,7 +18,10 @@ and writes the adapter plus a small progress file after each epoch. A
 crash or a closed lid costs at most the epoch in flight.
 """
 
+import contextlib
+import io
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -36,6 +39,14 @@ import finetune_utils
 MLX_ADAPTER_FOLDER = "mlx_adapter"
 MLX_ADAPTER_FILE = "adapters.safetensors"
 PROGRESS_FILE = "mlx_progress.json"
+
+# Smoke test sizes. Small on purpose: the smoke test is also what runs on
+# MLX's Linux CPU backend (no Mac needed), which is slow - about a minute
+# per training row. On Apple Silicon these finish in seconds.
+SMOKE_TEST_TRAIN_ROWS = 4
+SMOKE_TEST_VAL_ROWS = 2
+SMOKE_TEST_PREVIEW_COUNT = 2
+SMOKE_TEST_NEW_TOKENS = 24
 
 # Notebook 05 names layers the Hugging Face way ("q_proj"). mlx-lm wants
 # the path inside one transformer block ("self_attn.q_proj").
@@ -149,8 +160,9 @@ class LossPrinter(TrainingCallback):
     """Prints each loss report and appends it to loss_log.jsonl in the
     run folder - the same log format notebook 05 writes."""
 
-    def __init__(self, run_dir, iterations_before, iterations_per_epoch, seconds_before):
+    def __init__(self, run_dir, iterations_before, iterations_per_epoch, seconds_before, output):
         self.run_dir = Path(run_dir)
+        self.output = output
         self.iterations_before = iterations_before
         self.iterations_per_epoch = iterations_per_epoch
         self.seconds_before = seconds_before
@@ -168,7 +180,7 @@ class LossPrinter(TrainingCallback):
         with open(self.run_dir / finetune_utils.LOSS_LOG_FILE, "a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry) + "\n")
         print(f"iteration {iteration:>4}   epoch {entry['epoch']:>5.2f}   loss {entry['loss']:.4f}   "
-              f"{entry['minutes']:>5.1f} min so far   {train_info['tokens_per_second']:,.0f} tokens/s")
+              f"{entry['minutes']:>5.1f} min so far", file=self.output, flush=True)
 
 
 def make_optimizer(learning_rate):
@@ -181,8 +193,9 @@ def train_one_epoch(model, optimizer, train_set, run_dir, progress, batch_size,
     """One pass over the training rows. Returns the seconds it took.
 
     mlx-lm counts ITERATIONS (one batch each); an update happens every
-    `gradient_accumulation` iterations. Its own printing is left on, so
-    the raw mlx-lm lines appear next to ours.
+    `gradient_accumulation` iterations. mlx-lm prints its own progress
+    lines; they are silenced here so the notebook shows ONE line per
+    report, in the same shape as notebook 05.
     """
     iterations_per_epoch = len(train_set) // batch_size
     training_arguments = mlx_trainer.TrainingArgs(
@@ -196,30 +209,33 @@ def train_one_epoch(model, optimizer, train_set, run_dir, progress, batch_size,
         grad_checkpoint=True,
         grad_accumulation_steps=gradient_accumulation,
     )
+    notebook_output = sys.stdout
     printer = LossPrinter(run_dir, progress["iterations_done"], iterations_per_epoch,
-                          progress["training_seconds"])
+                          progress["training_seconds"], notebook_output)
     started = time.time()
     model.train()
-    mlx_trainer.train(
-        model=model,
-        optimizer=optimizer,
-        train_dataset=train_set,
-        val_dataset=None,
-        args=training_arguments,
-        training_callback=printer,
-    )
+    with contextlib.redirect_stdout(io.StringIO()):       # mlx-lm's own lines go nowhere
+        mlx_trainer.train(
+            model=model,
+            optimizer=optimizer,
+            train_dataset=train_set,
+            val_dataset=None,
+            args=training_arguments,
+            training_callback=printer,
+        )
     return time.time() - started
 
 
 def validation_loss(model, val_set, batch_size, max_length):
     """Average loss on the validation rows (answer tokens only)."""
-    loss = mlx_trainer.evaluate(
-        model=model,
-        dataset=val_set,
-        batch_size=batch_size,
-        num_batches=-1,
-        max_seq_length=max_length,
-    )
+    with contextlib.redirect_stderr(io.StringIO()):       # hide mlx-lm's progress bar
+        loss = mlx_trainer.evaluate(
+            model=model,
+            dataset=val_set,
+            batch_size=batch_size,
+            num_batches=-1,
+            max_seq_length=max_length,
+        )
     model.train()
     return float(loss)
 

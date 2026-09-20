@@ -22,6 +22,7 @@ What does NOT live here: the LoRA settings and the training settings.
 Those are the decisions of the lab, so they stay in the notebook.
 """
 
+import copy
 import json
 import time
 from pathlib import Path
@@ -537,8 +538,6 @@ def generate_reply(model, tokenizer, messages, max_new_tokens=160):
     Greedy (no sampling) so the same ticket gives the same answer every
     time - the eval harness asks the same way (temperature 0).
     """
-    from transformers import GenerationConfig
-
     was_training = model.training
     model.eval()
     model.config.use_cache = True
@@ -549,15 +548,18 @@ def generate_reply(model, tokenizer, messages, max_new_tokens=160):
     inputs = {name: tensor.to(model.device) for name, tensor in inputs.items()}
     prompt_length = inputs["input_ids"].shape[1]
 
-    # Spelled out in full so nothing is inherited from the model's own
-    # defaults: greedy, a hard length cap, and the model's stop tokens.
-    generation_config = GenerationConfig(
-        max_new_tokens=max_new_tokens,
-        do_sample=False,
-        pad_token_id=tokenizer.pad_token_id,
-        bos_token_id=model.generation_config.bos_token_id,
-        eos_token_id=model.generation_config.eos_token_id,
-    )
+    # Greedy, with a hard length cap. Start from the model's own settings
+    # (they hold its stop tokens) and switch sampling OFF in that copy.
+    # Llama ships do_sample=True, temperature 0.6, top_p 0.9; the neutral
+    # values 1.0 / 1.0 are what "off" looks like to transformers 5.x -
+    # None would be refilled from the model's defaults, with a warning.
+    generation_config = copy.deepcopy(model.generation_config)
+    generation_config.do_sample = False
+    generation_config.temperature = 1.0
+    generation_config.top_p = 1.0
+    generation_config.max_new_tokens = None
+    generation_config.max_length = prompt_length + max_new_tokens
+    generation_config.pad_token_id = tokenizer.pad_token_id
     with torch.no_grad():
         output_ids = model.generate(**inputs, generation_config=generation_config)
 
