@@ -1,0 +1,71 @@
+====================================================================================================
+COMPARISON  the same 20 tickets for every run
+  dataset   data/eval/heldout_20.jsonl   questions 9f92ad8c9de71479
+====================================================================================================
+                                                base           tuned
+  model                                  llama3.2:1b  oq-ticket-t...
+  endpoint                                     local           tuned
+
+  FORMAT  schema-valid replies             13/20 65%      20/20 100%
+  FIELD   category                          9/20 45%       15/20 75%
+  FIELD   affected_system                  10/20 50%       14/20 70%
+  FIELD   asset_tag                        16/20 80%      20/20 100%
+  FIELD   urgency                           5/20 25%        7/20 35%
+  FIELD   impact                           15/20 75%       19/20 95%
+  FIELD   requested_action (>= 0.50)         0/20 0%       16/20 80%
+  FIELD   routing_queue                     7/20 35%       16/20 80%
+  requested_action mean similarity              0.11            0.81
+  RECORD  all six exact fields right        2/20 10%        4/20 20%
+  INVENTED values (a count)                        2               0
+  median seconds per ticket                     3.17            3.26
+
+PER CLASS - tickets where that field was right, out of n   ('thin' = fewer than 5: an anecdote)
+  category=access (n=5)                          5/5             4/5
+  category=hardware (n=3) thin                   0/3             3/3
+  category=software (n=3) thin                   1/3             1/3
+  category=network (n=3) thin                    3/3             3/3
+  category=erp (n=2) thin                        0/2             1/2
+  category=telecom (n=2) thin                    0/2             1/2
+  category=other (n=2) thin                      0/2             2/2
+
+  urgency=low (n=10)                            2/10            3/10
+  urgency=medium (n=4) thin                      2/4             1/4
+  urgency=high (n=4) thin                        1/4             3/4
+  urgency=critical (n=2) thin                    0/2             0/2
+
+  impact=single_user (n=14)                    11/14           14/14
+  impact=team (n=4) thin                         2/4             3/4
+  impact=site (n=1) thin                         1/1             1/1
+  impact=enterprise (n=1) thin                   1/1             1/1
+
+PER TICKET - exact-match fields right, out of 6               ('-' = no readable reply)
+  INC-004183                                       -               4
+  INC-004454                                       3               5
+  INC-004467                                       3               6
+  INC-004603                                       3               6
+  INC-004682                                       2               4
+  INC-004872                                       6               6
+  INC-005132                                       4               5
+  INC-005354                                       3               4
+  INC-005370                                       5               3
+  INC-005480                                       6               4
+  INC-005546                                       3               6
+  INC-005700                                       4               5
+  INC-005716                                       2               2
+  INC-005783                                       1               5
+  INC-005962                                       4               5
+  INC-006080                                       4               5
+  INC-006087                                       -               5
+  INC-006126                                       3               3
+  INC-006255                                       3               5
+  INC-006285                                       3               3
+
+READ THIS BEFORE QUOTING A NUMBER
+  - 20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two
+    tickets - do not read it as a trend.
+  - Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3),
+    category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2),
+    urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site
+    (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file
+    in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included.
+====================================================================================================

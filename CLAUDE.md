@@ -54,6 +54,7 @@ every time.
 - Dataset: `python scripts/build_dataset.py --seed 42` (add `--no-plant --finetune-dir <dir> --eval-dir <dir>` for a clean copy)
 - Register the tuned adapter with Ollama: `python scripts/register_adapter.py --adapter <folder>` (`--name`, `--base`, `--print-modelfile`)
 - Fine-tune plumbing test, any machine, ~5 min: `OQ_SMOKE_TEST=1 python -m nbconvert --to notebook --execute --output <out.ipynb> solutions/05_finetune.ipynb` (write the output ELSEWHERE, never over the solution)
+- Base vs tuned (notebook 06) headless, ~3 min with Ollama 0.12.10 + `llama3.2:1b`: `python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/06_compare_base_tuned.ipynb`
 - Tests: `python -m pytest tests/`
 
 ---
@@ -272,6 +273,78 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   timed T4 run of 05 with the whole-notebook stopwatch; the Colab
   disconnect test; any run of 05b on Apple Silicon (speed, memory, the
   real 1B model). Steps: `docs/finetune_stack.md` sections 4 and 5.
+
+### Base vs tuned, notebook 06 (P6)
+- One command, one table: the notebook SCORES NOTHING itself. It runs
+  `scripts/run_eval.py` three times (base, tuned, `--compare`) through
+  `compare_utils.run_command`; base and tuned differ only in endpoint,
+  label and run id (tested). Do not add scoring or analysis cells.
+- **OLLAMA IS PINNED TO 0.12.10** (`ollama_utils.OLLAMA_VERSION`).
+  Tested 2026-09-20: the LoRA `ADAPTER` import that makes the `tuned`
+  endpoint works on 0.12.10, fails on 0.33.3, and 0.34.2 says `LoRA
+  adapters are no longer supported`. Colab gets the pinned `.tgz`
+  unpacked by `ollama_utils.install_on_linux` - never pipe the moving
+  `install.sh`. Do NOT bump the pin without re-running register + both
+  evals.
+- **DECISION 2026-09-21: the tuned endpoint (so notebook 06) is COLAB
+  T4 ONLY.** A laptop is documented as UNSUPPORTED for the tuned
+  model, not as a fallback - do not write text that recommends it or
+  asks participants to install/downgrade Ollama. The notebook still
+  runs locally (prints `LOCAL RUN - NOT A SUPPORTED PATH`) because the
+  build machine has 0.12.10: that is how the reference output and the
+  tests are produced. The one machine that must have 0.12.10 on
+  purpose is the facilitator's (fallback ladder, BUILD_SPEC 15). The
+  pre-program email should ask anyone who already has Ollama to report
+  `ollama --version` (`setup/ollama_setup.md`).
+- Adapter choice is `compare_utils.find_adapter`: the participant's
+  own (`CHECKPOINT_DIR/05_finetune/<model>_<run>/adapter_final`, then
+  `checkpoints/adapter_<model>_<run>`), else the pre-baked one. It
+  validates the safetensors length (a save cut off by a disconnect is
+  rejected), prints every folder checked with a verdict, and the
+  choice is printed again beside the final numbers. Never make the
+  fallback quiet. The base column is the model THE ADAPTER IN USE sits
+  on, not `OLLAMA_MODEL` from `.env`.
+- Results go to `CHECKPOINT_DIR/eval` with run ids
+  `06_base_<model_key>` and `06_tuned_<source>_<fingerprint>`
+  (contracts.md, Contract 4). Both runs always pass `--resume`; that
+  is only safe because the tuned run id carries the sha256 fingerprint
+  of the weights.
+- The four side-by-side tickets are picked by fixed rules
+  (`compare_utils.pick_examples`: format fixed, biggest content gain,
+  tuned worse, still wrong). Never hand-pick. A test fails if the
+  reference run stops containing a ticket where tuned did worse.
+- The tuned column wins every aggregate row, and that was checked, not
+  assumed: held-out is leak-free (tested in P2), the big gains are the
+  house conventions (requested_action 0->16, routing 7->16, format
+  13->20), urgency (5->7) and whole record (2->4) stay poor and inside
+  the noise, and tuned is WORSE on INC-005370 and INC-005480.
+- The untuned 1B is NOT stable at temperature 0: 9 to 12 of its 20
+  replies change between sittings or machines (schema-valid seen at 9,
+  12 and 13 of 20); one extra warm-up request is enough. The tuned
+  replies were byte-identical on Windows and Linux. Quote the base
+  column as "about", never chase a one-ticket difference (playbook 10).
+- A Colab CPU runtime cannot run this lab (two cores: a ticket exceeds
+  the endpoint's 120 s timeout), so the Ollama cell stops at once on
+  Colab without a GPU, and its message no longer offers a laptop.
+- The build machine's "CPU only" timings are not quite that: Ollama
+  puts most of a 1B model on the integrated AMD GPU (`ollama ps`).
+- Both versions are generated from one cell list so they cannot
+  drift; the generator was a scratch script and is NOT in the repo.
+  Edit both .ipynb files with the same change (tested), then re-execute
+  the solution from a cold state: delete `checkpoints/local/eval`,
+  `ollama stop` both models, run with `OLLAMA_BASE_URL=http://localhost:11435`,
+  write elsewhere, copy outputs in, refresh the `06_*` files in
+  `facilitator/prebaked_outputs/eval/`. The solution's TODO 3 numbers
+  must match its own retained table (tested).
+- `solutions/06` retained outputs are a LOCAL run on the build machine
+  (Ollama 0.12.10), i.e. the unsupported path - the only one available
+  here. Replace them with the first clean Colab T4 run, as was done for
+  notebook 05, and update the header's measured minutes.
+- STILL OWED for P6: two stopwatch runs on a cold free-tier Colab T4
+  (nobody has yet seen Ollama 0.12.10 use the T4 inside Colab - check
+  the warm-up line), the Colab disconnect test, and a run with a real
+  participant-trained adapter (the fallback tests used a copy of the
+  pre-baked one).
 
 ### Eval harness (P4)
 - Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring

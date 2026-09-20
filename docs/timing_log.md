@@ -22,6 +22,11 @@ this table, it has not been timed.
 | 05_finetune (solution, `OQ_SMOKE_TEST=1`: 135M model, 20 rows) | 2026-09-20 | local, Windows 11, Python 3.11.15, CPU, cold kernel (`python -m nbconvert --execute`) | none | 5.0 whole notebook (3.2 training) | - | plumbing test, not a lab timing. Kill-and-resume run: 2.0 min, resumed at step 4 of 6 |
 | 05b_finetune_mlx | - | **Apple Silicon Mac** | Apple GPU | **not yet measured** | training 25 | no Mac on the build side. First Mac to run it: time it and replace this row |
 | 05b_finetune_mlx (solution, `OQ_SMOKE_TEST=1`: 135M model, 4 rows, 3 epochs) | 2026-09-20 | Linux container (python:3.12-slim, `mlx[cpu]==0.32.2`, mlx-lm 0.31.3) on the Windows build machine | none (MLX CPU backend, one core) | 17.8 training; about 30 whole notebook across two sittings | - | plumbing test ONLY - says nothing about Mac speed (this backend needs ~70 s per training row). Hard-killed mid-epoch 3, re-run resumed at `epochs done: 2 of 3` |
+| 06_compare_base_tuned (solution, pre-baked adapter via the automatic fallback) | 2026-09-20 | local, Windows 11, Python 3.11.15, cold kernel, eval folder deleted and models unloaded first (`python -m nbconvert --execute`). Ollama 0.12.10 already running, `llama3.2:1b` already pulled. No NVIDIA GPU; Ollama put 89% of the model on the laptop's integrated AMD GPU | none (integrated graphics) | 2.83 (2 m 50 s) | 25 | run 1 of 2. No retries. 40 model calls, median 3.4 s (base) and 3.6 s (tuned) per ticket. Machine time only - the budget is participant time on 3 TODOs plus reading |
+| 06_compare_base_tuned (solution) | 2026-09-20 | same | same | 2.81 (2 m 49 s) | 25 | run 2 of 2. Within 1% of run 1, identical table. Two earlier runs the same evening, before the warm-up call was added: 2 m 50 s and 2 m 42 s. A third run on 2026-09-21, after the Colab-T4-only wording went in (this is the run retained in the solution): 2 m 33 s, identical table. NOTE: a local run is the UNSUPPORTED path for this lab - these rows time the machine work, they are not the lab's timing. The Colab T4 rows below are the ones that count |
+| 06_compare_base_tuned (solution), killed mid-run then re-run | 2026-09-20 | same. Process tree killed with 7 of 20 tuned replies saved | same | 1.0 for the re-run | 25 | resume test: 20 base + 7 tuned replies reused, 13 asked, table identical to the uninterrupted run. A re-run with everything saved: 14 s |
+| 06_compare_base_tuned (solution), Linux | 2026-09-20 | python:3.12-slim container on the build machine, `--cpus=2` (24 threads sharing two CPUs' worth of time - slower than two real cores would be with two threads). Ollama 0.12.10 installed by `ollama_utils.install_on_linux` (218 s over home broadband, not counted), model pull 126 s (counted) | none | **30.2 - OVER BUDGET** | 25 | one run. Proves the Linux path end to end; median 36 s (base), 44 s (tuned) per ticket. Pinned to two cores (`--cpuset-cpus=0,1`) every first ticket exceeded the 120 s endpoint timeout. Conclusion: a Colab CPU runtime cannot run this lab; the notebook now stops at once on Colab without a GPU |
+| 06_compare_base_tuned | - | Colab free tier, **cold**, T4 | T4 | **not yet measured** | 25 | OWED, two runs with a stopwatch. Nobody has yet seen Ollama 0.12.10 find the T4 inside Colab. Look at the warm-up line: it must say close to 100% in GPU memory and a few seconds |
 
 ## Scripts (not notebooks, no section 2 budget of their own)
 
@@ -45,3 +50,9 @@ budgets. Measured with `time`, whole command, held-out 20, temperature
 A first call against a model that is not loaded yet adds the load
 time (about 8 s for llama3.2:3b on the build machine).
 
+**About "CPU only" in the rows above (found 2026-09-20, P6):** the build
+machine has no NVIDIA GPU, but `ollama ps` shows Ollama placing most of
+a small model on its integrated AMD Radeon graphics (`26%/74% CPU/GPU`
+for `llama3.2:1b`). The per-ticket times above are therefore faster
+than a laptop with no usable GPU would give. Treat them as a lower
+bound for participant laptops.

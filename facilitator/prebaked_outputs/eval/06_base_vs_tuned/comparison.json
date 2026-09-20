@@ -1,0 +1,409 @@
+{
+  "contract": "eval-comparison/1",
+  "dataset": "data/eval/heldout_20.jsonl",
+  "dataset_sha256": "9f92ad8c9de71479",
+  "n_items": 20,
+  "runs": [
+    {
+      "name": "base",
+      "run_id": "06_base_llama3.2-1b",
+      "endpoint": "local",
+      "model": "llama3.2:1b",
+      "json_mode": false
+    },
+    {
+      "name": "tuned",
+      "run_id": "06_tuned_prebaked_b1c0e3d4",
+      "endpoint": "tuned",
+      "model": "oq-ticket-tuned",
+      "json_mode": false
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "schema_valid_rate",
+      "kind": "rate",
+      "values": {
+        "base": 0.65,
+        "tuned": 1.0
+      }
+    },
+    {
+      "metric": "category",
+      "kind": "rate",
+      "values": {
+        "base": 0.45,
+        "tuned": 0.75
+      }
+    },
+    {
+      "metric": "affected_system",
+      "kind": "rate",
+      "values": {
+        "base": 0.5,
+        "tuned": 0.7
+      }
+    },
+    {
+      "metric": "asset_tag",
+      "kind": "rate",
+      "values": {
+        "base": 0.8,
+        "tuned": 1.0
+      }
+    },
+    {
+      "metric": "urgency",
+      "kind": "rate",
+      "values": {
+        "base": 0.25,
+        "tuned": 0.35
+      }
+    },
+    {
+      "metric": "impact",
+      "kind": "rate",
+      "values": {
+        "base": 0.75,
+        "tuned": 0.95
+      }
+    },
+    {
+      "metric": "requested_action",
+      "kind": "rate",
+      "values": {
+        "base": 0.0,
+        "tuned": 0.8
+      }
+    },
+    {
+      "metric": "routing_queue",
+      "kind": "rate",
+      "values": {
+        "base": 0.35,
+        "tuned": 0.8
+      }
+    },
+    {
+      "metric": "requested_action_mean_similarity",
+      "kind": "score",
+      "values": {
+        "base": 0.108,
+        "tuned": 0.808
+      }
+    },
+    {
+      "metric": "overall_exact_match",
+      "kind": "rate",
+      "values": {
+        "base": 0.1,
+        "tuned": 0.2
+      }
+    },
+    {
+      "metric": "invented_values",
+      "kind": "count",
+      "values": {
+        "base": 2,
+        "tuned": 0
+      }
+    },
+    {
+      "metric": "seconds_per_item_median",
+      "kind": "seconds",
+      "values": {
+        "base": 3.17,
+        "tuned": 3.26
+      }
+    }
+  ],
+  "per_class": {
+    "category": [
+      {
+        "class": "access",
+        "n": 5,
+        "thin": false,
+        "field_correct": {
+          "base": 5,
+          "tuned": 4
+        }
+      },
+      {
+        "class": "hardware",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "tuned": 3
+        }
+      },
+      {
+        "class": "software",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "tuned": 1
+        }
+      },
+      {
+        "class": "network",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "base": 3,
+          "tuned": 3
+        }
+      },
+      {
+        "class": "erp",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "tuned": 1
+        }
+      },
+      {
+        "class": "telecom",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "tuned": 1
+        }
+      },
+      {
+        "class": "other",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "tuned": 2
+        }
+      }
+    ],
+    "urgency": [
+      {
+        "class": "low",
+        "n": 10,
+        "thin": false,
+        "field_correct": {
+          "base": 2,
+          "tuned": 3
+        }
+      },
+      {
+        "class": "medium",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 2,
+          "tuned": 1
+        }
+      },
+      {
+        "class": "high",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "tuned": 3
+        }
+      },
+      {
+        "class": "critical",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "base": 0,
+          "tuned": 0
+        }
+      }
+    ],
+    "impact": [
+      {
+        "class": "single_user",
+        "n": 14,
+        "thin": false,
+        "field_correct": {
+          "base": 11,
+          "tuned": 14
+        }
+      },
+      {
+        "class": "team",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "base": 2,
+          "tuned": 3
+        }
+      },
+      {
+        "class": "site",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "tuned": 1
+        }
+      },
+      {
+        "class": "enterprise",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "base": 1,
+          "tuned": 1
+        }
+      }
+    ]
+  },
+  "per_item": [
+    {
+      "item_id": "INC-004183",
+      "exact_fields_correct": {
+        "base": null,
+        "tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-004454",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-004467",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-004603",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-004682",
+      "exact_fields_correct": {
+        "base": 2,
+        "tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-004872",
+      "exact_fields_correct": {
+        "base": 6,
+        "tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-005132",
+      "exact_fields_correct": {
+        "base": 4,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005354",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-005370",
+      "exact_fields_correct": {
+        "base": 5,
+        "tuned": 3
+      }
+    },
+    {
+      "item_id": "INC-005480",
+      "exact_fields_correct": {
+        "base": 6,
+        "tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-005546",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-005700",
+      "exact_fields_correct": {
+        "base": 4,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005716",
+      "exact_fields_correct": {
+        "base": 2,
+        "tuned": 2
+      }
+    },
+    {
+      "item_id": "INC-005783",
+      "exact_fields_correct": {
+        "base": 1,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005962",
+      "exact_fields_correct": {
+        "base": 4,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006080",
+      "exact_fields_correct": {
+        "base": 4,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006087",
+      "exact_fields_correct": {
+        "base": null,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006126",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 3
+      }
+    },
+    {
+      "item_id": "INC-006255",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006285",
+      "exact_fields_correct": {
+        "base": 3,
+        "tuned": 3
+      }
+    }
+  ],
+  "limitations": [
+    "20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two tickets - do not read it as a trend.",
+    "Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3), category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2), urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included."
+  ]
+}

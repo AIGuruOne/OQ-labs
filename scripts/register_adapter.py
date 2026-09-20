@@ -114,8 +114,15 @@ def main():
             capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
 
-    if completed.returncode != 0:
-        reason = (completed.stderr or completed.stdout).strip().splitlines()
+    # Judge by the text as well as the exit code.
+    output = (completed.stderr or "") + (completed.stdout or "")
+    if "no longer supported" in output:
+        stop("this Ollama release has dropped LoRA adapters (seen on 0.34.2: 'LoRA adapters are no "
+             "longer supported'). The tuned endpoint is supported on Colab only, where the notebooks "
+             "install the pinned Ollama 0.12.10 themselves - open notebook 06 there, on a T4 runtime. "
+             "Background: setup/ollama_setup.md.")
+    if completed.returncode != 0 or "Error:" in output:
+        reason = output.strip().splitlines()
         stop(f"`ollama create` failed: {reason[-1] if reason else 'no message'} "
              "(is the Ollama server running? try `ollama list`)")
 

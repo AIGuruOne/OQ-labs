@@ -120,6 +120,88 @@ Format per entry: symptom → cause → fix → seen on.
   `checkpoints/adapter_prebaked/README.md`, "Urgency".
 - **Seen on:** 2026-09-20 (first run of `run_eval.py --endpoint tuned`).
 
+### 9. Notebook 06 says `ADAPTER IN USE: THE PRE-BAKED ONE` but the group did train
+- **Symptom:** the adapter cell of notebook 06 prints the pre-baked
+  line for a group whose notebook 05 reached `ADAPTER READY`.
+- **Cause:** read the `->` verdicts printed just above that line; it is
+  one of three. `folder does not exist`: `MODEL_NAME` / `RUN_NAME` in
+  notebook 06 are not the names used in notebook 05 (a second
+  experiment was saved as `run2`), or notebook 05 ran under a different
+  Google account, so a different Drive. `the weights file is cut off`:
+  the runtime died while the adapter was being written. `no twin in
+  Ollama`: the run was a smoke test.
+- **Fix:** set the two names to match notebook 05 and re-run from the
+  settings cell; the base run is reused, only the tuned run is asked
+  again. For a cut-off file, re-run notebook 05: it resumes from its
+  last checkpoint and saves the adapter again. If neither is quick,
+  carry on with the pre-baked adapter and say so when presenting -
+  that is what it is for.
+- **Seen on:** 2026-09-20 (build machine: adapter folder deleted, and a
+  weights file truncated to 9 MB, both on purpose;
+  `tests/test_compare_utils.py`).
+
+### 10. The base column in notebook 06 is a ticket off the header / the slides
+- **Symptom:** the untuned model scores `category 9/20, urgency 5/20`
+  where a reference table says `8/20, 4/20`; or two groups' base
+  columns differ slightly. Somebody asks which one is right.
+- **Cause:** both. `llama3.2:1b` untuned is not stable at temperature
+  0 under Ollama: 9 of its 20 replies differed between two runs on the
+  build machine on the same day, and the same single request sent
+  twice gave two different replies (one of them missing its closing
+  brace). Greedy decoding still depends on what the server processed
+  just before (prompt cache, batch shapes), and a 1B model has many
+  near-tied tokens. The tuned model moved on 1 reply of 20. Two
+  complete runs from the same server state were identical. Across
+  machines it is wider: the same Ollama 0.12.10 in a Linux container
+  changed 12 of the 20 base replies (schema-valid 9/20 there, 12/20 on
+  Windows; whole record 2/20 on both) and **0 of the 20 tuned
+  replies**.
+- **Fix:** nothing to fix - use it. It is the "base model is
+  inconsistent" point of BUILD_SPEC section 3, measured. Do not chase
+  the difference, and do not build an argument on a single base
+  ticket. The harness's own warning applies: one ticket is 5 points.
+- **Seen on:** 2026-09-20 (build machine, Ollama 0.12.10, CPU; and a
+  python:3.12-slim container on the same machine).
+
+### 11. `Cannot register the adapter: this Ollama release has dropped LoRA adapters`
+- **Symptom:** somebody runs notebook 06 (or
+  `scripts/register_adapter.py`) on a laptop and the register cell
+  stops; by hand, `ollama create` prints `Error: LoRA adapters are no
+  longer supported`. `ollama list` shows the base model but no
+  `oq-ticket-tuned`. The Ollama cell above it had already printed
+  `LOCAL RUN - NOT A SUPPORTED PATH FOR THIS LAB`.
+- **Cause:** the laptop has a current Ollama. Adapter import works on
+  0.12.10, the release this repo is built and measured on; it fails on
+  0.33.3 (`no Modelfile or safetensors files found`) and is refused on
+  0.34.2. This is why the tuned endpoint is **Colab T4 only** (decision
+  2026-09-21, `setup/ollama_setup.md`): in Colab the notebook installs
+  0.12.10 itself.
+- **Fix:** open notebook 06 in Colab on a T4 runtime. That is the
+  supported path, not a workaround. Do NOT reinstall or downgrade
+  Ollama on a participant's laptop in the room, and do NOT score a
+  different model under the `tuned` name. If Colab is unreachable, show
+  the pre-baked table (entry 12 says where it is).
+- **Seen on:** 2026-09-20 (`ollama/ollama:0.34.2` and `:0.33.3`
+  containers on the build machine, with `checkpoints/adapter_prebaked`).
+
+### 12. Notebook 06 on a Colab CPU runtime: `No GPU in this Colab runtime`
+- **Symptom:** the Ollama cell of notebook 06 stops with that message.
+- **Cause:** by design. On two CPU cores one ticket takes longer than
+  the endpoint's 120-second timeout, so the eval would die with `The
+  endpoint is not answering` after a 1.9 GB download. Measured in a
+  Linux container pinned to two cores: both first tickets timed out
+  twice. With two CPUs' worth of time spread over many threads it
+  limps: about 37 s per ticket, 30 minutes for the notebook - over its
+  25-minute budget.
+- **Fix:** *Runtime > Change runtime type > T4 GPU*, Run all. GPU quota
+  used up after notebook 05: pair with a group that has a GPU, or show
+  the pre-baked table - the no-model `--compare` command is in
+  `facilitator/prebaked_outputs/eval/README.md`, the table itself in
+  `06_base_vs_tuned/comparison.txt` there. A laptop is NOT the way out:
+  the tuned endpoint is unsupported there (entry 11).
+- **Seen on:** 2026-09-20 (python:3.12-slim containers, `--cpuset-cpus=0,1`
+  and `--cpus=2`, Ollama 0.12.10).
+
 *(Remaining entries — Colab blocked, runtime disconnect on Colab
 itself, Ollama won't start, model pull too slow, pip blocked,
 OOM, port in use, Drive not mounting — get filled in as they are

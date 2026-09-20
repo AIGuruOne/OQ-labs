@@ -247,6 +247,13 @@ python scripts/register_adapter.py --adapter checkpoints/adapter_prebaked
   therefore `llama3.2:1b` (`OLLAMA_MODEL=llama3.2:1b`), not the default
   local model `llama3.2:3b`. Both reference runs are in
   `facilitator/prebaked_outputs/eval/`.
+- **Where `"tuned"` is supported (decision 2026-09-21): Colab, free T4
+  runtime, only.** Registration needs Ollama 0.12.10; 0.33.3 fails to
+  import an adapter and 0.34.2 refuses (`LoRA adapters are no longer
+  supported`). In Colab `ollama_utils.ensure_server` installs the
+  pinned release, so a consumer there gets it for free. A laptop is
+  not a supported path for `"tuned"` (`setup/ollama_setup.md`);
+  `"local"` and `"hosted"` are unaffected.
 - A consumer (Day 4 S19, the capstone) needs only: Ollama running, the
   registration command above run once, then `get_endpoint("tuned")`.
 
@@ -462,6 +469,41 @@ reply.
 Additive changes (new keys) are allowed and keep `eval-summary/1`.
 Renaming or redefining a key is a raise-with-Ritesh change and bumps
 the contract string.
+
+### Where notebook 06 (Day 2 S12) leaves its runs (P6)
+
+Notebook 06 calls the CLI above and nothing else; it scores nothing
+itself. Everything lands in `CHECKPOINT_DIR / "eval"` (Drive on
+Colab), so a later notebook - Day 4 S19 - can add a column with
+`--compare` and never re-run these two:
+
+| File | What |
+|---|---|
+| `06_base_<model_key>_{summary.json,rows.jsonl,replies.jsonl,report.txt}` | the untuned model the adapter sits on. `<model_key>` is a key of `finetune_utils.MODEL_CHOICES`, e.g. `llama3.2-1b`; endpoint `local` with `OLLAMA_MODEL` set to that model's Ollama name; label `base` |
+| `06_tuned_<source>_<fingerprint>_{...}` | the tuned model. `<source>` is `yours` or `prebaked`; `<fingerprint>` is the first 8 hex digits of the sha256 of `adapter_model.safetensors`; endpoint `tuned`; label `tuned` |
+| `06_adapter_in_use.json` | what `compare_utils.find_adapter` decided: `source`, `path`, `fingerprint`, `model_key`, `ollama_base`, every folder it `checked` with a verdict |
+| `06_base_vs_tuned/comparison.{json,txt}` | the S12 table (`eval-comparison/1`) |
+| `06_reflection.json` | the group's rubric tally sheet (TODO 3) |
+
+- Both runs always pass `--resume`. That is safe only because the run
+  id names the model: the tuned id carries the adapter's fingerprint,
+  so a retrained adapter gets a new id and its replies are never mixed
+  with an older adapter's. Anything else that calls `--resume` must
+  keep that property.
+- **Adapter choice (binding for S12 and S19):** the participant's own
+  adapter if usable (`CHECKPOINT_DIR/05_finetune/<model>_<run>/adapter_final`,
+  then `checkpoints/adapter_<model>_<run>/`), else
+  `checkpoints/adapter_prebaked/`. "Usable" = config parses, the base
+  model has an Ollama twin, and the safetensors file is as long as its
+  own header says. The choice is printed, saved in
+  `06_adapter_in_use.json`, and printed again next to the final
+  numbers. Never a silent substitution.
+- The base column is the model **the adapter in use** sits on, read
+  from its `adapter_config.json` - not `OLLAMA_MODEL` from `.env`.
+- Ollama in Colab is ONE pinned release,
+  `ollama_utils.OLLAMA_VERSION` (0.12.10: the release every reference
+  score was measured on), unpacked from the versioned `.tgz` - the
+  moving `install.sh` is never piped into a shell.
 
 ---
 
