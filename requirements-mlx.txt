@@ -1,0 +1,20 @@
+# Apple Silicon variant of the fine-tune lab (notebook 05b). Fully pinned.
+#
+# macOS on Apple Silicon (M1 or later), Python 3.11 or 3.12:
+#     pip install -r requirements.txt -r requirements-mlx.txt
+#
+# Notebook 05b's install cell installs the same three pins if mlx-lm is
+# missing. No torch needed: MLX is Apple's own array library.
+#
+# Versions: latest on PyPI on 2026-09-20, and the exact pair unsloth_zoo
+# 2026.9.6 pins for Apple Silicon (mlx==0.32.2, mlx-lm==0.31.3), so they
+# are a combination somebody else also tests together.
+#
+# Build-machine note: mlx also ships a Linux CPU backend (`mlx[cpu]`),
+# which is how 05b was executed end to end without a Mac. The plain
+# Windows wheel has no backend and does not import.
+
+mlx==0.32.2
+mlx-lm==0.31.3
+transformers==5.16.1      # mlx-lm needs transformers>=5.0.0 for the tokenizer; pinned to match notebook 05
+safetensors==0.8.0        # adapter conversion to the notebook 05 format

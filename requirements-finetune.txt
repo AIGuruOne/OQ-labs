@@ -1,38 +1,38 @@
-# Day 2 fine-tuning stack — Colab T4 / Linux GPU runtimes ONLY.
+# Day 2 fine-tuning stack (notebooks 05 and 06). Fully pinned, no ranges.
 #
-# DO NOT install this on a participant laptop, and do not add it to
-# base requirements.txt. It deliberately pins transformers/datasets
-# OLDER than Colab preinstalls, because unsloth 2026.9.7 caps
-# transformers<=5.5.0, trl<=0.24.0 and datasets<4.4.0 (verified from
-# unsloth's published wheel metadata and its own T4 Colab notebooks,
-# 2026-09-19). Installing this file downgrades those packages inside
-# the fine-tune runtime — expected, and exactly what unsloth's own
-# notebooks do. Restart the Colab runtime after installing.
+# THE DESIGN DECISION (2026-09-20, see docs/finetune_stack.md):
+# plain transformers + peft + bitsandbytes. NOT unsloth.
 #
-# Installed by the pinned install cell of notebooks 05/06:
-#     %pip install -q -r requirements-finetune.txt
+#   Every package below except bitsandbytes is ALREADY on Colab at
+#   exactly this version (source: github.com/googlecolab/backend-info,
+#   pip-freeze.gpu.txt, checked 2026-09-20). So on a cold Colab runtime
+#   notebook 05 installs ONE 43 MB wheel, downgrades nothing, and never
+#   asks for a runtime restart.
 #
-# Relies on Colab's preinstalled torch 2.11.0+cu128 and triton 3.6.0
-# (inside unsloth's supported range torch>=2.4,<2.13) — torch is
-# deliberately NOT listed so pip never touches it.
+#   unsloth 2026.9.7 (latest on PyPI, 2026-09-18) would be roughly 2x
+#   faster, but its wheel metadata caps transformers<=5.5.0, trl<=0.24.0
+#   and datasets<4.4.0. Colab ships transformers 5.16.1 and datasets
+#   4.8.5, so installing it means downgrading the core of a cold
+#   runtime in front of the room, then restarting it. It also cannot
+#   run without a GPU, so its code path could not be tested off a T4.
 #
-# T4 note: T4 is sm_75 — fp16, no bf16. unsloth selects fp16
-# automatically; supported per unsloth's requirements docs.
+# On Colab: do NOT install this file. Notebook 05's install cell
+# installs bitsandbytes only.
+# Locally (CPU smoke test, or the facilitator's fallback machine):
+#     pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+#     pip install -r requirements.txt -r requirements-finetune.txt
+# Local Python 3.11 or 3.12 only (see CLAUDE.md).
+#
+# No compiled dependencies: every package here ships prebuilt wheels
+# for Linux x86_64, Windows x86_64 and macOS arm64.
 
-unsloth==2026.9.7         # pure-Python wheel
-unsloth_zoo==2026.9.6     # required companion package
-transformers==4.56.2      # unsloth's own T4 notebook pin (cap is <=5.5.0)
-trl==0.22.2               # unsloth's own T4 notebook pin (cap is <=0.24.0)
-peft==0.20.0              # Colab preinstalled version; unsloth needs >=0.18.0
-bitsandbytes==0.50.2      # prebuilt wheels incl. Windows; needed on T4 for 4-bit
+torch==2.11.0             # Colab preinstalled (2.11.0+cu128). Never reinstalled on Colab
+transformers==5.16.1      # Colab preinstalled version
+peft==0.20.0              # Colab preinstalled version
 accelerate==1.14.0        # Colab preinstalled version
-datasets==4.3.0           # unsloth cap is <4.4.0 (Colab ships 4.8.5 — downgrade expected)
-xformers==0.0.35          # matches torch 2.11
-torchao==0.16.0           # unsloth's notebooks require >=0.16.0
-sentencepiece==0.2.2      # Colab preinstalled version; tokenizer support
-protobuf==5.29.6          # Colab preinstalled version
+safetensors==0.8.0        # Colab preinstalled version; adapter file format
+tokenizers==0.23.1        # Colab preinstalled version
+huggingface_hub==1.29.0   # Colab preinstalled version; model download
+bitsandbytes==0.50.2      # THE one install on Colab. 4-bit base weights on the T4. Used on GPU only
 
-# --- Apple Silicon variant (notebook 05b, learner machines) ----------
-# Not installed here — recorded so the pins live in one place:
-#   mlx==0.32.2
-#   mlx-lm==0.31.3
+# --- Apple Silicon variant (notebook 05b) lives in requirements-mlx.txt ---
