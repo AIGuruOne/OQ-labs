@@ -1,0 +1,208 @@
+STEP 3: more reads
+checkpoint: services/mcp_server_reference/steps/step3_more_reads.py
+
+$ -m services.mcp_server_reference.call list --brief
+====================================================================================================
+tools/list
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/list",
+>>>  "params": {
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-0d0518adf854b4f0c26b9a030c38021c-e47225d367641905-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "cacheScope": "public",
+<<<   "resultType": "complete",
+<<<   "tools": [
+<<<    {
+<<<     "annotations": {"openWorldHint": false, "readOnlyHint": true},
+<<<     "description": "One equipment master record by tag, with its open work orders.",
+<<<     "inputSchema": {
+<<<      "type": "object",
+<<<      "properties": {
+<<<       "tag": {
+<<<        "description": "Equipment tag, upper case, e.g. P-1201A",
+<<<        "pattern": "^[A-Z]{1,3}-[0-9]{4}[A-Z]?$",
+<<<        "title": "Tag",
+<<<        "type": "string"
+<<<       }
+<<<      },
+<<<      "required": ["tag"],
+<<<      "title": "get_equipmentArguments"
+<<<     },
+<<<     "name": "get_equipment",
+<<<     "outputSchema": {
+<<<      "description": "One row of the equipment master.",
+<<<      "properties": {
+<<<       "tag": {
+<<<        "description": "Equipment tag, unique across the ERP.",
+<<<        "examples": ["P-1201A"],
+<<<        "title": "Tag",
+<<<        "type": "string"
+<<<       },
+<<<       "site": {
+<<<        "description": "Three-letter site code.",
+<<<        "enum": ["HBT", "KTF", "MRB", "SHZ", "TMQ", "WQR", "ZFL"],
+<<<        "title": "Site",
+<<<        "type": "string"
+<<<       },
+<<<       "unit": {
+<<<        "description": "Process unit: the first two digits of the tag number.",
+<<<        "examples": ["12"],
+<<<        "title": "Unit",
+<<<        "type": "string"
+<<<       },
+<<< ... (331 more lines)
+[exit 0, 0.2 s]
+
+$ -m services.mcp_server_reference.call get_maintenance_history tag=P-1201A limit=2 --brief
+====================================================================================================
+tools/call get_maintenance_history
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "get_maintenance_history",
+>>>   "arguments": {"tag": "P-1201A", "limit": 2},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-89cf0f9b37d1bab9e8163402b6711c53-0467984b06d5f9db-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [{"text": "{...[1260 chars]", "type": "text"}],
+<<<   "isError": false,
+<<<   "resultType": "complete",
+<<<   "structuredContent": {
+<<<    "total": 3,
+<<<    "limit": 2,
+<<<    "offset": 0,
+<<<    "next_offset": 2,
+<<<    "items": [
+<<<     {
+<<<      "record_id": "MH-000224",
+<<<      "equipment_tag": "P-1201A",
+<<<      "site": "MRB",
+<<<      "work_order_id": "WO-118305",
+<<<      "date": "2026-05-18",
+<<<      "work_type": "corrective",
+<<<      "failure_mode": "mechanical seal leak",
+<<<      "action_taken": "Replaced mechanical seal cartridge, flushed seal pla...[124 chars]",
+<<<      "parts": [
+<<<       {"part_number": "30-2201-01", "description": "Mechanical seal cartridge", "quantity": 1},
+<<<       {"part_number": "31-0415-01", "description": "O-ring kit", "quantity": 1}
+<<<      ],
+<<<      "downtime_hours": 14.0,
+<<<      "performed_by": "MRB rotating equipment crew"
+<<<     },
+<<<     {
+<<<      "record_id": "MH-000171",
+<<<      "equipment_tag": "P-1201A",
+<<<      "site": "MRB",
+<<<      "work_order_id": "WO-116417",
+<<<      "date": "2025-11-03",
+<<<      "work_type": "preventive",
+<<<      "failure_mode": null,
+<<<      "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+<<<      "parts": [],
+<<<      "downtime_hours": 3.0,
+<<<      "performed_by": "MRB rotating equipment crew"
+<<<     }
+<<<    ]
+<<<   },
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<< ... (2 more lines)
+[exit 0, 0.2 s]
+
+$ -m services.mcp_server_reference.call list_work_orders equipment_tag=P-1201A limit=2 --brief
+====================================================================================================
+tools/call list_work_orders
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "list_work_orders",
+>>>   "arguments": {"equipment_tag": "P-1201A", "limit": 2},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-6b212de0782059818bc198430d14adba-7ac5200042491008-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [{"text": "{...[1334 chars]", "type": "text"}],
+<<<   "isError": false,
+<<<   "resultType": "complete",
+<<<   "structuredContent": {
+<<<    "total": 3,
+<<<    "limit": 2,
+<<<    "offset": 0,
+<<<    "next_offset": 2,
+<<<    "items": [
+<<<     {
+<<<      "work_order_id": "WO-118305",
+<<<      "equipment_tag": "P-1201A",
+<<<      "site": "MRB",
+<<<      "work_type": "corrective",
+<<<      "priority": 2,
+<<<      "status": "completed",
+<<<      "title": "P-1201A mechanical seal leak",
+<<<      "description": "Crude transfer pump P-1201A at MRB: mechanical seal ...[104 chars]",
+<<<      "requested_by": "Control room operator, MRB",
+<<<      "approved_by": "Maintenance planner, MRB",
+<<<      "source_ticket": null,
+<<<      "raised_via": "erp_screen",
+<<<      "created": "2026-05-14T09:52:00+04:00",
+<<<      "target_date": "2026-05-16",
+<<<      "completed_date": "2026-05-18"
+<<<     },
+<<<     {
+<<<      "work_order_id": "WO-116417",
+<<<      "equipment_tag": "P-1201A",
+<<<      "site": "MRB",
+<<<      "work_type": "preventive",
+<<<      "priority": 4,
+<<<      "status": "completed",
+<<<      "title": "P-1201A planned maintenance",
+<<<      "description": "Planned maintenance on crude transfer pump P-1201A per the PM plan.",
+<<<      "requested_by": "Control room operator, MRB",
+<<<      "approved_by": "Maintenance planner, MRB",
+<<<      "source_ticket": null,
+<<<      "raised_via": "erp_screen",
+<<<      "created": "2025-10-20T15:02:00+04:00",
+<<<      "target_date": "2025-11-17",
+<<< ... (7 more lines)
+[exit 0, 0.2 s]
+

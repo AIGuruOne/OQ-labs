@@ -67,8 +67,8 @@ S26) writes. If your server writes something else, change the server.
 | `tool` | tool name | |
 | `access` | `"read"` or `"write"` (the class from template 4, not the annotation) | |
 | `args_sha256`, `args_redacted` | hash of the arguments; the arguments with secrets and personal data removed | |
-| `approval` | `{"required": false}` or `{"required": true, "decision": "approved" / "rejected", "by": "<approver>", "ts": "...", "reason": "..."}` | |
-| `status` | `"ok"`, `"error"`, `"refused"` (refused = write attempted without approval, or rate-limited) | |
+| `approval` | `{"required": false}` or `{"required": true, "decision": "approved" / "rejected", "by": "<approver>", "ts": "...", "reason": "..."}`. Under MCP 2026-07-28 an approval is a Multi Round-Trip Request, so one write is two calls and two lines: the first has `"decision": "pending"` (the question went out), the retry has the decision. A refusal by the server's own rules has `"by": "server"` and the rule as the reason | |
+| `status` | `"ok"`, `"error"`, `"refused"` (refused = write attempted without approval, or rate-limited; the `pending` round is `refused` too: nothing was written) | |
 | `upstream` | the downstream system and its status (`{"system": "mock_erp", "status": 201}`) | |
 | `result_sha256`, `records` | hash of the result; number of records returned or written | |
 | `ms` | duration | |

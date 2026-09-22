@@ -49,6 +49,7 @@ every time.
 - Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
 - Data quality: `python scripts/quality_checks.py --dataset data/finetune` (a folder, or `--dataset <train file> --val <val file>`; `--all` lists every finding)
 - Mock ERP: `uvicorn services.mock_erp.main:app --reload` (on Windows drop `--reload`: the reload hangs, playbook 17). Walk every endpoint: `python -m services.mock_erp.tour` (`--base-url`, `--api-key`). Regenerate seed: `python -m services.mock_erp.seed --seed 42`; OpenAPI file: `python -m services.mock_erp.write_openapi`
+- MCP server (S26): `python -m services.mcp_server_reference.server` (read-only; `--enable-writes`, `--port 8100`, `--audit-log <file>`, `--transport stdio`). Speak to it by hand, every header shown: `python -m services.mcp_server_reference.call discover | list | <tool> key=value` (`--args-file`, `--approve/--reject <approver> --reason`, `--brief`, `--no-forms`). Prove it: `python services/mcp_server_reference/test_inspector.py` (`--inspector` needs Node >= 22.19, `--module s26_server`). Refresh its pre-baked outputs: `python scripts/walk_s26_steps.py --out facilitator/prebaked_outputs/mcp_server` (ports 8000 + 8100 free)
 - Tickets: `python scripts/generate_tickets.py --count 600 --seed 42`
 - Ticket checks: `python scripts/check_tickets.py --tickets corpus/tickets/tickets_raw.jsonl --labels data/finetune/ticket_labels.jsonl --schema data/finetune/ticket_schema.json`
 - Dataset: `python scripts/build_dataset.py --seed 42` (add `--no-plant --finetune-dir <dir> --eval-dir <dir>` for a clean copy)
@@ -613,11 +614,10 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   checked by route table AND by trying every method on every path. No
   reset endpoint on purpose - a restart is the reset.
 - CHOSEN 2026-09-22: the write is a work order (brief 4, Day 4
-  approval interrupt), NOT an equipment-record update. The governance
-  example (`facilitator/governance_pack/examples/brief3_vision_capture_filled.md`)
-  still names `update_equipment_record` as "the one write endpoint of
-  the mock ERP" - that is now false. Raised with Utkarsh as a
-  decision, not silently edited.
+  approval interrupt), NOT an equipment-record update. RESOLVED in P11
+  (Utkarsh's instruction): the brief 3 governance example now raises a
+  "correct the master data" work order through `raise_work_order`; a
+  person applies the correction in the equipment master.
 - Seed data is GENERATED (`python -m services.mock_erp.seed --seed 42`,
   stdlib, reads the ticket corpus). Never hand-edit; the test
   regenerates and byte-compares. `/health` shows `data_fingerprint`
@@ -841,3 +841,80 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   15-second lookup was timed with a fresh model session (7-8 s per
   entry, first screen only), NOT with a person. A human stopwatch at the
   dry run is the real measurement.
+
+### Reference MCP server + inspector tests, Day 5 S26 (P11)
+- `services/mcp_server_reference/`: MCP **2026-07-28** over Streamable
+  HTTP (`127.0.0.1:8100/mcp`), SDK `mcp==2.2.0` (already pinned in P0;
+  v2.x implements 2026-07-28, 1.x does not). Surface is binding:
+  `docs/contracts.md`, "Service surface — reference MCP server".
+  Research sources and what was verified: its README, "Versions".
+- 2026-07-28 facts the code relies on (read in the spec AND the SDK
+  source, 2026-09-22): no `initialize`, no session; `_meta` carries
+  `io.modelcontextprotocol/{protocolVersion,clientInfo,clientCapabilities}`
+  on every request; headers `MCP-Protocol-Version`, `Mcp-Method`,
+  `Mcp-Name` (tools/call), mismatch = 400 / `-32020`, unknown version =
+  400 / `-32022`; `server/discover` is mandatory; MRTR =
+  `resultType: "input_required"` + `inputRequests` + `requestState`,
+  client retries with a NEW id + `inputResponses` + the state echoed.
+  The SDK serves 2025-11-25 clients on the same URL (dual-era): a
+  request with no version header takes the legacy path.
+- The SDK seals `requestState` itself (`RequestStateBoundary`,
+  AES-256-GCM, bound to method + tool + args digest, 10 min TTL,
+  audience = server name); a bad echo is `-32602` before the tool runs.
+  Default key is per process: a restart kills pending approvals
+  (playbook E20); `OQ_MCP_STATE_KEY` fixes that. One-time use of an
+  approval is OURS (`approval.py`, nonce set in memory) because the spec
+  says the server MUST enforce it; with a shared key a restart forgets
+  the used set - documented, not fixed.
+- The approval is hand-rolled `InputRequiredResult` in the tool body
+  (visible to the room), NOT the SDK's `Resolve(Elicit)` DI - the two
+  cannot be combined in one tool (the SDK refuses at registration).
+- ONE audit line per `tools/call`, written ONLY by
+  `audit.AuditMiddleware`, inserted at index 0 of `mcp.middleware`
+  (outside the SDK's request-state boundary, so SDK rejections are
+  logged too). Fields = governance template 5.1.2 exactly, in order;
+  `tests/test_mcp_server.py` parses them FROM the template. Round 1 of
+  an approval = `status: "refused"` + `approval.decision: "pending"`
+  (added to template 5.1.2 as a clarification, 2026-09-22). Tools
+  never touch the log: `erp_client` notes the upstream status, the
+  approval helpers note the approval block, via a contextvar.
+- The middleware also enforces, for EVERY tool: the class table
+  `TOOL_ACCESS` (not annotations; a missing tool = refused as a write),
+  read-only default (`writes_enabled`), rate limits (10 writes / 120
+  reads a minute per caller - each MRTR round counts).
+- `raise_work_order` is registered only with `--enable-writes`, AND the
+  middleware refuses writes when disabled (belt and braces).
+- `caller` is `unverified-client:<clientInfo.name>` on purpose (no
+  login in the lab). `trace_id` comes from `_meta.traceparent`; the
+  SDK's own `Client` sends none, so its two rounds get different ids.
+- Output schemas reuse `services/mock_erp/models.py`. Tool docstrings
+  are ONE line (a multi-line docstring puts its indentation into the
+  tool description the model reads).
+- The type-along: `facilitator/mcp_build_sequence.md` (8 steps, sums
+  to 80 min, tested). Checkpoints `steps/step1..4_*.py`, final =
+  `server.py`; participants work in `s26_server.py` at the repo root,
+  so checkpoints must not depend on their own location (the default
+  audit path lives in `audit.DEFAULT_LOG_PATH`; tested). Step 1's code
+  in the doc must equal the step 1 checkpoint, and step 6's typed body
+  must be in `server.py` (tested). Edit the doc and the files together.
+- Timing: machine time per step measured (3 walks: 62 / 43.5 / 42.9 s).
+  The ROOM is not timed: 77 typed lines, fits on paper only at ~2
+  lines a minute. The 09:17 rule (paste step 6) is the cut. Ritesh's
+  dry run is the measurement.
+- `test_inspector.py` starts its own ERP (8010, random API key) and two
+  servers (8110 read-only, 8111 writes) with fresh audit logs; 59
+  checks, 62 with `--inspector` (MCP Inspector CLI pinned
+  `@modelcontextprotocol/inspector@2.7.0`, needs `--protocol-era
+  modern` or it negotiates legacy). The Inspector CLI declares no
+  elicitation, so it is refused the write (exit 5) - correct. On
+  Windows it crashes (exit 127) on an unknown tool name (playbook E19);
+  never script that case.
+- Brief 3's gated action is a "correct the master data" WORK ORDER via
+  `raise_work_order` (the governance example was rewritten 2026-09-22;
+  `update_equipment_record` no longer exists anywhere).
+- Tested on Linux too: `python:3.12-slim` / `3.13-slim` containers ran
+  `test_inspector.py` and `tests/test_mcp_server.py` clean, and the
+  README's Colab cells through a Jupyter kernel (13 s incl. `%pip
+  install mcp==2.2.0`, no restart needed). NOT tested: Colab itself,
+  a Mac, the Inspector web UI's approval form (the UI starts; nobody
+  clicked through it), a human room.

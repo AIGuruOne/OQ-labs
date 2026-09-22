@@ -13,8 +13,10 @@ anything here is a raise-with-Ritesh change, not a quiet edit.
 | 5 | Index interface | **Shape fixed now; finalised in P13** (Day 5 capstone build) |
 
 Also binding, though not one of the five: the **mock ERP API surface**
-(end of this file, P10) - Day 4 agent labs and the Day 5 MCP server
-call it.
+(P10) - Day 4 agent labs and the Day 5 MCP server call it - and the
+**reference MCP server surface** (P11) - the Day 5 capstone scaffold
+and any agent that uses the ERP through MCP call it. Both at the end of
+this file.
 
 ---
 
@@ -682,3 +684,98 @@ Always `{"error": "<code>", "message": "<sentence>"}`; `problems:
 - Additive changes (a new optional filter, a new response field) are
   allowed. Renaming or removing a field, changing a status code, or
   adding a write is a raise-with-Ritesh change.
+
+---
+
+## Service surface — reference MCP server (P11)
+
+**Final.** Implemented in `services/mcp_server_reference/` (`server.py`
+plus the helpers it imports), documented for people in its
+`README.md`, built live in Day 5 S26 (`facilitator/mcp_build_sequence.md`),
+proved by `services/mcp_server_reference/test_inspector.py` and enforced
+by `tests/test_mcp_server.py`. Consumers: the Day 5 capstone scaffold
+(P13), capstone briefs 3 and 4, any Day 4 agent that reaches the ERP
+through MCP rather than HTTP.
+
+### Where it is and what it speaks
+
+- MCP **2026-07-28**, Streamable HTTP, `POST http://127.0.0.1:8100/mcp`
+  (`--host`, `--port`; `MCP_SERVER_URL` for clients). Also `--transport
+  stdio`. SDK: `mcp==2.2.0`, which also answers 2025-11-25 clients
+  (`initialize`) on the same URL.
+- Stateless: no `initialize`, no `Mcp-Session-Id`. Every request carries
+  `_meta.io.modelcontextprotocol/{protocolVersion, clientInfo,
+  clientCapabilities}` and the headers `MCP-Protocol-Version`,
+  `Mcp-Method`, and `Mcp-Name` on `tools/call`; a header that disagrees
+  with the body is `400` / `-32020`. Clients SHOULD send
+  `_meta.traceparent` (W3C): its trace id becomes the audit line's
+  `trace_id`, which is how the two rounds of an approval join up.
+- `server/discover`: `serverInfo` `oq-erp-mcp` `0.1.0`,
+  `supportedVersions: ["2026-07-28"]`. `server/discover` and
+  `tools/list` are cacheable: `ttlMs: 300000`, `cacheScope: "public"`;
+  the tool order is fixed.
+- ERP location and key from the environment (`MOCK_ERP_URL`,
+  `MOCK_ERP_API_KEY`), never from a tool argument.
+
+### Tools (the whole list)
+
+| Tool | Class | Arguments | `structuredContent` |
+|---|---|---|---|
+| `get_equipment` | read | `tag` (pattern `^[A-Z]{1,3}-[0-9]{4}[A-Z]?$`) | `Equipment` (the ERP record shape above) |
+| `get_maintenance_history` | read | `tag`, `limit` 1-50 (10) | `HistoryPage` (`total, limit, offset, next_offset, items`) |
+| `list_work_orders` | read | `equipment_tag?`, `status?`, `source_ticket?` (`INC-` + 6 digits), `limit` 1-50 (10) | `WorkOrderPage` |
+| `raise_work_order` | **write** | `equipment_tag`, `work_type`, `priority` 1-4, `title` 5-80, `description` 10-2000, `requested_by` 2-80, `source_ticket?` | `WorkOrder`, after an approval |
+
+- **Read-only by default.** `raise_work_order` is registered only when
+  the server is started with `--enable-writes`; otherwise a call to it
+  is refused ("started READ-ONLY") and logged. The three reads are
+  always there.
+- Errors: a tool result with `isError: true` and a sentence (the ERP's
+  own for a 404 / 409 / 422; `ERP said 401` for a wrong key). A schema
+  violation is refused before the ERP is called.
+- The class table `TOOL_ACCESS` in `server.py` decides read or write,
+  not the annotations. A tool name missing from it is refused as a
+  write.
+
+### The approval (a Multi Round-Trip Request)
+
+A call to `raise_work_order` without an answer returns
+`resultType: "input_required"` with `inputRequests.approval` (an
+`elicitation/create` form: `decision` `approve | reject`, `approver`
+one of `OQ_MCP_APPROVERS`, `reason` 3-200 characters; the message
+contains the exact `POST /work-orders` body) and a `requestState`.
+The client retries the SAME tool with the SAME arguments, a new
+JSON-RPC id, `inputResponses: {"approval": <ElicitResult>}` and the
+`requestState` echoed exactly. The server writes only if all hold: the
+state is its own (sealed by the SDK, bound to this tool and these
+arguments, 10-minute expiry; else `-32602`), unused (one approval, one
+write), the client declared `elicitation.form`, the approver is on the
+list, the decision is `approve`. Otherwise the result is `isError` and
+nothing is written. `approved_by` in the ERP is the approver from the
+form. Clients built on the SDK (`mcp.Client(..., elicitation_callback=)`)
+do the retry automatically.
+
+### The audit line
+
+One JSON line per `tools/call`, fields exactly governance template
+5.1.2 in its order (`ts, event, trace_id, request_id, server,
+server_version, caller, tool, access, args_sha256, args_redacted,
+approval, status, upstream, result_sha256, records, ms`), appended to
+`--audit-log` (default `checkpoints/local/mcp_audit/tool_call.jsonl`).
+`status` is `ok`, `error` or `refused`; the first round of an approval
+is `refused` with `approval.decision: "pending"`; `approval.by` is the
+approver or `"server"`.
+
+### Settings
+
+`MOCK_ERP_URL`, `MOCK_ERP_API_KEY` (secret), `OQ_MCP_APPROVERS`
+(default `planner:salim,planner:aisha,planner:nasser`),
+`OQ_MCP_STATE_KEY` (secret, 32+ characters; empty = a fresh key per
+start, so a restart forgets pending approvals). Environment or the
+repo-root `.env`.
+
+Additive changes (a new read tool with a `TOOL_ACCESS` row, a new
+optional argument, a new output field) are allowed. A new write tool,
+a change to the approval's form or keys, or a change to the audit line
+is a raise-with-Ritesh change: it changes what the governance pack says
+the server does.

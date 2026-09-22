@@ -90,3 +90,21 @@ a small model on its integrated AMD Radeon graphics (`26%/74% CPU/GPU`
 for `llama3.2:1b`). The per-ticket times above are therefore faster
 than a laptop with no usable GPU would give. Treat them as a lower
 bound for participant laptops.
+
+## Day 5 S26: the MCP server type-along (80 min, not a notebook)
+
+S26 is a guided type-along, so there is no notebook to run cold. What
+can be timed without people is the machine part of each step: start the
+checkpoint as `s26_server.py`, run the step's commands
+(`scripts/walk_s26_steps.py`, which follows
+`facilitator/mcp_build_sequence.md`). The step budgets are participant
+time: typing and reading, which only a room can measure.
+
+| What | Date | Where | Measured | Budget | Notes |
+|---|---|---|---|---|---|
+| Walk of all 8 steps, machine time | 2026-09-22 | local, Windows 11, Python 3.11, `mcp==2.2.0`, mock ERP on 8000, server on 8100 | 62 s | 80 min | walk 1 of 3 (by hand-driven scratch script). Every step showed its capability; step 8 `test_inspector.py --module s26_server --inspector` 62 / 62 PASS in 23.8 s |
+| same | 2026-09-22 | same | 43.5 s | 80 min | walk 2 of 3, **the run retained in `facilitator/prebaked_outputs/mcp_server/`** (`timings.json`). Server start 1.3-3.3 s a step; each step's commands 0.2-0.6 s; step 8 18.8 s |
+| same, via the committed `scripts/walk_s26_steps.py` | 2026-09-22 | same | 42.9 s | 80 min | walk 3 of 3. Within 2% of walk 2; outputs identical apart from timestamps, trace ids and sealed state |
+| `test_inspector.py` (no Inspector) | 2026-09-22 | same | 13.5-15.6 s | 6 min (step 8) | 59 checks, 58 PASS + 1 SKIP (the Inspector). Starts its own ERP and two servers |
+| `test_inspector.py --inspector` | 2026-09-22 | same, Node 24.11.0, Inspector 2.7.0 already in the npx cache | 17.6-23.8 s | 6 min (step 8) | 62 / 62 PASS. The first `npx` download of the Inspector is extra: the package installed in 21 s over home broadband |
+| **The room: 77 typed lines + 8 runs** | - | people | **not yet measured** | 80 min | STILL OWED: Ritesh's Day 5 dry run. On paper: 77 lines at an assumed 2 lines a minute = ~40 min, 8 runs x ~3 min = 24, setup 5 -> 69 of 80. At 1 line a minute it does not fit; `mcp_build_sequence.md` has the 09:17 rule (paste step 6) for that |

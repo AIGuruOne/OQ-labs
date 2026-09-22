@@ -1,0 +1,130 @@
+STEP 4: audit
+checkpoint: services/mcp_server_reference/steps/step4_audit.py
+
+$ -m services.mcp_server_reference.call get_equipment tag=P-1201A --brief
+====================================================================================================
+tools/call get_equipment
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "get_equipment",
+>>>   "arguments": {"tag": "P-1201A"},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-64b72f6cda42d39c2fb83417bc1cc688-ecdd6ea35313017f-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [{"text": "{...[360 chars]", "type": "text"}],
+<<<   "isError": false,
+<<<   "resultType": "complete",
+<<<   "structuredContent": {
+<<<    "tag": "P-1201A",
+<<<    "site": "MRB",
+<<<    "unit": "12",
+<<<    "equipment_type": "pump",
+<<<    "description": "Crude transfer pump",
+<<<    "manufacturer": "Kalvik Fluidworks",
+<<<    "model": "KF-410",
+<<<    "serial_number": "KF2008-39256",
+<<<    "rating": "91 m3/h at 92 m head",
+<<<    "install_date": "2008-12-09",
+<<<    "criticality": "A",
+<<<    "status": "in_service",
+<<<    "open_work_orders": []
+<<<   },
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+[exit 0, 0.2 s]
+
+$ -m services.mcp_server_reference.call get_equipment tag=X-0000 --brief
+====================================================================================================
+tools/call get_equipment
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "get_equipment",
+>>>   "arguments": {"tag": "X-0000"},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-cb3847a0b6ec788d62a2dee75436085b-2339397afe73a744-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "text": "Error executing tool get_equipment: ERP said 404: No...[156 chars]",
+<<<     "type": "text"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+<<< [error] Error executing tool get_equipment: ERP said 404: No equipment with tag X-0000. Find
+<<< [error] tags with GET /equipment?site=MRB (sites: HBT KTF MRB SHZ TMQ WQR ZFL).
+[exit 1, 0.2 s]
+
+$ -m services.mcp_server_reference.call delete_everything --brief
+====================================================================================================
+tools/call delete_everything
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "delete_everything",
+>>>   "arguments": {},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-05184e51d0643690a529ad4fbab05515-1799726e00524b71-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "type": "text",
+<<<     "text": "Refused: 'delete_everything' is not in this server's...[120 chars]"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete"
+<<<  }
+<<< }
+<<< [error] Refused: 'delete_everything' is not in this server's class table (TOOL_ACCESS), so it is
+<<< [error] treated as a write and refused.
+[exit 1, 0.2 s]
+

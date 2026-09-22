@@ -1,0 +1,80 @@
+$ services/mcp_server_reference/test_inspector.py --module s26_server --inspector
+====================================================================================================
+Testing s26_server
+Scratch folder (logs, audit files): C:\Users\utkar\AppData\Local\Temp\oq_mcp_test_q88qtwlg
+====================================================================================================
+Mock ERP up at http://127.0.0.1:8010 in 0.5 s (pid 15264). Docs: http://127.0.0.1:8010/docs
+Server log: C:\Users\utkar\AppData\Local\Temp\oq_mcp_test_q88qtwlg\erp.log
+MCP server up at http://127.0.0.1:8110/mcp in 1.3 s, read-only (pid 46268).
+MCP server up at http://127.0.0.1:8111/mcp in 1.3 s, writes ENABLED (gated) (pid 43428).
+
+PASS  protocol server/discover answers without any handshake  (supportedVersions ['2026-07-28'])
+PASS  protocol discover names the server and its tools capability
+PASS  protocol discover is cacheable (ttlMs, cacheScope)  (ttlMs 300000, public)
+PASS  protocol no Mcp-Session-Id is minted (stateless)
+PASS  protocol a 2026-07-28 GET is 405, Allow: POST (no GET stream any more)  (HTTP 405)
+PASS  protocol missing Mcp-Method header -> 400 HeaderMismatch (-32020)  (HTTP 400, -32020)
+PASS  protocol Mcp-Name that disagrees with the body -> 400 (-32020)  (HTTP 400, -32020)
+PASS  protocol header version != _meta version -> 400 (-32020)  (HTTP 400, -32020)
+PASS  protocol unsupported version -> 400 (-32022) listing supported ones
+PASS  protocol a foreign Origin is refused (DNS rebinding guard)  (HTTP 403)
+PASS  tools    tools/list is exactly 3 tools
+PASS  tools    tools/list order is the same on every call (cache-friendly)
+PASS  tools    tools/list is cacheable (ttlMs)  (ttlMs 300000)
+PASS  tools    get_equipment: input + output schema, readOnlyHint True
+PASS  tools    get_maintenance_history: input + output schema, readOnlyHint True
+PASS  tools    list_work_orders: input + output schema, readOnlyHint True
+PASS  reads    get_equipment(tag=P-1201A)  (result matches outputSchema)
+PASS  reads    get_maintenance_history(tag=P-1201A, limit=3)  (result matches outputSchema)
+PASS  reads    list_work_orders(equipment_tag=P-1201A, status=completed)
+PASS  reads    list_work_orders(status=released, limit=5)  (result matches outputSchema)
+PASS  reads    get_equipment P-1201A is the brief 4 pump
+PASS  reads    unknown tag -> isError with the ERP's 404 sentence
+PASS  reads    input that breaks the schema -> isError, ERP never called
+PASS  gate     read-only server: raise_work_order is refused
+PASS  gate     a tool not in the class table is refused as a write
+PASS  tools    tools/list is exactly 4 tools
+PASS  tools    tools/list order is the same on every call (cache-friendly)
+PASS  tools    tools/list is cacheable (ttlMs)  (ttlMs 300000)
+PASS  tools    get_equipment: input + output schema, readOnlyHint True
+PASS  tools    get_maintenance_history: input + output schema, readOnlyHint True
+PASS  tools    list_work_orders: input + output schema, readOnlyHint True
+PASS  tools    raise_work_order: input + output schema, readOnlyHint False
+PASS  gate     exchange 1: resultType input_required, approval form, requestState
+PASS  gate     the form shows the exact request that will be sent
+PASS  gate     nothing written after exchange 1
+PASS  gate     exchange 2: work order released, approved_by = the approver  (WO-195893)
+PASS  gate     exchange 3: the write landed (MCP read and ERP read agree)  (WO-195893)
+PASS  gate     replaying a used approval is refused
+PASS  gate     an approval without the server's requestState is refused
+PASS  gate     a tampered requestState -> -32602, nothing written
+PASS  gate     an approval for other arguments -> -32602, nothing written
+PASS  gate     a rejection is refused and says who rejected it
+PASS  gate     an approver not on OQ_MCP_APPROVERS is refused
+PASS  gate     a client without the elicitation capability is refused, not asked
+PASS  gate     write rate limit: the 11th write call in a minute is refused  (refused at call 11)
+PASS  clients  SDK client negotiates 2026-07-28 and reads a tool  (protocol 2026-07-28)
+PASS  clients  SDK client: form answered by callback, retried, work order written  (WO-195894)
+PASS  clients  Inspector modern era: tools/list exit 0, three read tools  (exit 0, 2 s)
+PASS  clients  Inspector legacy era: tools/list exit 0, three read tools  (exit 0, 2 s)
+PASS  clients  Inspector: tools/call get_equipment exit 0, P-1201A  (exit 0)
+PASS  clients  Inspector CLI (no forms): the write is refused, exit 5  (exit 5)
+PASS  audit    read-only: one line per tool call  (10 lines for 10 tools/call requests)
+PASS  audit    read-only: every line has exactly the template 5.1.2 fields
+PASS  audit    read-only: status is only ok / error / refused  (error, ok, refused)
+PASS  audit    read-only: the ERP key appears in no audit line and no reply
+PASS  audit    writes: one line per tool call  (29 lines for 29 tools/call requests)
+PASS  audit    writes: every line has exactly the template 5.1.2 fields
+PASS  audit    writes: status is only ok / error / refused  (ok, refused)
+PASS  audit    writes: the ERP key appears in no audit line and no reply
+PASS  audit    the approved write: approver, reason and upstream 201 recorded
+PASS  audit    round 1 (pending) and round 2 (approved) share one trace_id
+PASS  audit    refusals say who decided (server policy or a named approver)
+MCP server at http://127.0.0.1:8110/mcp stopped (pid 46268).
+MCP server at http://127.0.0.1:8111/mcp stopped (pid 43428).
+Mock ERP at http://127.0.0.1:8010 stopped (pid 15264).
+====================================================================================================
+62 checks: 62 PASS, 0 FAIL, 0 SKIP, in 17.6 s.
+Audit logs: C:\Users\utkar\AppData\Local\Temp\oq_mcp_test_q88qtwlg
+[exit 0, 18.8 s]
+

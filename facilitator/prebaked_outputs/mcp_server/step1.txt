@@ -1,0 +1,97 @@
+STEP 1: one tool
+checkpoint: services/mcp_server_reference/steps/step1_first_tool.py
+
+$ -m services.mcp_server_reference.call discover
+====================================================================================================
+server/discover
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> Content-Type: application/json
+>>> Accept: application/json, text/event-stream
+>>> MCP-Protocol-Version: 2026-07-28
+>>> Mcp-Method: server/discover
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "server/discover",
+>>>  "params": {
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-a2ce45bcf7477c93f9f134f7a42ee5a1-378c5891953484c8-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< date: Tue, 22 Sep 2026 19:40:53 GMT
+<<< server: uvicorn
+<<< content-length: 429
+<<< content-type: application/json
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "cacheScope": "private",
+<<<   "capabilities": {
+<<<    "prompts": {"listChanged": true},
+<<<    "resources": {"listChanged": true, "subscribe": true},
+<<<    "tools": {"listChanged": true}
+<<<   },
+<<<   "instructions": "Equipment master, maintenance history and work orders of the mock ERP.",
+<<<   "resultType": "complete",
+<<<   "supportedVersions": ["2026-07-28"],
+<<<   "ttlMs": 0,
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+[exit 0, 0.2 s]
+
+$ -m services.mcp_server_reference.call get_equipment tag=P-1201A --brief
+====================================================================================================
+tools/call get_equipment
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "get_equipment",
+>>>   "arguments": {"tag": "P-1201A"},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-e1aba703236bc7d41a9289044a05876e-3a0fc0177f8e3002-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [{"text": "{...[360 chars]", "type": "text"}],
+<<<   "isError": false,
+<<<   "resultType": "complete",
+<<<   "structuredContent": {
+<<<    "tag": "P-1201A",
+<<<    "site": "MRB",
+<<<    "unit": "12",
+<<<    "equipment_type": "pump",
+<<<    "description": "Crude transfer pump",
+<<<    "manufacturer": "Kalvik Fluidworks",
+<<<    "model": "KF-410",
+<<<    "serial_number": "KF2008-39256",
+<<<    "rating": "91 m3/h at 92 m head",
+<<<    "install_date": "2008-12-09",
+<<<    "criticality": "A",
+<<<    "status": "in_service",
+<<<    "open_work_orders": []
+<<<   },
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+[exit 0, 0.2 s]
+

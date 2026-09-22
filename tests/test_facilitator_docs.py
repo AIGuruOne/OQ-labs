@@ -38,7 +38,6 @@ PENDING_PATHS = {
     "data/eval/golden_answers.jsonl",
     "data/eval/image_ground_truth/",
     "capstone/reference_index/",
-    "services/mcp_server_reference/",
     "scripts/score_extraction.py",
 }
 

@@ -30,7 +30,6 @@ TEMPLATES = [
 # entry when the thing exists (tests/test_facilitator_docs.py has the
 # same list for the Day 1 documents).
 PENDING_PATHS = {
-    "services/mcp_server_reference/",
     "scripts/score_extraction.py",
     "data/eval/image_ground_truth/",
 }

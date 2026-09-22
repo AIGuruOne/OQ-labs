@@ -1,0 +1,343 @@
+STEP 7: try to break the gate
+checkpoint: services/mcp_server_reference/server.py
+
+$ -m services.mcp_server_reference.call raise_work_order --args-file facilitator/prebaked_outputs/mcp_server/work_order_2.json --brief --reject planner:aisha --reason duplicate of the job raised in step 6
+====================================================================================================
+tools/call raise_work_order
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004413"
+>>>   },
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-7e3794e823f13c2abc8e11d7fdb85567-ccd067085b19613c-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "inputRequests": {
+<<<    "approval": {
+<<<     "method": "elicitation/create",
+<<<     "params": {
+<<<      "message": "APPROVAL NEEDED: raise_work_order writes to the ERP....[700 chars]",
+<<<      "mode": "form",
+<<<      "requestedSchema": {
+<<<       "properties": {
+<<<        "decision": {"type": "string", "title": "Decision", "enum": ["approve", "reject"]},
+<<<        "approver": {
+<<<         "type": "string",
+<<<         "title": "Approver",
+<<<         "enum": ["planner:salim", "planner:aisha", "planner:nasser"]
+<<<        },
+<<<        "reason": {
+<<<         "type": "string",
+<<<         "title": "Reason (required, also for an approval)",
+<<<         "minLength": 3,
+<<<         "maxLength": 200
+<<<        }
+<<<       },
+<<<       "required": ["decision", "approver", "reason"],
+<<<       "type": "object"
+<<<      }
+<<<     }
+<<<    }
+<<<   },
+<<<   "requestState": "v1.TqN_r2XYS9kg4JVMyecFUE8v6yUTzPnrgWNJ8jSCN14R1unPf...[507 chars]",
+<<<   "resultType": "input_required",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+====================================================================================================
+THE CLIENT SHOWS THE PERSON THIS FORM (no network traffic in this step)
+----------------------------------------------------------------------------------------------------
+  | APPROVAL NEEDED: raise_work_order writes to the ERP.
+  | If you approve, exactly this is sent (approved_by = the approver you pick):
+  | POST /work-orders
+  | {
+  |   "equipment_tag": "P-1201A",
+  |   "work_type": "corrective",
+  |   "priority": 2,
+  |   "title": "P-1201A abnormal noise, suspect seal",
+  |   "description": "Control room reports the pump sounds wrong. Seal replaced under WO-118305 in
+  | May 2026.",
+  |   "requested_by": "Control room operator, MRB",
+  |   "source_ticket": "INC-004413"
+  | }
+  | 
+  | What the server checked: P-1201A is 'Crude transfer pump' at MRB, criticality A, status
+  | in_service, open work orders: WO-195893.
+  | A work order is released to the site crew at once. The API cannot change, cancel or delete it
+  | afterwards.
+  | field decision: one of ['approve', 'reject']
+  | field approver: one of ['planner:salim', 'planner:aisha', 'planner:nasser']
+  | field reason:
+  -> answer: {"decision": "reject", "approver": "planner:aisha", "reason": "duplicate of the job rai
+====================================================================================================
+tools/call raise_work_order AGAIN: same arguments + inputResponses + requestState
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 2,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004413"
+>>>   },
+>>>   "inputResponses": {
+>>>    "approval": {
+>>>     "action": "accept",
+>>>     "content": {
+>>>      "decision": "reject",
+>>>      "approver": "planner:aisha",
+>>>      "reason": "duplicate of the job raised in step 6"
+>>>     }
+>>>    }
+>>>   },
+>>>   "requestState": "v1.TqN_r2XYS9kg4JVMyecFUE8v6yUTzPnrgWNJ8jSCN14R1unPf...[507 chars]",
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-7e3794e823f13c2abc8e11d7fdb85567-b3ea4e96172ef0cb-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 2,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "text": "Error executing tool raise_work_order: rejected by p...[121 chars]",
+<<<     "type": "text"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+<<< [error] Error executing tool raise_work_order: rejected by planner:aisha: duplicate of the job
+<<< [error] raised in step 6 (nothing written)
+[exit 1, 0.2 s]
+
+$ -m services.mcp_server_reference.call raise_work_order --args-file facilitator/prebaked_outputs/mcp_server/work_order_2.json --brief --no-forms
+====================================================================================================
+tools/call raise_work_order
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004413"
+>>>   },
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {},
+>>>    "traceparent": "00-62662b9232871b43f72661eea62df99e-10402a92153892d7-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "text": "Error executing tool raise_work_order: this client d...[170 chars]",
+<<<     "type": "text"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+<<< [error] Error executing tool raise_work_order: this client did not declare the elicitation
+<<< [error] (form) capability, so it cannot show a person the approval form. Use a client that can.
+[exit 1, 0.2 s]
+
+$ -m services.mcp_server_reference.call raise_work_order --args-file facilitator/prebaked_outputs/mcp_server/work_order_2.json --brief --approve intern:bob --reason looks fine
+====================================================================================================
+tools/call raise_work_order
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004413"
+>>>   },
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-0da458275112e7264d9f7b58e0a3c12e-ac0494d49d1182e4-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "inputRequests": {
+<<<    "approval": {
+<<<     "method": "elicitation/create",
+<<<     "params": {
+<<<      "message": "APPROVAL NEEDED: raise_work_order writes to the ERP....[700 chars]",
+<<<      "mode": "form",
+<<<      "requestedSchema": {
+<<<       "properties": {
+<<<        "decision": {"type": "string", "title": "Decision", "enum": ["approve", "reject"]},
+<<<        "approver": {
+<<<         "type": "string",
+<<<         "title": "Approver",
+<<<         "enum": ["planner:salim", "planner:aisha", "planner:nasser"]
+<<<        },
+<<<        "reason": {
+<<<         "type": "string",
+<<<         "title": "Reason (required, also for an approval)",
+<<<         "minLength": 3,
+<<<         "maxLength": 200
+<<<        }
+<<<       },
+<<<       "required": ["decision", "approver", "reason"],
+<<<       "type": "object"
+<<<      }
+<<<     }
+<<<    }
+<<<   },
+<<<   "requestState": "v1.TqN_rwKSHlPDlVBlhQgo2nIz-u5vXFt7f2kF2Pz5d1CrXopBy...[507 chars]",
+<<<   "resultType": "input_required",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+====================================================================================================
+THE CLIENT SHOWS THE PERSON THIS FORM (no network traffic in this step)
+----------------------------------------------------------------------------------------------------
+  | APPROVAL NEEDED: raise_work_order writes to the ERP.
+  | If you approve, exactly this is sent (approved_by = the approver you pick):
+  | POST /work-orders
+  | {
+  |   "equipment_tag": "P-1201A",
+  |   "work_type": "corrective",
+  |   "priority": 2,
+  |   "title": "P-1201A abnormal noise, suspect seal",
+  |   "description": "Control room reports the pump sounds wrong. Seal replaced under WO-118305 in
+  | May 2026.",
+  |   "requested_by": "Control room operator, MRB",
+  |   "source_ticket": "INC-004413"
+  | }
+  | 
+  | What the server checked: P-1201A is 'Crude transfer pump' at MRB, criticality A, status
+  | in_service, open work orders: WO-195893.
+  | A work order is released to the site crew at once. The API cannot change, cancel or delete it
+  | afterwards.
+  | field decision: one of ['approve', 'reject']
+  | field approver: one of ['planner:salim', 'planner:aisha', 'planner:nasser']
+  | field reason:
+  -> answer: {"decision": "approve", "approver": "intern:bob", "reason": "looks fine"}
+====================================================================================================
+tools/call raise_work_order AGAIN: same arguments + inputResponses + requestState
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 2,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004413"
+>>>   },
+>>>   "inputResponses": {
+>>>    "approval": {
+>>>     "action": "accept",
+>>>     "content": {"decision": "approve", "approver": "intern:bob", "reason": "looks fine"}
+>>>    }
+>>>   },
+>>>   "requestState": "v1.TqN_rwKSHlPDlVBlhQgo2nIz-u5vXFt7f2kF2Pz5d1CrXopBy...[507 chars]",
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-0da458275112e7264d9f7b58e0a3c12e-7588f483095a0fac-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 2,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "text": "Error executing tool raise_work_order: 'intern:bob' ...[98 chars]",
+<<<     "type": "text"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+<<< [error] Error executing tool raise_work_order: 'intern:bob' is not on the approver list
+<<< [error] (OQ_MCP_APPROVERS)
+[exit 1, 0.2 s]
+

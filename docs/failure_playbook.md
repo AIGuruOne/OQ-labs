@@ -27,7 +27,7 @@ try the fix ONCE, then go straight to the fallback.
 | [15](#15-pasted-tutorial-code-crashes-the-fine-tune) | "unexpected keyword argument 'warmup_ratio'" | GROUP |
 
 **Colab blocked for everyone?** Go to [Part 2: the demo fallback ladder](#part-2-demo-fallback-ladder).
-**Exact error text you don't see above?** Check [Part 3: the error-message reference](#part-3-error-message-reference-e1-e18).
+**Exact error text you don't see above?** Check [Part 3: the error-message reference](#part-3-error-message-reference-e1-e20).
 The E-numbers there are the entry numbers this file used before
 2026-09-23, so older notes that say "playbook entry 10" mean E10.
 
@@ -628,7 +628,7 @@ No step has been run from an OQ network yet.
 
 ---
 
-# Part 3: error-message reference (E1-E18)
+# Part 3: error-message reference (E1-E20)
 
 The exact-text entries this playbook started from, which the Part 1
 entries point to. The numbers are the ones this file used before
@@ -994,3 +994,42 @@ entries point to. The numbers are the ones this file used before
 - **Seen on:** 2026-09-22 (build machine, provoked on purpose: a plain
   HTTP server on the port, `tests/test_mock_erp.py`; and a second
   uvicorn on a port the ERP already held, for the Errno 10048 text).
+
+### E19. MCP Inspector CLI on Windows: `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 76`
+- **Symptom:** `npx @modelcontextprotocol/inspector@2.7.0 --cli ...
+  --method tools/call --tool-name <a name the server does not have>`
+  prints `{"error":{"code":"tool_not_found","message":"Tool '...' not
+  found on server."}}` on stderr, then that assertion, and exits
+  **127** instead of the documented 5.
+- **Cause:** the Inspector checks the tool list itself, reports the
+  missing tool correctly, and then crashes while closing (a Node / libuv
+  handle bug on Windows; Node 24.11). The call never reaches the MCP
+  server, so there is no audit line for it - which is correct.
+- **Fix:** nothing to fix in the server. Read the `tool_not_found` line,
+  not the exit code; check the name with `--method tools/list`. The
+  S26 proof script (`services/mcp_server_reference/test_inspector.py
+  --inspector`) never calls an unknown tool through the Inspector for
+  this reason.
+- **Seen on:** 2026-09-22 (build machine, Windows 11, Node 24.11.0,
+  Inspector 2.7.0; three runs out of three). Not tried on a Mac or Linux.
+
+### E20. S26 approval: `-32602 Invalid or expired requestState` (HTTP 400)
+- **Symptom:** the second round of an approval
+  (`call ... raise_work_order`, or any client's retry) gets
+  `{"code": -32602, "message": "Invalid or expired requestState",
+  "data": {"reason": "invalid_request_state"}}` and nothing is written.
+  The server's own terminal says why: `requestState rejected on
+  tools/call: unknown key` (or `expired`, or `request binding`).
+- **Cause:** the SDK seals every approval question with a key the
+  server makes at start-up, binds it to the exact tool arguments, and
+  gives it 10 minutes. `unknown key` = the server was restarted between
+  the two rounds (every restart after a code change does this);
+  `expired` = more than 10 minutes to answer; `request binding` = the
+  retry changed an argument. This is the gate working, not a crash.
+- **Fix:** call the tool again from the start (round 1 again) - that is
+  the normal answer. To keep pending approvals across restarts, give
+  the server a fixed key: `OQ_MCP_STATE_KEY=<any 32+ characters>` in
+  `.env` (tested: an approval asked before a restart wrote after it).
+- **Seen on:** 2026-09-22 (build machine, provoked on purpose: round 1,
+  restart, round 2 -> exactly the text above; the same with
+  `OQ_MCP_STATE_KEY` set -> `WO-195893` written).

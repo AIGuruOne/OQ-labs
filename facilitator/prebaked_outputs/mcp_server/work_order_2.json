@@ -1,0 +1,9 @@
+{
+ "equipment_tag": "P-1201A",
+ "work_type": "corrective",
+ "priority": 2,
+ "title": "P-1201A abnormal noise, suspect seal",
+ "description": "Control room reports the pump sounds wrong. Seal replaced under WO-118305 in May 2026.",
+ "requested_by": "Control room operator, MRB",
+ "source_ticket": "INC-004413"
+}

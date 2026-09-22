@@ -25,6 +25,9 @@ checkpoints/*
 # runs we DO keep live in facilitator/prebaked_outputs/eval/.
 eval_runs/
 
+# The file each group types in Day 5 S26 (facilitator/mcp_build_sequence.md)
+s26_server.py
+
 # Local tool state (not lab material)
 .claude/settings.local.json
 .kilo/

@@ -1,0 +1,43 @@
+STEP 5a: secrets: server has no key
+checkpoint: services/mcp_server_reference/steps/step4_audit.py
+
+$ -m services.mcp_server_reference.call get_equipment tag=P-1201A --brief
+====================================================================================================
+tools/call get_equipment
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "get_equipment",
+>>>   "arguments": {"tag": "P-1201A"},
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-690d8e7d2b12ca8891e1547b50933b5a-faa6525f895fac52-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "text": "Error executing tool get_equipment: ERP said 401: Th...[170 chars]",
+<<<     "type": "text"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete",
+<<<   "_meta": {"io.modelcontextprotocol/serverInfo": {"name": "oq-erp-mcp", "version": "0.1.0"}}
+<<<  }
+<<< }
+<<< [error] Error executing tool get_equipment: ERP said 401: The ERP refused the MCP server's key
+<<< [error] (401). Set MOCK_ERP_API_KEY for the MCP server to the key the ERP was started with.
+[exit 1, 0.2 s]
+

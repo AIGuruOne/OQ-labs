@@ -58,6 +58,7 @@ verified; nothing is cited from memory.
 | File | Session | What it is |
 |---|---|---|
 | `claude_code_session.md` | S1, compressed path only | The 45-minute Claude Code configuration session that fills the time reclaimed when the S1 diagnostic sends the room down the short path (P7) |
+| `mcp_build_sequence.md` | S26 (Day 5, 80 min) | The guided class build of the reference MCP server over the mock ERP: eight steps with clock times, the code typed at each, the command that shows the new capability, the checkpoint file to catch up from, and what was and was not timed (P11) |
 
 ## Pre-baked outputs
 
@@ -70,6 +71,11 @@ S26) walked end to end: every endpoint, the one write and its
 read-back, every error path, as real request/reply pairs from a live
 server. If the ERP will not start in the room, show this; if it does
 start, `python -m services.mock_erp.tour` prints the same thing live.
+
+`prebaked_outputs/mcp_server/` — the S26 type-along walked step by
+step against a live ERP: every step's requests and replies with their
+headers, the three exchanges of the gated write, every refusal, the
+audit log they produced, and `test_inspector.py` at 62 / 62 PASS.
 
 ## Keeping the cost model honest
 

@@ -1,0 +1,50 @@
+STEP 6a: gated write, read-only start
+checkpoint: services/mcp_server_reference/server.py
+
+$ -m services.mcp_server_reference.call raise_work_order --args-file facilitator/prebaked_outputs/mcp_server/work_order.json --brief
+====================================================================================================
+tools/call raise_work_order
+----------------------------------------------------------------------------------------------------
+>>> POST /mcp HTTP/1.1
+>>> {
+>>>  "jsonrpc": "2.0",
+>>>  "id": 1,
+>>>  "method": "tools/call",
+>>>  "params": {
+>>>   "name": "raise_work_order",
+>>>   "arguments": {
+>>>    "equipment_tag": "P-1201A",
+>>>    "work_type": "corrective",
+>>>    "priority": 2,
+>>>    "title": "P-1201A abnormal noise, suspect seal",
+>>>    "description": "Control room reports the pump sounds wrong. Seal rep...[86 chars]",
+>>>    "requested_by": "Control room operator, MRB",
+>>>    "source_ticket": "INC-004412"
+>>>   },
+>>>   "_meta": {
+>>>    "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+>>>    "io.modelcontextprotocol/clientInfo": {"name": "oq-wire-client", "version": "1.0"},
+>>>    "io.modelcontextprotocol/clientCapabilities": {"elicitation": {"form": {}}},
+>>>    "traceparent": "00-2b32051ced866d4c6d01a345ed4fd3a4-5831431feb7e7fed-01"
+>>>   }
+>>>  }
+>>> }
+<<< HTTP 200 OK
+<<< {
+<<<  "jsonrpc": "2.0",
+<<<  "id": 1,
+<<<  "result": {
+<<<   "content": [
+<<<    {
+<<<     "type": "text",
+<<<     "text": "Refused: 'raise_work_order' writes to the ERP and th...[155 chars]"
+<<<    }
+<<<   ],
+<<<   "isError": true,
+<<<   "resultType": "complete"
+<<<  }
+<<< }
+<<< [error] Refused: 'raise_work_order' writes to the ERP and this server was started READ-ONLY. A
+<<< [error] person restarts it with --enable-writes; nothing a client sends can.
+[exit 1, 0.2 s]
+
