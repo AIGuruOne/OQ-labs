@@ -1,0 +1,1734 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Mock ERP (lab)",
+  "description": "\nA small, fake ERP for the labs. **Everything in it is synthetic**: sites, tags,\nmanufacturers, work orders. It stands in for the plant maintenance system that\ntickets call *AssetHive*.\n\n### Three resources\n\n| Resource | Endpoints | Id looks like |\n|---|---|---|\n| Equipment master | `GET /equipment`, `GET /equipment/{tag}` | `P-1201A` |\n| Maintenance history | `GET /maintenance-history`, `GET /maintenance-history/{record_id}` | `MH-000224` |\n| Work orders | `GET /work-orders`, `GET /work-orders/{work_order_id}`, **`POST /work-orders`** | `WO-118305` |\n\n### The one write\n\n`POST /work-orders` **raises a work order and releases it to the site crew.**\nPriority 1 calls a crew out at once. There is no endpoint to change, cancel or\ndelete a work order: once raised, only a planner in the real ERP can undo it.\nThat is why an agent must never call it without a person approving first\n(Day 4 approval interrupt; Day 5 MCP server gate). The body must name who\napproved it in `approved_by`. The ERP records that name; it cannot check it.\n\n### Conventions\n\n- **Lists** are pages: `?limit=` (1 to 100, default 20) and `?offset=`. The reply\n  carries `total` and `next_offset` (null on the last page). Unknown query\n  parameters are refused, so a typo is an error rather than an unfiltered list.\n- **Ids** are case-insensitive: `p-1201a` finds `P-1201A`.\n- **Dates** are ISO 8601. Timestamps carry the Gulf offset (`+04:00`).\n- **Errors** always look like `{\"error\": \"not_found\", \"message\": \"...\"}`.\n  Validation errors add `problems`: one `{where, problem, got}` per problem.\n- **Auth**: none by default. If the server was started with `MOCK_ERP_API_KEY`\n  set, send it as `X-API-Key` (the *Authorize* button). `GET /health` is always open.\n- **State** lives in memory. A restart reloads the seed data: every work order\n  raised through the API is gone, and the ERP is identical on every machine.\n",
+  "version": "1.0.0"
+ },
+ "paths": {
+  "/equipment": {
+   "get": {
+    "tags": [
+     "Equipment master"
+    ],
+    "summary": "List equipment",
+    "description": "Equipment, sorted by tag, one page at a time. Every filter is optional\nand they combine with AND: `?site=MRB&equipment_type=pump`.",
+    "operationId": "list_equipment_equipment_get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 100,
+       "minimum": 1,
+       "description": "Items per page, 1 to 100.",
+       "default": 20,
+       "title": "Limit"
+      },
+      "description": "Items per page, 1 to 100."
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "How many items to skip.",
+       "default": 0,
+       "title": "Offset"
+      },
+      "description": "How many items to skip."
+     },
+     {
+      "name": "site",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "HBT",
+          "KTF",
+          "MRB",
+          "SHZ",
+          "TMQ",
+          "WQR",
+          "ZFL"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Site"
+      }
+     },
+     {
+      "name": "equipment_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "pump",
+          "compressor",
+          "heat_exchanger",
+          "air_cooler",
+          "vessel",
+          "column",
+          "tank",
+          "control_valve"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Equipment Type"
+      }
+     },
+     {
+      "name": "criticality",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "A",
+          "B",
+          "C"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Criticality"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "in_service",
+          "standby",
+          "out_of_service"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Status"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EquipmentPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/equipment/{tag}": {
+   "get": {
+    "tags": [
+     "Equipment master"
+    ],
+    "summary": "Get one piece of equipment",
+    "description": "One row of the equipment master, plus `open_work_orders`: the work\norders on this tag that are not finished yet.",
+    "operationId": "get_equipment_equipment__tag__get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "tag",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Equipment tag, any case.",
+       "examples": [
+        "P-1201A"
+       ],
+       "title": "Tag"
+      },
+      "description": "Equipment tag, any case."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Equipment"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "No such record.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/maintenance-history": {
+   "get": {
+    "tags": [
+     "Maintenance history"
+    ],
+    "summary": "List maintenance history",
+    "description": "Completed work, newest first. The usual question is\n`?equipment_tag=P-1201A`: what has been done to this pump before?",
+    "operationId": "list_history_maintenance_history_get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 100,
+       "minimum": 1,
+       "description": "Items per page, 1 to 100.",
+       "default": 20,
+       "title": "Limit"
+      },
+      "description": "Items per page, 1 to 100."
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "How many items to skip.",
+       "default": 0,
+       "title": "Offset"
+      },
+      "description": "How many items to skip."
+     },
+     {
+      "name": "equipment_tag",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "pattern": "^[A-Z]{1,3}-[0-9]{4}[A-Z]?$"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Equipment Tag"
+      }
+     },
+     {
+      "name": "site",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "HBT",
+          "KTF",
+          "MRB",
+          "SHZ",
+          "TMQ",
+          "WQR",
+          "ZFL"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Site"
+      }
+     },
+     {
+      "name": "work_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "corrective",
+          "preventive",
+          "inspection"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Work Type"
+      }
+     },
+     {
+      "name": "failure_mode",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Case-insensitive substring match, e.g. `seal`.",
+       "title": "Failure Mode"
+      },
+      "description": "Case-insensitive substring match, e.g. `seal`."
+     },
+     {
+      "name": "since",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "On or after this date (ISO 8601).",
+       "title": "Since"
+      },
+      "description": "On or after this date (ISO 8601)."
+     },
+     {
+      "name": "until",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "format": "date"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "On or before this date (ISO 8601).",
+       "title": "Until"
+      },
+      "description": "On or before this date (ISO 8601)."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HistoryPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/maintenance-history/{record_id}": {
+   "get": {
+    "tags": [
+     "Maintenance history"
+    ],
+    "summary": "Get one maintenance record",
+    "description": "One maintenance record: what failed, what was done, which parts.",
+    "operationId": "get_history_record_maintenance_history__record_id__get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "record_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Maintenance record id.",
+       "examples": [
+        "MH-000224"
+       ],
+       "title": "Record Id"
+      },
+      "description": "Maintenance record id."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MaintenanceRecord"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "No such record.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/work-orders": {
+   "get": {
+    "tags": [
+     "Work orders"
+    ],
+    "summary": "List work orders",
+    "description": "Work orders, newest first. Use `?source_ticket=INC-004412` to check\nwhether a ticket already has one before raising another.",
+    "operationId": "list_work_orders_work_orders_get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 100,
+       "minimum": 1,
+       "description": "Items per page, 1 to 100.",
+       "default": 20,
+       "title": "Limit"
+      },
+      "description": "Items per page, 1 to 100."
+     },
+     {
+      "name": "offset",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 0,
+       "description": "How many items to skip.",
+       "default": 0,
+       "title": "Offset"
+      },
+      "description": "How many items to skip."
+     },
+     {
+      "name": "equipment_tag",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "pattern": "^[A-Z]{1,3}-[0-9]{4}[A-Z]?$"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Equipment Tag"
+      }
+     },
+     {
+      "name": "site",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "HBT",
+          "KTF",
+          "MRB",
+          "SHZ",
+          "TMQ",
+          "WQR",
+          "ZFL"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Site"
+      }
+     },
+     {
+      "name": "status",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "released",
+          "in_progress",
+          "on_hold",
+          "completed",
+          "cancelled"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Status"
+      }
+     },
+     {
+      "name": "work_type",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "enum": [
+          "corrective",
+          "preventive",
+          "inspection"
+         ],
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Work Type"
+      }
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer",
+         "maximum": 4,
+         "minimum": 1
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Priority"
+      }
+     },
+     {
+      "name": "source_ticket",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "pattern": "^INC-[0-9]{6}$"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Source Ticket"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkOrderPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   },
+   "post": {
+    "tags": [
+     "Work orders"
+    ],
+    "summary": "Raise a work order and release it to the site crew (THE ONE WRITE)",
+    "description": "**Consequential and not reversible through this API.** The new work\norder is created in status `released`: it is on the site crew's list\nthe moment this returns, and priority 1 calls a crew out now. There is\nno endpoint to edit, cancel or delete it.\n\nCall it only after a named person has approved the exact body you are\nabout to send, and put that person in `approved_by`.\n\n- `201 Created`: the new work order; its URL is in the `Location` header.\n- `409 Conflict`: `source_ticket` already has a work order (a retry after a\n  timeout lands here instead of raising a duplicate).\n- `422`: a field is wrong, or the tag is not in the equipment master.\n  Nothing was written.",
+    "operationId": "raise_work_order_work_orders_post",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkOrderCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkOrder"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "400": {
+      "description": "The body is not valid JSON.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "409": {
+      "description": "This source ticket already has a work order.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "415": {
+      "description": "The body was not sent as application/json.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/work-orders/{work_order_id}": {
+   "get": {
+    "tags": [
+     "Work orders"
+    ],
+    "summary": "Get one work order",
+    "description": "One work order, whatever its status. A work order raised through\nPOST /work-orders is readable here straight away.",
+    "operationId": "get_work_order_work_orders__work_order_id__get",
+    "security": [
+     {
+      "APIKeyHeader": []
+     }
+    ],
+    "parameters": [
+     {
+      "name": "work_order_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "Work order id.",
+       "examples": [
+        "WO-118305"
+       ],
+       "title": "Work Order Id"
+      },
+      "description": "Work order id."
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkOrder"
+        }
+       }
+      }
+     },
+     "401": {
+      "description": "Only when MOCK_ERP_API_KEY is set: key missing or wrong.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "404": {
+      "description": "No such record.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "A parameter or field is wrong. `problems` says which.",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ErrorResponse"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/health": {
+   "get": {
+    "tags": [
+     "Service"
+    ],
+    "summary": "Is it up?",
+    "description": "Always open, even with an API key set. `data_fingerprint` is the same\non every machine and every restart; `work_orders_raised_since_start`\ncounts calls to the one write since this process started.",
+    "operationId": "health_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Health"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Equipment": {
+    "properties": {
+     "tag": {
+      "type": "string",
+      "title": "Tag",
+      "description": "Equipment tag, unique across the ERP.",
+      "examples": [
+       "P-1201A"
+      ]
+     },
+     "site": {
+      "type": "string",
+      "enum": [
+       "HBT",
+       "KTF",
+       "MRB",
+       "SHZ",
+       "TMQ",
+       "WQR",
+       "ZFL"
+      ],
+      "title": "Site",
+      "description": "Three-letter site code."
+     },
+     "unit": {
+      "type": "string",
+      "title": "Unit",
+      "description": "Process unit: the first two digits of the tag number.",
+      "examples": [
+       "12"
+      ]
+     },
+     "equipment_type": {
+      "type": "string",
+      "enum": [
+       "pump",
+       "compressor",
+       "heat_exchanger",
+       "air_cooler",
+       "vessel",
+       "column",
+       "tank",
+       "control_valve"
+      ],
+      "title": "Equipment Type"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description",
+      "examples": [
+       "Crude transfer pump"
+      ]
+     },
+     "manufacturer": {
+      "type": "string",
+      "title": "Manufacturer",
+      "examples": [
+       "Veltrane Pumps"
+      ]
+     },
+     "model": {
+      "type": "string",
+      "title": "Model",
+      "examples": [
+       "VP-450"
+      ]
+     },
+     "serial_number": {
+      "type": "string",
+      "title": "Serial Number",
+      "examples": [
+       "VP2014-40711"
+      ]
+     },
+     "rating": {
+      "type": "string",
+      "title": "Rating",
+      "description": "Nameplate rating, free text.",
+      "examples": [
+       "180 m3/h at 120 m head"
+      ]
+     },
+     "install_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Install Date"
+     },
+     "criticality": {
+      "type": "string",
+      "enum": [
+       "A",
+       "B",
+       "C"
+      ],
+      "title": "Criticality",
+      "description": "A = safety or production critical, B = important, C = everything else."
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "in_service",
+       "standby",
+       "out_of_service"
+      ],
+      "title": "Status"
+     },
+     "open_work_orders": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Open Work Orders",
+      "description": "Work orders on this tag that are released, in progress or on hold, newest first. Worked out at read time, so a new work order shows here at once.",
+      "examples": [
+       [
+        "WO-195893"
+       ]
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "tag",
+     "site",
+     "unit",
+     "equipment_type",
+     "description",
+     "manufacturer",
+     "model",
+     "serial_number",
+     "rating",
+     "install_date",
+     "criticality",
+     "status",
+     "open_work_orders"
+    ],
+    "title": "Equipment",
+    "description": "One row of the equipment master."
+   },
+   "EquipmentPage": {
+    "properties": {
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Items matching the filters, across all pages."
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "offset": {
+      "type": "integer",
+      "title": "Offset"
+     },
+     "next_offset": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Offset",
+      "description": "Pass as ?offset= for the next page; null on the last."
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/Equipment"
+      },
+      "type": "array",
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "total",
+     "limit",
+     "offset",
+     "next_offset",
+     "items"
+    ],
+    "title": "EquipmentPage"
+   },
+   "ErrorResponse": {
+    "properties": {
+     "error": {
+      "type": "string",
+      "title": "Error",
+      "description": "Short machine-readable code.",
+      "examples": [
+       "not_found",
+       "validation_failed",
+       "malformed_body",
+       "unsupported_media_type",
+       "conflict",
+       "method_not_allowed",
+       "unauthorised"
+      ]
+     },
+     "message": {
+      "type": "string",
+      "title": "Message",
+      "description": "One or two sentences a person can act on."
+     },
+     "problems": {
+      "anyOf": [
+       {
+        "items": {
+         "$ref": "#/components/schemas/Problem"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Problems",
+      "description": "validation_failed only: one entry per problem."
+     },
+     "existing_work_order_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Existing Work Order Id",
+      "description": "conflict only: the work order that already exists."
+     }
+    },
+    "type": "object",
+    "required": [
+     "error",
+     "message"
+    ],
+    "title": "ErrorResponse",
+    "description": "Every error the ERP returns has this shape."
+   },
+   "Health": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "const": "ok",
+      "title": "Status"
+     },
+     "service": {
+      "type": "string",
+      "title": "Service"
+     },
+     "version": {
+      "type": "string",
+      "title": "Version"
+     },
+     "auth": {
+      "type": "string",
+      "enum": [
+       "off",
+       "api_key"
+      ],
+      "title": "Auth",
+      "description": "off = no key needed (lab default). api_key = send X-API-Key."
+     },
+     "data_fingerprint": {
+      "type": "string",
+      "title": "Data Fingerprint",
+      "description": "sha256 (first 12 hex digits) of the three seed files loaded at startup. The same on every machine and every restart."
+     },
+     "started": {
+      "type": "string",
+      "title": "Started"
+     },
+     "counts": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "type": "object",
+      "title": "Counts"
+     },
+     "work_orders_raised_since_start": {
+      "type": "integer",
+      "title": "Work Orders Raised Since Start"
+     }
+    },
+    "type": "object",
+    "required": [
+     "status",
+     "service",
+     "version",
+     "auth",
+     "data_fingerprint",
+     "started",
+     "counts",
+     "work_orders_raised_since_start"
+    ],
+    "title": "Health"
+   },
+   "HistoryPage": {
+    "properties": {
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Items matching the filters, across all pages."
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "offset": {
+      "type": "integer",
+      "title": "Offset"
+     },
+     "next_offset": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Offset",
+      "description": "Pass as ?offset= for the next page; null on the last."
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/MaintenanceRecord"
+      },
+      "type": "array",
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "total",
+     "limit",
+     "offset",
+     "next_offset",
+     "items"
+    ],
+    "title": "HistoryPage"
+   },
+   "MaintenanceRecord": {
+    "properties": {
+     "record_id": {
+      "type": "string",
+      "title": "Record Id",
+      "examples": [
+       "MH-000224"
+      ]
+     },
+     "equipment_tag": {
+      "type": "string",
+      "title": "Equipment Tag",
+      "examples": [
+       "P-1201A"
+      ]
+     },
+     "site": {
+      "type": "string",
+      "enum": [
+       "HBT",
+       "KTF",
+       "MRB",
+       "SHZ",
+       "TMQ",
+       "WQR",
+       "ZFL"
+      ],
+      "title": "Site"
+     },
+     "work_order_id": {
+      "type": "string",
+      "title": "Work Order Id",
+      "description": "The completed work order this record closes.",
+      "examples": [
+       "WO-118305"
+      ]
+     },
+     "date": {
+      "type": "string",
+      "format": "date",
+      "title": "Date",
+      "description": "Date the work was completed."
+     },
+     "work_type": {
+      "type": "string",
+      "enum": [
+       "corrective",
+       "preventive",
+       "inspection"
+      ],
+      "title": "Work Type"
+     },
+     "failure_mode": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Failure Mode",
+      "description": "What failed. null for planned maintenance and inspections.",
+      "examples": [
+       "mechanical seal leak"
+      ]
+     },
+     "action_taken": {
+      "type": "string",
+      "title": "Action Taken"
+     },
+     "parts": {
+      "items": {
+       "$ref": "#/components/schemas/Part"
+      },
+      "type": "array",
+      "title": "Parts"
+     },
+     "downtime_hours": {
+      "type": "number",
+      "title": "Downtime Hours"
+     },
+     "performed_by": {
+      "type": "string",
+      "title": "Performed By",
+      "examples": [
+       "MRB rotating equipment crew"
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "record_id",
+     "equipment_tag",
+     "site",
+     "work_order_id",
+     "date",
+     "work_type",
+     "failure_mode",
+     "action_taken",
+     "parts",
+     "downtime_hours",
+     "performed_by"
+    ],
+    "title": "MaintenanceRecord",
+    "description": "What was found and what was done: one record per completed work order."
+   },
+   "Part": {
+    "properties": {
+     "part_number": {
+      "type": "string",
+      "title": "Part Number",
+      "examples": [
+       "30-2201-01"
+      ]
+     },
+     "description": {
+      "type": "string",
+      "title": "Description",
+      "examples": [
+       "Mechanical seal cartridge"
+      ]
+     },
+     "quantity": {
+      "type": "integer",
+      "title": "Quantity",
+      "examples": [
+       1
+      ]
+     }
+    },
+    "type": "object",
+    "required": [
+     "part_number",
+     "description",
+     "quantity"
+    ],
+    "title": "Part"
+   },
+   "Problem": {
+    "properties": {
+     "where": {
+      "type": "string",
+      "title": "Where",
+      "description": "body.priority, query.site, path.tag ...",
+      "examples": [
+       "body.priority"
+      ]
+     },
+     "problem": {
+      "type": "string",
+      "title": "Problem",
+      "examples": [
+       "must be one of 1, 2, 3, 4"
+      ]
+     },
+     "got": {
+      "anyOf": [
+       {},
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Got",
+      "description": "The value that was sent, if any."
+     }
+    },
+    "type": "object",
+    "required": [
+     "where",
+     "problem"
+    ],
+    "title": "Problem"
+   },
+   "WorkOrder": {
+    "properties": {
+     "work_order_id": {
+      "type": "string",
+      "title": "Work Order Id",
+      "examples": [
+       "WO-118305"
+      ]
+     },
+     "equipment_tag": {
+      "type": "string",
+      "title": "Equipment Tag",
+      "examples": [
+       "P-1201A"
+      ]
+     },
+     "site": {
+      "type": "string",
+      "enum": [
+       "HBT",
+       "KTF",
+       "MRB",
+       "SHZ",
+       "TMQ",
+       "WQR",
+       "ZFL"
+      ],
+      "title": "Site",
+      "description": "Taken from the equipment master, never from the caller."
+     },
+     "work_type": {
+      "type": "string",
+      "enum": [
+       "corrective",
+       "preventive",
+       "inspection"
+      ],
+      "title": "Work Type"
+     },
+     "priority": {
+      "type": "integer",
+      "enum": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "title": "Priority",
+      "description": "1 emergency (crew called out now), 2 urgent (2 days), 3 normal (7 days), 4 planned (next window, 28 days)."
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "released",
+       "in_progress",
+       "on_hold",
+       "completed",
+       "cancelled"
+      ],
+      "title": "Status"
+     },
+     "title": {
+      "type": "string",
+      "title": "Title"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description"
+     },
+     "requested_by": {
+      "type": "string",
+      "title": "Requested By"
+     },
+     "approved_by": {
+      "type": "string",
+      "title": "Approved By",
+      "description": "The person who approved raising it."
+     },
+     "source_ticket": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Ticket",
+      "description": "The service desk ticket it came from, if any.",
+      "examples": [
+       "INC-004412"
+      ]
+     },
+     "raised_via": {
+      "type": "string",
+      "enum": [
+       "erp_screen",
+       "api"
+      ],
+      "title": "Raised Via",
+      "description": "erp_screen = raised by a planner in the ERP itself (all seed data); api = raised through POST /work-orders."
+     },
+     "created": {
+      "type": "string",
+      "title": "Created",
+      "description": "ISO 8601 with the Gulf offset.",
+      "examples": [
+       "2026-09-22T10:41:07+04:00"
+      ]
+     },
+     "target_date": {
+      "type": "string",
+      "format": "date",
+      "title": "Target Date",
+      "description": "created + 0 / 2 / 7 / 28 days for priority 1 / 2 / 3 / 4."
+     },
+     "completed_date": {
+      "anyOf": [
+       {
+        "type": "string",
+        "format": "date"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Completed Date"
+     }
+    },
+    "type": "object",
+    "required": [
+     "work_order_id",
+     "equipment_tag",
+     "site",
+     "work_type",
+     "priority",
+     "status",
+     "title",
+     "description",
+     "requested_by",
+     "approved_by",
+     "source_ticket",
+     "raised_via",
+     "created",
+     "target_date",
+     "completed_date"
+    ],
+    "title": "WorkOrder",
+    "description": "A work order: a request for a crew to do work on one piece of equipment."
+   },
+   "WorkOrderCreate": {
+    "properties": {
+     "equipment_tag": {
+      "type": "string",
+      "pattern": "^[A-Z]{1,3}-[0-9]{4}[A-Z]?$",
+      "title": "Equipment Tag",
+      "description": "Must be a tag in the equipment master (GET /equipment/{tag})."
+     },
+     "work_type": {
+      "type": "string",
+      "enum": [
+       "corrective",
+       "preventive",
+       "inspection"
+      ],
+      "title": "Work Type"
+     },
+     "priority": {
+      "type": "integer",
+      "enum": [
+       1,
+       2,
+       3,
+       4
+      ],
+      "title": "Priority",
+      "description": "1 emergency: the site crew is called out NOW. 2 urgent: within 2 days. 3 normal: within 7 days. 4 planned: next maintenance window."
+     },
+     "title": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 5,
+      "title": "Title"
+     },
+     "description": {
+      "type": "string",
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Description"
+     },
+     "requested_by": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Requested By",
+      "description": "Who asked for the work."
+     },
+     "approved_by": {
+      "type": "string",
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Approved By",
+      "description": "The PERSON who approved raising this work order. Required. The ERP records it; it cannot check it. The check happens before this call: the agent's approval interrupt and the MCP server's gate."
+     },
+     "source_ticket": {
+      "anyOf": [
+       {
+        "type": "string",
+        "pattern": "^INC-[0-9]{6}$"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source Ticket",
+      "description": "Service desk ticket this came from. One work order per ticket: a second POST with the same ticket gets 409 Conflict."
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "required": [
+     "equipment_tag",
+     "work_type",
+     "priority",
+     "title",
+     "description",
+     "requested_by",
+     "approved_by"
+    ],
+    "title": "WorkOrderCreate",
+    "description": "The body of POST /work-orders. Unknown fields are refused, so a typo\nsuch as `prority` is an error, not a silently ignored field.",
+    "examples": [
+     {
+      "approved_by": "Salim (maintenance planner, MRB)",
+      "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal replaced under WO-118305 in May 2026. Inspect seal and bearings.",
+      "equipment_tag": "P-1201A",
+      "priority": 2,
+      "requested_by": "Control room operator, MRB",
+      "source_ticket": "INC-004412",
+      "title": "P-1201A abnormal noise, suspect seal",
+      "work_type": "corrective"
+     }
+    ]
+   },
+   "WorkOrderPage": {
+    "properties": {
+     "total": {
+      "type": "integer",
+      "title": "Total",
+      "description": "Items matching the filters, across all pages."
+     },
+     "limit": {
+      "type": "integer",
+      "title": "Limit"
+     },
+     "offset": {
+      "type": "integer",
+      "title": "Offset"
+     },
+     "next_offset": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Next Offset",
+      "description": "Pass as ?offset= for the next page; null on the last."
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/WorkOrder"
+      },
+      "type": "array",
+      "title": "Items"
+     }
+    },
+    "type": "object",
+    "required": [
+     "total",
+     "limit",
+     "offset",
+     "next_offset",
+     "items"
+    ],
+    "title": "WorkOrderPage"
+   }
+  },
+  "securitySchemes": {
+   "APIKeyHeader": {
+    "type": "apiKey",
+    "description": "Only when the server was started with MOCK_ERP_API_KEY set.",
+    "in": "header",
+    "name": "X-API-Key"
+   }
+  }
+ },
+ "tags": [
+  {
+   "name": "Equipment master",
+   "description": "What is installed where. Read only."
+  },
+  {
+   "name": "Maintenance history",
+   "description": "Completed work: what failed, what was done. Read only."
+  },
+  {
+   "name": "Work orders",
+   "description": "Requests for work. Read, plus the ONE write."
+  },
+  {
+   "name": "Service",
+   "description": "Is it up, and with which data."
+  }
+ ]
+}

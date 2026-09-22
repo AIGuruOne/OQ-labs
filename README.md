@@ -35,7 +35,11 @@ python setup/setup_check.py
 
 `setup_check.py` prints a pass/fail table. Every row should be PASS or
 an explained WARN before Day 1. It needs no packages installed — you
-can run it before step 3 to check your machine.
+can run it before step 3 to check your machine. On the OQ network, also
+run `python setup/setup_check.py --network` and send the result to the
+facilitator: it says which of the hosts the week needs (Colab, Google
+sign-in, Drive, GitHub, PyPI, the model API, Ollama, Hugging Face) this
+network can reach, so a block is found before Sunday, not during it.
 
 **Day 2 on a laptop** also needs Ollama (a model server, not a Python
 package) and one pulled model. Install it and run
@@ -75,10 +79,13 @@ sidebar, add a secret named exactly `OPENAI_API_KEY`, switch on
 
 ```bash
 python setup/setup_check.py                                  # environment check
+python setup/setup_check.py --network                        # + can this network reach every host the week needs
 python scripts/run_eval.py --dataset <path> --endpoint <name>  # eval
 python scripts/build_dataset.py --seed 42                      # rebuild train/val/heldout
 python scripts/quality_checks.py --dataset data/finetune       # data quality (folder, or file + --val)
-uvicorn services.mock_erp.main:app --reload                    # mock ERP
+python scripts/concurrency_test.py --endpoint local            # load test: latency and throughput as callers rise
+uvicorn services.mock_erp.main:app --reload                    # mock ERP (Windows: drop --reload)
+python -m services.mock_erp.tour                               # hit every mock ERP endpoint
 ```
 
 Read `BUILD_SPEC.md` before changing anything, and `CLAUDE.md` if you

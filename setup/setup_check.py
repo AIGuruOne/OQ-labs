@@ -3,6 +3,8 @@
 Run it from the repo root:
 
     python setup/setup_check.py
+    python setup/setup_check.py --network   # also: can this network reach
+                                            # every host the week needs?
 
 It prints a pass/fail table and exits non-zero if anything needs
 fixing. Every row tells you what to do about a failure. Send the
@@ -20,6 +22,7 @@ Statuses:
     INFO  - reported for the facilitator, never a failure
 """
 
+import argparse
 import json
 import os
 import shutil
@@ -84,7 +87,17 @@ def check_python_version():
     version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     if (3, 10) <= sys.version_info[:2] <= (3, 12):
         return "PASS", f"Python {version}"
-    if sys.version_info[:2] > (3, 12):
+    if sys.version_info[:2] >= (3, 14):
+        # Measured 2026-09-22: numpy==2.1.3 (Colab's version, pinned in
+        # requirements.txt) has no wheel for 3.14, so pip tries to compile
+        # it and stops with "Unknown compiler(s)" on a normal laptop.
+        return "FAIL", (
+            f"Python {version}: requirements.txt will NOT install on it "
+            "(numpy 2.1.3 has no build for this version, so pip tries to "
+            "compile it and fails). Install Python 3.12 or 3.11 and make "
+            "the venv with that one. docs/failure_playbook.md entry 8."
+        )
+    if sys.version_info[:2] == (3, 13):
         return "WARN", (
             f"Python {version} — labs are tested on 3.10-3.12; the Day 2 "
             "fine-tuning packages may not install on this version. "
@@ -234,6 +247,51 @@ def check_gpu():
 
 
 # ---------------------------------------------------------------------------
+# --network: can THIS network reach every host the week needs?
+# ---------------------------------------------------------------------------
+
+# One row per host: (url, the HTTP status it answers with on an open network,
+# what stops working without it). The statuses were measured 2026-09-22.
+# A corporate proxy that blocks a host usually answers with its own page
+# (403, 407, or a 200/302 to a "blocked" page) or not at all - both show here
+# as FAIL. Python's view is not the browser's: a proxy can treat them
+# differently, so the Colab rows are a first signal, and the browser test in
+# docs/failure_playbook.md Part 2 is the real one.
+NETWORK_HOSTS = [
+    ("https://colab.research.google.com/", 200, "Colab itself - every lab in the browser"),
+    ("https://accounts.google.com/ServiceLogin", 200, "Google sign-in - Colab and Drive"),
+    ("https://drive.google.com/", 200, "Drive - checkpoints that survive a disconnect"),
+    ("https://www.gstatic.com/generate_204", 204, "Google static files - the Colab page"),
+    ("https://github.com/Utkarsh-09/AI_GURU_labs", 200, "the lab repo - Open in Colab links, git clone"),
+    ("https://pypi.org/simple/requests/", 200, "pip index - installs on a laptop"),
+    ("https://files.pythonhosted.org/packages/7c/e4/56027c4a6b4ae70ca9de302488c5ca95ad4a39e190093d6c1a8ace08341b/requests-2.32.4-py3-none-any.whl",
+     200, "pip downloads - installs on a laptop"),
+    ("https://api.openai.com/v1/models", 401, "hosted model API (401 = reachable, no key sent)"),
+    ("https://ollama.com/", 200, "Ollama download - installing it on a laptop"),
+    ("https://registry.ollama.ai/v2/library/llama3.2/manifests/1b", 200, "Ollama model pulls on a laptop"),
+    ("https://huggingface.co/api/models/unsloth/Llama-3.2-1B-Instruct", 200, "model download for fine-tuning"),
+]
+
+
+def check_host(url, expected_status):
+    status, body = http_get(url)
+    if status == expected_status:
+        return "PASS", f"HTTP {status}"
+    if status is None:
+        return "FAIL", f"no answer: {body[:90]}"
+    return "FAIL", f"HTTP {status}, expected {expected_status} - blocked, or a proxy's own page"
+
+
+def network_rows():
+    rows = []
+    for url, expected_status, needed_for in NETWORK_HOSTS:
+        host = url.split("/")[2]
+        status, detail = check_host(url, expected_status)
+        rows.append((host, status, f"{detail}. Needed for: {needed_for}"))
+    return rows
+
+
+# ---------------------------------------------------------------------------
 # Run everything and print the table
 # ---------------------------------------------------------------------------
 
@@ -249,7 +307,13 @@ CHECKS = [
 ]
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="Environment check for the OQ labs.")
+    parser.add_argument("--network", action="store_true",
+                        help="also test whether this network reaches every host the week needs "
+                             "(run it on the OQ network before Day 1)")
+    args = parser.parse_args(argv)
+
     load_dotenv()
 
     where = "Colab" if in_colab() else "local machine"
@@ -264,8 +328,12 @@ def main() -> int:
             status, detail = "FAIL", f"Check crashed: {type(err).__name__}: {err}"
         rows.append((label, status, detail))
 
+    if args.network:
+        rows.extend(network_rows())
+
+    width = max(len(label) for label, _, _ in rows)
     for label, status, detail in rows:
-        print(f"{label:<22} [{status:^4}] {detail}")
+        print(f"{label:<{width}} [{status:^4}] {detail}")
 
     failures = [label for label, status, _ in rows if status == "FAIL"]
     warnings = [label for label, status, _ in rows if status == "WARN"]

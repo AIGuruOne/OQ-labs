@@ -1,0 +1,106 @@
+{
+  "run_id": "03_load_llama3.2_1b_1-2-4-8-16",
+  "label": "local (llama3.2:1b)",
+  "base_url": "http://localhost:11437/v1",
+  "model": "llama3.2:1b",
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 16,
+      "ok": 16,
+      "failed": 0,
+      "p50_seconds": 3.0,
+      "p95_seconds": 3.19,
+      "max_seconds": 3.42,
+      "wall_seconds": 48.22,
+      "requests_per_second": 0.33,
+      "reply_tokens": 916,
+      "reply_tokens_per_second": 19.0,
+      "errors": {}
+    },
+    {
+      "concurrency": 2,
+      "requests": 16,
+      "ok": 16,
+      "failed": 0,
+      "p50_seconds": 2.95,
+      "p95_seconds": 3.33,
+      "max_seconds": 3.71,
+      "wall_seconds": 24.59,
+      "requests_per_second": 0.65,
+      "reply_tokens": 916,
+      "reply_tokens_per_second": 37.3,
+      "errors": {}
+    },
+    {
+      "concurrency": 4,
+      "requests": 16,
+      "ok": 16,
+      "failed": 0,
+      "p50_seconds": 3.32,
+      "p95_seconds": 4.54,
+      "max_seconds": 5.15,
+      "wall_seconds": 15.3,
+      "requests_per_second": 1.05,
+      "reply_tokens": 916,
+      "reply_tokens_per_second": 59.9,
+      "errors": {}
+    },
+    {
+      "concurrency": 8,
+      "requests": 16,
+      "ok": 16,
+      "failed": 0,
+      "p50_seconds": 6.77,
+      "p95_seconds": 7.8,
+      "max_seconds": 8.46,
+      "wall_seconds": 15.53,
+      "requests_per_second": 1.03,
+      "reply_tokens": 916,
+      "reply_tokens_per_second": 59.0,
+      "errors": {}
+    },
+    {
+      "concurrency": 16,
+      "requests": 16,
+      "ok": 16,
+      "failed": 0,
+      "p50_seconds": 8.41,
+      "p95_seconds": 14.01,
+      "max_seconds": 15.02,
+      "wall_seconds": 15.03,
+      "requests_per_second": 1.06,
+      "reply_tokens": 916,
+      "reply_tokens_per_second": 60.9,
+      "errors": {}
+    }
+  ],
+  "settings": {
+    "levels": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "requests_per_level": 16,
+    "max_tokens": 64,
+    "timeout_seconds": 60.0,
+    "dataset": "C:\\Users\\utkar\\oq-advanced-ai\\data\\eval\\heldout_20.jsonl",
+    "prompts": 20
+  },
+  "preflight": {
+    "seconds": 3.176,
+    "ok": true,
+    "status": 200,
+    "reply_tokens": 64,
+    "error": null
+  },
+  "machine": {
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.15",
+    "OLLAMA_NUM_PARALLEL": null
+  },
+  "note": "local; no NVIDIA GPU; parallel slots 1",
+  "measured_at": "2026-09-22T22:54:44"
+}

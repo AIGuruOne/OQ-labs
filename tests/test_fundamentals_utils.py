@@ -216,3 +216,21 @@ def test_ensure_api_key_reports_a_missing_key_locally(monkeypatch, capsys, tmp_p
     assert utils.ensure_api_key(in_colab=False) is False
     out = capsys.readouterr().out
     assert "NOT SET" in out and ".env.example" in out
+
+
+def test_ensure_api_key_sees_a_env_file_fixed_after_the_kernel_started(
+    monkeypatch, capsys, tmp_path
+):
+    """The NOT SET message says "re-run this cell". That must be true: a
+    participant who creates .env mid-session must not need a kernel
+    restart (reproduced as a bug 2026-09-22, failure playbook entry 4)."""
+    import config.endpoints as endpoints
+
+    monkeypatch.setattr(endpoints, "REPO_ROOT", tmp_path)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert utils.ensure_api_key(in_colab=False) is False
+
+    (tmp_path / ".env").write_text("OPENAI_API_KEY=sk-test-fixed-later\n", encoding="utf-8")
+    assert utils.ensure_api_key(in_colab=False) is True
+    out = capsys.readouterr().out
+    assert "found in .env" in out and "sk-test" not in out

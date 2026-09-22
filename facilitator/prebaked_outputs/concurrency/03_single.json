@@ -1,0 +1,13 @@
+{
+  "reply": "{\n  \"category\": \"access\",\n  \"affected_system\": null,\n  \"asset_tag\": null,\n  \"urgency\": \"medium\",\n  \"impact\": \"single_user\",\n  \"requested_action\": \"Activate mic in TEAMS and reset password for Claimpoint\",\n  \"routing_queue\": \"identity_access",
+  "done_reason": "length",
+  "prompt_tokens": 349,
+  "reply_tokens": 64,
+  "load_seconds": 0.17,
+  "prompt_seconds": 0.69,
+  "generate_seconds": 0.64,
+  "total_seconds": 1.56,
+  "tokens_per_second": 100.0,
+  "model": "llama3.2:1b",
+  "measured_on": "local, no NVIDIA GPU"
+}

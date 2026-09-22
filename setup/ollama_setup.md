@@ -102,7 +102,7 @@ ollama version is 0.12.10          <- yours will be newer; that is fine
 Notes seen on the build machine (Windows 11, app 0.12.10):
 - The app has a **context length setting**. At its maximum (262144)
   even a 2 GB model asks for 15.9 GiB of memory and fails to load
-  (`docs/failure_playbook.md` entry 2). Set it to 4096 for the labs,
+  (`docs/failure_playbook.md` E2). Set it to 4096 for the labs,
   or leave the app alone and run a second server on another port
   (section 6, "port already in use").
 - `ollama serve` in a terminal while the app is running fails with
@@ -176,12 +176,16 @@ llama3.2:1b    baf6a787fdff    1.3 GB    Less than a second ago
   forty-five. Pull during the Day 1 tech check, not in the S7 slot.
   A pull that prints nothing for a minute is a network problem, not a
   slow one.
-- **Offline backup (untested during the build):** models are plain
-  files. Copying a machine's `~/.ollama/models` folder (both `blobs/`
-  and `manifests/`) into the same place on another machine of any OS
-  should make `ollama list` show the model without a download; the
-  store is the same layout on every platform. Test this on two laptops
-  before relying on it in the room.
+- **Offline backup (tested on Windows 2026-09-22, not yet on a Mac):**
+  models are plain files. Copy the model's manifest
+  (`manifests/registry.ollama.ai/library/llama3.2/1b`) and the blobs it
+  lists (or the whole `~/.ollama/models` folder, both `blobs/` and
+  `manifests/`) into the other machine's store with Ollama QUIT, then
+  start it. Measured: 6 files, 1.3 GB. A server started on a store
+  holding only that copy listed `llama3.2:1b` with the same ID and
+  answered in 6.9 s, with no download. The store has the same layout
+  on every OS, but the copy between two different OSes is untested.
+  `docs/failure_playbook.md` entry 2 has the room version.
 
 ---
 
@@ -262,7 +266,7 @@ Not the model: the **context length**. The desktop app's setting, or
 what does not fit. Set it to 4096 (the ticket prompts are under 1,000
 tokens) - in the app's settings, or by running a second server as
 above. Seen 2026-09-20 on the build machine; `docs/failure_playbook.md`
-entry 2.
+E2.
 
 ### `NOTE: this server is Ollama 0.34.2; the labs are built and measured on 0.12.10`
 Printed by the notebook when your laptop's Ollama is not the pinned
@@ -278,7 +282,7 @@ version and notes it could not ask a server for its own. Not a fault.
 Venue Wi-Fi. A pull is resumable: Ctrl-C and run it again later, it
 continues. Options in order: wait for it (progress prints every 10%
 in the notebook); pull on a phone hotspot; copy the model folder from a
-laptop that has it (section 4, untested); on Colab, nothing to do - its
+laptop that has it (section 4; tested on Windows 2026-09-22); on Colab, nothing to do - its
 network pulls the model in about 30 s.
 
 ### Colab: `NVIDIA GPU: none found` and every reply takes many seconds
@@ -296,7 +300,7 @@ ladder. There is no pip package to fall back to - Ollama is a binary.
 Not a fault. A small model has many near-tied token choices and the
 server's state between requests tips them; measured across sittings
 and machines, 9 to 12 of 20 `llama3.2:1b` replies changed
-(`docs/failure_playbook.md` entry 10). Notebook 02's TODO 1 shows it
+(`docs/failure_playbook.md` E10). Notebook 02's TODO 1 shows it
 live. Deterministic-by-setting is not deterministic.
 
 ### Where the logs are
@@ -327,6 +331,7 @@ Colab, *Runtime > Disconnect and delete runtime* removes everything.
 | `OLLAMA_CONTEXT_LENGTH` | `ollama serve` | context window every model is served with | `4096` (the helper sets it when it starts a server) |
 | `OLLAMA_MODELS` | `ollama serve` | where model files live | default per OS, section 3 |
 | `OLLAMA_KEEP_ALIVE` | `ollama serve` | how long a model stays in memory after a request (`5m` default; `-1` forever; `0` unload at once) | default |
+| `OLLAMA_NUM_PARALLEL` | `ollama serve` | how many requests one loaded model processes at the same time. **0.12.10 defaults to 1** (`envconfig/config.go`; the FAQ's "auto-selects 4 or 1" text is older than the code). The server logs the value it used as `Parallel:N` in its model-load line; `/api/ps` does not report it. Notebook 03 measures what it does: with 4, the knee moved from 1-2 callers to 8 on the build machine and the ceiling rose 3.6x; memory per model grows with it (KV cache x N) | default (1); a server the helpers start inherits your shell's value |
 
 ---
 

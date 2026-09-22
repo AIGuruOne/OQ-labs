@@ -24,6 +24,13 @@ the cost model (S4) → specs swapped and reviewed (S5) → groups
 confirmed (close). The spec is revised that evening (v0.2) and again
 on Day 2 with the S12 eval numbers (v0.3).
 
+## Day 2 sizing worksheet (P9)
+
+| File | Session | Minutes | What it is |
+|---|---|---|---|
+| `sizing_worksheet.md` | S8, 09:35, the talk half after notebook 03 | 10 | From expected request volume and a latency target to a server count: five sections (what one server does, what the work is, the arithmetic, six sanity checks, the levers in cost order) and a worked example filled with the build laptop's measured numbers for brief 1. Paper only; the three inputs come off notebook 03's final cell |
+| `prebaked_outputs/concurrency/` | S8 insurance | — | The retained run's load-test summary, the per-request rows, the single-request timing and the capacity read-off, plus two contrast runs (`OLLAMA_NUM_PARALLEL=4`, and the vendor API). Its README says which is which |
+
 ## Day 5 governance pack (P14)
 
 `governance_pack/` — eight fillable templates for S29 (12:45, 30
@@ -57,6 +64,12 @@ verified; nothing is cited from memory.
 `prebaked_outputs/eval/` — real `run_eval.py` runs on the held-out 20
 for every model the week compares, and the notebook 06 output. Its
 README says which is which and how to show a table without a model.
+
+`prebaked_outputs/mock_erp/` — the mock ERP (Day 4 agent labs, Day 5
+S26) walked end to end: every endpoint, the one write and its
+read-back, every error path, as real request/reply pairs from a live
+server. If the ERP will not start in the room, show this; if it does
+start, `python -m services.mock_erp.tour` prints the same thing live.
 
 ## Keeping the cost model honest
 

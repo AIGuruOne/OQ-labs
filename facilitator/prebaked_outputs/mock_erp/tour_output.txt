@@ -1,0 +1,484 @@
+====================================================================================================
+ 1. Is it up, and with which data?
+>>> GET /health
+<<< 200 OK   [ok]
+    {
+     "status": "ok",
+     "service": "mock-erp",
+     "version": "1.0.0",
+     "auth": "off",
+     "data_fingerprint": "84e0cc199798",
+     "started": "2026-09-22T22:40:10+04:00",
+     "counts": {
+      "equipment": 86,
+      "work_orders": 295,
+      "maintenance_history": 258
+     },
+     "work_orders_raised_since_start": 0
+    }
+====================================================================================================
+ 2. List equipment: pumps at MRB, 2 per page
+>>> GET /equipment?site=MRB&equipment_type=pump&limit=2
+<<< 200 OK   [ok]
+    {
+     "total": 3,
+     "limit": 2,
+     "offset": 0,
+     "next_offset": 2,
+     "items": [
+      {
+       "tag": "P-1201A",
+       "site": "MRB",
+       "unit": "12",
+       "equipment_type": "pump",
+       "description": "Crude transfer pump",
+       "manufacturer": "Kalvik Fluidworks",
+       "model": "KF-410",
+    ... (24 more lines)
+====================================================================================================
+ 3. Next page (offset = the next_offset from the reply above)
+>>> GET /equipment?site=MRB&equipment_type=pump&limit=2&offset=2
+<<< 200 OK   [ok]
+    {
+     "total": 3,
+     "limit": 2,
+     "offset": 2,
+     "next_offset": null,
+     "items": [
+      {
+       "tag": "P-1999",
+       "site": "MRB",
+       "unit": "19",
+       "equipment_type": "pump",
+       "description": "Produced water injection pump",
+       "manufacturer": "Veltrane Pumps",
+       "model": "VP-850",
+    ... (9 more lines)
+====================================================================================================
+ 4. Get one piece of equipment (any case works)
+>>> GET /equipment/p-1201a
+<<< 200 OK   [ok]
+    {
+     "tag": "P-1201A",
+     "site": "MRB",
+     "unit": "12",
+     "equipment_type": "pump",
+     "description": "Crude transfer pump",
+     "manufacturer": "Kalvik Fluidworks",
+     "model": "KF-410",
+     "serial_number": "KF2008-39256",
+     "rating": "91 m3/h at 92 m head",
+     "install_date": "2008-12-09",
+     "criticality": "A",
+     "status": "in_service",
+     "open_work_orders": []
+    ... (1 more lines)
+====================================================================================================
+ 5. What has been done to P-1201A before? Newest first
+>>> GET /maintenance-history?equipment_tag=P-1201A
+<<< 200 OK   [ok]
+    {
+     "total": 3,
+     "limit": 20,
+     "offset": 0,
+     "next_offset": null,
+     "items": [
+      {
+       "record_id": "MH-000224",
+       "equipment_tag": "P-1201A",
+       "site": "MRB",
+       "work_order_id": "WO-118305",
+       "date": "2026-05-18",
+       "work_type": "corrective",
+       "failure_mode": "mechanical seal leak",
+    ... (32 more lines)
+====================================================================================================
+ 6. Seal failures anywhere since 2026-01-01
+>>> GET /maintenance-history?failure_mode=seal&since=2026-01-01&limit=3
+<<< 200 OK   [ok]
+    {
+     "total": 1,
+     "limit": 3,
+     "offset": 0,
+     "next_offset": null,
+     "items": [
+      {
+       "record_id": "MH-000224",
+       "equipment_tag": "P-1201A",
+       "site": "MRB",
+       "work_order_id": "WO-118305",
+       "date": "2026-05-18",
+       "work_type": "corrective",
+       "failure_mode": "mechanical seal leak",
+    ... (18 more lines)
+====================================================================================================
+ 7. Get one maintenance record
+>>> GET /maintenance-history/MH-000224
+<<< 200 OK   [ok]
+    {
+     "record_id": "MH-000224",
+     "equipment_tag": "P-1201A",
+     "site": "MRB",
+     "work_order_id": "WO-118305",
+     "date": "2026-05-18",
+     "work_type": "corrective",
+     "failure_mode": "mechanical seal leak",
+     "action_taken": "Replaced mechanical seal cartridge, flushed seal plan, checked alignment. S...
+     "parts": [
+      {
+       "part_number": "30-2201-01",
+       "description": "Mechanical seal cartridge",
+       "quantity": 1
+    ... (10 more lines)
+====================================================================================================
+ 8. List work orders in progress, priority 2
+>>> GET /work-orders?status=in_progress&priority=2&limit=2
+<<< 200 OK   [ok]
+    {
+     "total": 3,
+     "limit": 2,
+     "offset": 0,
+     "next_offset": 2,
+     "items": [
+      {
+       "work_order_id": "WO-119395",
+       "equipment_tag": "C-2557",
+       "site": "KTF",
+       "work_type": "corrective",
+       "priority": 2,
+       "status": "in_progress",
+       "title": "C-2557 tray damage suspected",
+    ... (28 more lines)
+====================================================================================================
+ 9. Get one work order: the May seal job
+>>> GET /work-orders/WO-118305
+<<< 200 OK   [ok]
+    {
+     "work_order_id": "WO-118305",
+     "equipment_tag": "P-1201A",
+     "site": "MRB",
+     "work_type": "corrective",
+     "priority": 2,
+     "status": "completed",
+     "title": "P-1201A mechanical seal leak",
+     "description": "Crude transfer pump P-1201A at MRB: mechanical seal leak reported by operati...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Maintenance planner, MRB",
+     "source_ticket": null,
+     "raised_via": "erp_screen",
+     "created": "2026-05-14T09:52:00+04:00",
+    ... (3 more lines)
+====================================================================================================
+10. Does INC-009001 already have a work order? (check before writing)
+>>> GET /work-orders?source_ticket=INC-009001
+<<< 200 OK   [ok]
+    {
+     "total": 0,
+     "limit": 20,
+     "offset": 0,
+     "next_offset": null,
+     "items": []
+    }
+====================================================================================================
+11. THE ONE WRITE: raise a work order, released to the site crew
+>>> POST /work-orders
+    {
+     "equipment_tag": "P-1201A",
+     "work_type": "corrective",
+     "priority": 2,
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Salim (maintenance planner, MRB)",
+     "source_ticket": "INC-009001"
+    }
+<<< 201 Created   [ok]
+    Location: /work-orders/WO-195893
+    {
+     "work_order_id": "WO-195893",
+     "equipment_tag": "P-1201A",
+     "site": "MRB",
+     "work_type": "corrective",
+     "priority": 2,
+     "status": "released",
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Salim (maintenance planner, MRB)",
+     "source_ticket": "INC-009001",
+     "raised_via": "api",
+     "created": "2026-09-22T22:40:11+04:00",
+    ... (3 more lines)
+====================================================================================================
+12. Read it back by id
+>>> GET /work-orders/WO-195893
+<<< 200 OK   [ok]
+    {
+     "work_order_id": "WO-195893",
+     "equipment_tag": "P-1201A",
+     "site": "MRB",
+     "work_type": "corrective",
+     "priority": 2,
+     "status": "released",
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Salim (maintenance planner, MRB)",
+     "source_ticket": "INC-009001",
+     "raised_via": "api",
+     "created": "2026-09-22T22:40:11+04:00",
+    ... (3 more lines)
+====================================================================================================
+13. Read it back by ticket
+>>> GET /work-orders?source_ticket=INC-009001
+<<< 200 OK   [ok]
+    {
+     "total": 1,
+     "limit": 20,
+     "offset": 0,
+     "next_offset": null,
+     "items": [
+      {
+       "work_order_id": "WO-195893",
+       "equipment_tag": "P-1201A",
+       "site": "MRB",
+       "work_type": "corrective",
+       "priority": 2,
+       "status": "released",
+       "title": "P-1201A abnormal noise, suspect seal",
+    ... (11 more lines)
+====================================================================================================
+14. The equipment now lists it as open work
+>>> GET /equipment/P-1201A
+<<< 200 OK   [ok]
+    {
+     "tag": "P-1201A",
+     "site": "MRB",
+     "unit": "12",
+     "equipment_type": "pump",
+     "description": "Crude transfer pump",
+     "manufacturer": "Kalvik Fluidworks",
+     "model": "KF-410",
+     "serial_number": "KF2008-39256",
+     "rating": "91 m3/h at 92 m head",
+     "install_date": "2008-12-09",
+     "criticality": "A",
+     "status": "in_service",
+     "open_work_orders": [
+    ... (3 more lines)
+====================================================================================================
+15. Health counts the write
+>>> GET /health
+<<< 200 OK   [ok]
+    {
+     "status": "ok",
+     "service": "mock-erp",
+     "version": "1.0.0",
+     "auth": "off",
+     "data_fingerprint": "84e0cc199798",
+     "started": "2026-09-22T22:40:10+04:00",
+     "counts": {
+      "equipment": 86,
+      "work_orders": 296,
+      "maintenance_history": 258
+     },
+     "work_orders_raised_since_start": 1
+    }
+====================================================================================================
+16. Send the same write again (a retry after a timeout): refused
+>>> POST /work-orders
+    {
+     "equipment_tag": "P-1201A",
+     "work_type": "corrective",
+     "priority": 2,
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Salim (maintenance planner, MRB)",
+     "source_ticket": "INC-009001"
+    }
+<<< 409 Conflict   [ok]
+    {
+     "error": "conflict",
+     "message": "Ticket INC-009001 already has work order WO-195893 (status released). One work o...
+     "existing_work_order_id": "WO-195893"
+    }
+====================================================================================================
+17. 404: a well-formed tag that does not exist
+>>> GET /equipment/P-9999
+<<< 404 Not Found   [ok]
+    {
+     "error": "not_found",
+     "message": "No equipment with tag P-9999. Find tags with GET /equipment?site=MRB (sites: HBT...
+    }
+====================================================================================================
+18. 404: no such work order
+>>> GET /work-orders/WO-999999
+<<< 404 Not Found   [ok]
+    {
+     "error": "not_found",
+     "message": "No work order WO-999999. Search with GET /work-orders?equipment_tag=P-1201A."
+    }
+====================================================================================================
+19. 404: no such endpoint
+>>> GET /equipmnt
+<<< 404 Not Found   [ok]
+    {
+     "error": "not_found",
+     "message": "No such endpoint: GET /equipmnt. The list is at /docs."
+    }
+====================================================================================================
+20. 422: not a tag at all
+>>> GET /equipment/pump-one
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 1 problem. Nothing was changed.",
+     "problems": [
+      {
+       "where": "path.tag",
+       "problem": "must look like P-1201A or HX-3040",
+       "got": "PUMP-ONE"
+      }
+     ]
+    }
+====================================================================================================
+21. 422: a typo in a filter name is refused, not ignored
+>>> GET /work-orders?stauts=released
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 1 problem. Nothing was changed.",
+     "problems": [
+      {
+       "where": "query.stauts",
+       "problem": "is not a field this endpoint accepts (check the spelling; /docs lists the fiel...
+       "got": "released"
+      }
+     ]
+    }
+====================================================================================================
+22. 422: limit out of range
+>>> GET /equipment?limit=500
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 1 problem. Nothing was changed.",
+     "problems": [
+      {
+       "where": "query.limit",
+       "problem": "input should be less than or equal to 100",
+       "got": "500"
+      }
+     ]
+    }
+====================================================================================================
+23. 422: since after until
+>>> GET /maintenance-history?since=2026-06-01&until=2026-01-01
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 1 problem. Nothing was changed.",
+     "problems": [
+      {
+       "where": "query",
+       "problem": "since (2026-06-01) is after until (2026-01-01)"
+      }
+     ]
+    }
+====================================================================================================
+24. 422: four problems in one body, all listed
+>>> POST /work-orders
+    {
+     "equipment_tag": "pump 1201",
+     "work_type": "corrective",
+     "priority": 7,
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "source_ticket": null,
+     "prority": 1
+    }
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 4 problems. Nothing was changed.",
+     "problems": [
+      {
+       "where": "body.equipment_tag",
+       "problem": "must look like P-1201A or HX-3040",
+       "got": "PUMP 1201"
+      },
+      {
+       "where": "body.priority",
+       "problem": "input should be 1, 2, 3 or 4",
+       "got": 7
+      },
+    ... (11 more lines)
+====================================================================================================
+25. 422: a tag that is not in the equipment master
+>>> POST /work-orders
+    {
+     "equipment_tag": "P-4444",
+     "work_type": "corrective",
+     "priority": 2,
+     "title": "P-1201A abnormal noise, suspect seal",
+     "description": "Control room reports P-1201A screen red and the pump sounds wrong. Seal repl...
+     "requested_by": "Control room operator, MRB",
+     "approved_by": "Salim (maintenance planner, MRB)",
+     "source_ticket": null
+    }
+<<< 422 Unprocessable Entity   [ok]
+    {
+     "error": "validation_failed",
+     "message": "The request was not processed: 1 problem. Nothing was changed.",
+     "problems": [
+      {
+       "where": "body.equipment_tag",
+       "problem": "is not in the equipment master (GET /equipment lists the tags)",
+       "got": "P-4444"
+      }
+     ]
+    }
+====================================================================================================
+26. 400: malformed JSON (trailing comma)
+>>> POST /work-orders
+    (raw body, Content-Type: application/json) {"equipment_tag": "P-1201A", "priority": 2,}
+<<< 400 Bad Request   [ok]
+    {
+     "error": "malformed_body",
+     "message": "The request body is not valid JSON (Expecting property name enclosed in double q...
+    }
+====================================================================================================
+27. 415: JSON sent as text/plain
+>>> POST /work-orders
+    (raw body, Content-Type: text/plain) {"equipment_tag": "P-1201A", "work_type": "corr...
+<<< 415 Unsupported Media Type   [ok]
+    {
+     "error": "unsupported_media_type",
+     "message": "Send the body as JSON with the header Content-Type: application/json (this reque...
+    }
+====================================================================================================
+28. 405: there is no way to delete a work order
+>>> DELETE /work-orders/WO-195893
+<<< 405 Method Not Allowed   [ok]
+    Allow: GET
+    {
+     "error": "method_not_allowed",
+     "message": "DELETE is not allowed on /work-orders/WO-195893. Work orders cannot be changed, ...
+    }
+====================================================================================================
+29. 405: or to change equipment
+>>> PATCH /equipment/P-1201A
+    {
+     "status": "out_of_service"
+    }
+<<< 405 Method Not Allowed   [ok]
+    Allow: GET
+    {
+     "error": "method_not_allowed",
+     "message": "PATCH is not allowed on /equipment/P-1201A. This API is read-only except for POS...
+    }
+====================================================================================================
+State change: P-1201A open work orders before [] -> after ['WO-195893']
+All 29 replies had the expected status.

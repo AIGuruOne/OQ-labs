@@ -1,0 +1,4095 @@
+[
+ {
+  "record_id": "MH-000001",
+  "equipment_tag": "C-2696A",
+  "site": "KTF",
+  "work_order_id": "WO-110143",
+  "date": "2024-01-16",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 31.6,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000002",
+  "equipment_tag": "E-3426",
+  "site": "TMQ",
+  "work_order_id": "WO-110324",
+  "date": "2024-02-04",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000003",
+  "equipment_tag": "P-2316",
+  "site": "ZFL",
+  "work_order_id": "WO-110353",
+  "date": "2024-02-07",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Laser aligned pump and motor, replaced coupling element",
+  "parts": [
+   {
+    "part_number": "34-0110-01",
+    "description": "Coupling element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 14.1,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000004",
+  "equipment_tag": "K-3880B",
+  "site": "ZFL",
+  "work_order_id": "WO-110372",
+  "date": "2024-02-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 0.8,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000005",
+  "equipment_tag": "K-3732B",
+  "site": "KTF",
+  "work_order_id": "WO-110420",
+  "date": "2024-02-14",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.4,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000006",
+  "equipment_tag": "P-1735A",
+  "site": "WQR",
+  "work_order_id": "WO-110429",
+  "date": "2024-02-15",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.1,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000007",
+  "equipment_tag": "V-2704",
+  "site": "TMQ",
+  "work_order_id": "WO-110439",
+  "date": "2024-02-16",
+  "work_type": "corrective",
+  "failure_mode": "level transmitter fault",
+  "action_taken": "Replaced level transmitter, recalibrated",
+  "parts": [
+   {
+    "part_number": "45-4100-01",
+    "description": "Level transmitter",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 26.3,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000008",
+  "equipment_tag": "V-2571B",
+  "site": "SHZ",
+  "work_order_id": "WO-110487",
+  "date": "2024-02-21",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 5.1,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000009",
+  "equipment_tag": "K-4087B",
+  "site": "TMQ",
+  "work_order_id": "WO-110611",
+  "date": "2024-03-05",
+  "work_type": "corrective",
+  "failure_mode": "surge trip",
+  "action_taken": "Recalibrated anti-surge valve positioner, reviewed trip log",
+  "parts": [],
+  "downtime_hours": 22.3,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000010",
+  "equipment_tag": "K-1736A",
+  "site": "SHZ",
+  "work_order_id": "WO-110639",
+  "date": "2024-03-08",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 2.3,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000011",
+  "equipment_tag": "FV-2659B",
+  "site": "SHZ",
+  "work_order_id": "WO-110668",
+  "date": "2024-03-11",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000012",
+  "equipment_tag": "HX-2485A",
+  "site": "MRB",
+  "work_order_id": "WO-110697",
+  "date": "2024-03-14",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.8,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000013",
+  "equipment_tag": "V-1119B",
+  "site": "TMQ",
+  "work_order_id": "WO-110706",
+  "date": "2024-03-15",
+  "work_type": "corrective",
+  "failure_mode": "level transmitter fault",
+  "action_taken": "Replaced level transmitter, recalibrated",
+  "parts": [
+   {
+    "part_number": "45-4100-01",
+    "description": "Level transmitter",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 16.9,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000014",
+  "equipment_tag": "FV-3261",
+  "site": "ZFL",
+  "work_order_id": "WO-110716",
+  "date": "2024-03-16",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 22.7,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000015",
+  "equipment_tag": "E-4186",
+  "site": "TMQ",
+  "work_order_id": "WO-110735",
+  "date": "2024-03-18",
+  "work_type": "corrective",
+  "failure_mode": "fan belt failure",
+  "action_taken": "Replaced fan belts, set tension",
+  "parts": [
+   {
+    "part_number": "43-0520-01",
+    "description": "Fan belt set",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 31.2,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000016",
+  "equipment_tag": "K-1349",
+  "site": "ZFL",
+  "work_order_id": "WO-110744",
+  "date": "2024-03-19",
+  "work_type": "corrective",
+  "failure_mode": "surge trip",
+  "action_taken": "Recalibrated anti-surge valve positioner, reviewed trip log",
+  "parts": [],
+  "downtime_hours": 17.7,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000017",
+  "equipment_tag": "HX-3077",
+  "site": "MRB",
+  "work_order_id": "WO-110764",
+  "date": "2024-03-21",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.3,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000018",
+  "equipment_tag": "T-4403B",
+  "site": "SHZ",
+  "work_order_id": "WO-110792",
+  "date": "2024-03-24",
+  "work_type": "corrective",
+  "failure_mode": "bottom corrosion found",
+  "action_taken": "Recorded pitting, scheduled bottom repair",
+  "parts": [],
+  "downtime_hours": 28.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000019",
+  "equipment_tag": "K-3867B",
+  "site": "ZFL",
+  "work_order_id": "WO-110811",
+  "date": "2024-03-26",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Balanced impeller, replaced journal bearing",
+  "parts": [
+   {
+    "part_number": "40-1180-01",
+    "description": "Journal bearing",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 17.3,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000020",
+  "equipment_tag": "E-4186",
+  "site": "TMQ",
+  "work_order_id": "WO-110878",
+  "date": "2024-04-02",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.7,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000021",
+  "equipment_tag": "FV-4534B",
+  "site": "MRB",
+  "work_order_id": "WO-110888",
+  "date": "2024-04-03",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "MRB instrument crew"
+ },
+ {
+  "record_id": "MH-000022",
+  "equipment_tag": "FV-3657B",
+  "site": "SHZ",
+  "work_order_id": "WO-111012",
+  "date": "2024-04-16",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000023",
+  "equipment_tag": "E-1567",
+  "site": "TMQ",
+  "work_order_id": "WO-111040",
+  "date": "2024-04-19",
+  "work_type": "corrective",
+  "failure_mode": "fin fouling",
+  "action_taken": "Water washed fin banks",
+  "parts": [],
+  "downtime_hours": 21.4,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000024",
+  "equipment_tag": "E-4353",
+  "site": "SHZ",
+  "work_order_id": "WO-111050",
+  "date": "2024-04-20",
+  "work_type": "corrective",
+  "failure_mode": "fin fouling",
+  "action_taken": "Water washed fin banks",
+  "parts": [],
+  "downtime_hours": 2.9,
+  "performed_by": "SHZ mechanical crew"
+ },
+ {
+  "record_id": "MH-000025",
+  "equipment_tag": "FV-2761",
+  "site": "HBT",
+  "work_order_id": "WO-111069",
+  "date": "2024-04-22",
+  "work_type": "corrective",
+  "failure_mode": "packing leak",
+  "action_taken": "Repacked stem, retorqued gland",
+  "parts": [
+   {
+    "part_number": "51-0022-01",
+    "description": "Stem packing set",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.5,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000026",
+  "equipment_tag": "K-4083",
+  "site": "SHZ",
+  "work_order_id": "WO-111079",
+  "date": "2024-04-23",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.3,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000027",
+  "equipment_tag": "C-1206B",
+  "site": "HBT",
+  "work_order_id": "WO-111107",
+  "date": "2024-04-26",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 0.9,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000028",
+  "equipment_tag": "HX-1902",
+  "site": "MRB",
+  "work_order_id": "WO-111108",
+  "date": "2024-04-26",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.1,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000029",
+  "equipment_tag": "P-4485",
+  "site": "KTF",
+  "work_order_id": "WO-111184",
+  "date": "2024-05-04",
+  "work_type": "corrective",
+  "failure_mode": "bearing overheating",
+  "action_taken": "Replaced drive end bearing, renewed lube oil, trended temperature 24 h",
+  "parts": [
+   {
+    "part_number": "32-6312-01",
+    "description": "Bearing 6312 C3",
+    "quantity": 1
+   },
+   {
+    "part_number": "33-0046-01",
+    "description": "Lube oil ISO VG 46, 20 L",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 10.0,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000030",
+  "equipment_tag": "FV-2659B",
+  "site": "SHZ",
+  "work_order_id": "WO-111193",
+  "date": "2024-05-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 3.9,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000031",
+  "equipment_tag": "FV-2659B",
+  "site": "SHZ",
+  "work_order_id": "WO-111222",
+  "date": "2024-05-08",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000032",
+  "equipment_tag": "FV-3261",
+  "site": "ZFL",
+  "work_order_id": "WO-111231",
+  "date": "2024-05-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.6,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000033",
+  "equipment_tag": "P-3604B",
+  "site": "WQR",
+  "work_order_id": "WO-111232",
+  "date": "2024-05-09",
+  "work_type": "corrective",
+  "failure_mode": "bearing overheating",
+  "action_taken": "Replaced drive end bearing, renewed lube oil, trended temperature 24 h",
+  "parts": [
+   {
+    "part_number": "32-6312-01",
+    "description": "Bearing 6312 C3",
+    "quantity": 1
+   },
+   {
+    "part_number": "33-0046-01",
+    "description": "Lube oil ISO VG 46, 20 L",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.5,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000034",
+  "equipment_tag": "K-2265",
+  "site": "HBT",
+  "work_order_id": "WO-111260",
+  "date": "2024-05-12",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000035",
+  "equipment_tag": "P-3473A",
+  "site": "ZFL",
+  "work_order_id": "WO-111394",
+  "date": "2024-05-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000036",
+  "equipment_tag": "K-1647B",
+  "site": "HBT",
+  "work_order_id": "WO-111470",
+  "date": "2024-06-03",
+  "work_type": "corrective",
+  "failure_mode": "surge trip",
+  "action_taken": "Recalibrated anti-surge valve positioner, reviewed trip log",
+  "parts": [],
+  "downtime_hours": 5.5,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000037",
+  "equipment_tag": "FV-3522A",
+  "site": "KTF",
+  "work_order_id": "WO-111489",
+  "date": "2024-06-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.5,
+  "performed_by": "KTF instrument crew"
+ },
+ {
+  "record_id": "MH-000038",
+  "equipment_tag": "FV-3657B",
+  "site": "SHZ",
+  "work_order_id": "WO-111508",
+  "date": "2024-06-07",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 2.1,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000039",
+  "equipment_tag": "K-2733B",
+  "site": "HBT",
+  "work_order_id": "WO-111509",
+  "date": "2024-06-07",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Balanced impeller, replaced journal bearing",
+  "parts": [
+   {
+    "part_number": "40-1180-01",
+    "description": "Journal bearing",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 30.7,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000040",
+  "equipment_tag": "K-3795B",
+  "site": "SHZ",
+  "work_order_id": "WO-111575",
+  "date": "2024-06-14",
+  "work_type": "corrective",
+  "failure_mode": "low lube oil pressure",
+  "action_taken": "Replaced lube oil filter, repaired pressure switch",
+  "parts": [
+   {
+    "part_number": "38-0220-01",
+    "description": "Lube oil filter element",
+    "quantity": 2
+   },
+   {
+    "part_number": "39-0031-01",
+    "description": "Pressure switch",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 31.7,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000041",
+  "equipment_tag": "V-2704",
+  "site": "TMQ",
+  "work_order_id": "WO-111585",
+  "date": "2024-06-15",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 3.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000042",
+  "equipment_tag": "HX-2863A",
+  "site": "TMQ",
+  "work_order_id": "WO-111671",
+  "date": "2024-06-24",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000043",
+  "equipment_tag": "P-4485",
+  "site": "KTF",
+  "work_order_id": "WO-111680",
+  "date": "2024-06-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 5.8,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000044",
+  "equipment_tag": "HX-3124A",
+  "site": "ZFL",
+  "work_order_id": "WO-111690",
+  "date": "2024-06-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000045",
+  "equipment_tag": "V-3405A",
+  "site": "MRB",
+  "work_order_id": "WO-111691",
+  "date": "2024-06-26",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 4.1,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000046",
+  "equipment_tag": "P-4157",
+  "site": "TMQ",
+  "work_order_id": "WO-111814",
+  "date": "2024-07-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 0.7,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000047",
+  "equipment_tag": "V-2029",
+  "site": "HBT",
+  "work_order_id": "WO-111852",
+  "date": "2024-07-13",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 35.9,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000048",
+  "equipment_tag": "V-2836",
+  "site": "WQR",
+  "work_order_id": "WO-111862",
+  "date": "2024-07-14",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 12.7,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000049",
+  "equipment_tag": "K-2733B",
+  "site": "HBT",
+  "work_order_id": "WO-112091",
+  "date": "2024-08-07",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 6.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000050",
+  "equipment_tag": "FV-2761",
+  "site": "HBT",
+  "work_order_id": "WO-112110",
+  "date": "2024-08-09",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.3,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000051",
+  "equipment_tag": "C-3636A",
+  "site": "SHZ",
+  "work_order_id": "WO-112215",
+  "date": "2024-08-20",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 35.3,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000052",
+  "equipment_tag": "E-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-112263",
+  "date": "2024-08-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.0,
+  "performed_by": "MRB mechanical crew"
+ },
+ {
+  "record_id": "MH-000053",
+  "equipment_tag": "FV-2084",
+  "site": "HBT",
+  "work_order_id": "WO-112292",
+  "date": "2024-08-28",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000054",
+  "equipment_tag": "K-3880B",
+  "site": "ZFL",
+  "work_order_id": "WO-112301",
+  "date": "2024-08-29",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.2,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000055",
+  "equipment_tag": "C-2434",
+  "site": "TMQ",
+  "work_order_id": "WO-112377",
+  "date": "2024-09-06",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.5,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000056",
+  "equipment_tag": "C-3943",
+  "site": "MRB",
+  "work_order_id": "WO-112387",
+  "date": "2024-09-07",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000057",
+  "equipment_tag": "V-2029",
+  "site": "HBT",
+  "work_order_id": "WO-112425",
+  "date": "2024-09-11",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 33.7,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000058",
+  "equipment_tag": "E-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-112444",
+  "date": "2024-09-13",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.3,
+  "performed_by": "MRB mechanical crew"
+ },
+ {
+  "record_id": "MH-000059",
+  "equipment_tag": "K-1736A",
+  "site": "SHZ",
+  "work_order_id": "WO-112463",
+  "date": "2024-09-15",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000060",
+  "equipment_tag": "V-1206",
+  "site": "SHZ",
+  "work_order_id": "WO-112607",
+  "date": "2024-09-30",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.3,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000061",
+  "equipment_tag": "E-1567",
+  "site": "TMQ",
+  "work_order_id": "WO-112683",
+  "date": "2024-10-08",
+  "work_type": "corrective",
+  "failure_mode": "fan motor trip",
+  "action_taken": "Replaced fan motor bearing, megger tested motor",
+  "parts": [
+   {
+    "part_number": "44-6205-01",
+    "description": "Bearing 6205",
+    "quantity": 2
+   }
+  ],
+  "downtime_hours": 31.4,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000062",
+  "equipment_tag": "P-3183B",
+  "site": "WQR",
+  "work_order_id": "WO-112684",
+  "date": "2024-10-08",
+  "work_type": "corrective",
+  "failure_mode": "mechanical seal leak",
+  "action_taken": "Replaced mechanical seal cartridge, flushed seal plan, checked alignment",
+  "parts": [
+   {
+    "part_number": "30-2201-01",
+    "description": "Mechanical seal cartridge",
+    "quantity": 1
+   },
+   {
+    "part_number": "31-0415-01",
+    "description": "O-ring kit",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 24.8,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000063",
+  "equipment_tag": "FV-2761",
+  "site": "HBT",
+  "work_order_id": "WO-112702",
+  "date": "2024-10-10",
+  "work_type": "corrective",
+  "failure_mode": "packing leak",
+  "action_taken": "Repacked stem, retorqued gland",
+  "parts": [
+   {
+    "part_number": "51-0022-01",
+    "description": "Stem packing set",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 20.4,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000064",
+  "equipment_tag": "V-3568",
+  "site": "TMQ",
+  "work_order_id": "WO-112807",
+  "date": "2024-10-21",
+  "work_type": "corrective",
+  "failure_mode": "internal corrosion found",
+  "action_taken": "Recorded wall thickness, scheduled repair at next shutdown",
+  "parts": [],
+  "downtime_hours": 25.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000065",
+  "equipment_tag": "HX-2863A",
+  "site": "TMQ",
+  "work_order_id": "WO-112826",
+  "date": "2024-10-23",
+  "work_type": "corrective",
+  "failure_mode": "fouling, high pressure drop",
+  "action_taken": "Hydrojetted tube bundle, reinstalled",
+  "parts": [],
+  "downtime_hours": 2.7,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000066",
+  "equipment_tag": "V-3568",
+  "site": "TMQ",
+  "work_order_id": "WO-112836",
+  "date": "2024-10-24",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 34.5,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000067",
+  "equipment_tag": "P-3183B",
+  "site": "WQR",
+  "work_order_id": "WO-112865",
+  "date": "2024-10-27",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.0,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000068",
+  "equipment_tag": "FV-3261",
+  "site": "ZFL",
+  "work_order_id": "WO-112874",
+  "date": "2024-10-28",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.2,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000069",
+  "equipment_tag": "V-3545",
+  "site": "HBT",
+  "work_order_id": "WO-112912",
+  "date": "2024-11-01",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.2,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000070",
+  "equipment_tag": "P-4485",
+  "site": "KTF",
+  "work_order_id": "WO-112931",
+  "date": "2024-11-03",
+  "work_type": "corrective",
+  "failure_mode": "bearing overheating",
+  "action_taken": "Replaced drive end bearing, renewed lube oil, trended temperature 24 h",
+  "parts": [
+   {
+    "part_number": "32-6312-01",
+    "description": "Bearing 6312 C3",
+    "quantity": 1
+   },
+   {
+    "part_number": "33-0046-01",
+    "description": "Lube oil ISO VG 46, 20 L",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 29.0,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000071",
+  "equipment_tag": "FV-3261",
+  "site": "ZFL",
+  "work_order_id": "WO-112941",
+  "date": "2024-11-04",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.9,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000072",
+  "equipment_tag": "P-3183B",
+  "site": "WQR",
+  "work_order_id": "WO-112989",
+  "date": "2024-11-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.7,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000073",
+  "equipment_tag": "FV-4037B",
+  "site": "HBT",
+  "work_order_id": "WO-113017",
+  "date": "2024-11-12",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.2,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000074",
+  "equipment_tag": "HX-4582A",
+  "site": "ZFL",
+  "work_order_id": "WO-113027",
+  "date": "2024-11-13",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.2,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000075",
+  "equipment_tag": "K-2265",
+  "site": "HBT",
+  "work_order_id": "WO-113028",
+  "date": "2024-11-13",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000076",
+  "equipment_tag": "FV-3522A",
+  "site": "KTF",
+  "work_order_id": "WO-113056",
+  "date": "2024-11-16",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 2.2,
+  "performed_by": "KTF instrument crew"
+ },
+ {
+  "record_id": "MH-000077",
+  "equipment_tag": "P-4157",
+  "site": "TMQ",
+  "work_order_id": "WO-113065",
+  "date": "2024-11-17",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 0.2,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000078",
+  "equipment_tag": "T-2251",
+  "site": "ZFL",
+  "work_order_id": "WO-113094",
+  "date": "2024-11-20",
+  "work_type": "corrective",
+  "failure_mode": "level gauge fault",
+  "action_taken": "Replaced radar level gauge",
+  "parts": [
+   {
+    "part_number": "49-0810-01",
+    "description": "Radar level gauge",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 17.8,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000079",
+  "equipment_tag": "P-4485",
+  "site": "KTF",
+  "work_order_id": "WO-113122",
+  "date": "2024-11-23",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 1.7,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000080",
+  "equipment_tag": "K-1349",
+  "site": "ZFL",
+  "work_order_id": "WO-113141",
+  "date": "2024-11-25",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000081",
+  "equipment_tag": "C-3933A",
+  "site": "MRB",
+  "work_order_id": "WO-113170",
+  "date": "2024-11-28",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 14.2,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000082",
+  "equipment_tag": "HX-1518B",
+  "site": "TMQ",
+  "work_order_id": "WO-113171",
+  "date": "2024-11-28",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000083",
+  "equipment_tag": "V-2704",
+  "site": "TMQ",
+  "work_order_id": "WO-113199",
+  "date": "2024-12-01",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000084",
+  "equipment_tag": "V-2812",
+  "site": "KTF",
+  "work_order_id": "WO-113237",
+  "date": "2024-12-05",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 21.8,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000085",
+  "equipment_tag": "K-1736A",
+  "site": "SHZ",
+  "work_order_id": "WO-113256",
+  "date": "2024-12-07",
+  "work_type": "corrective",
+  "failure_mode": "low lube oil pressure",
+  "action_taken": "Replaced lube oil filter, repaired pressure switch",
+  "parts": [
+   {
+    "part_number": "38-0220-01",
+    "description": "Lube oil filter element",
+    "quantity": 2
+   },
+   {
+    "part_number": "39-0031-01",
+    "description": "Pressure switch",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 33.2,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000086",
+  "equipment_tag": "P-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-113371",
+  "date": "2024-12-19",
+  "work_type": "corrective",
+  "failure_mode": "mechanical seal leak",
+  "action_taken": "Replaced mechanical seal cartridge, flushed seal plan, checked alignment",
+  "parts": [
+   {
+    "part_number": "30-2201-01",
+    "description": "Mechanical seal cartridge",
+    "quantity": 1
+   },
+   {
+    "part_number": "31-0415-01",
+    "description": "O-ring kit",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.2,
+  "performed_by": "MRB rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000087",
+  "equipment_tag": "T-2855B",
+  "site": "MRB",
+  "work_order_id": "WO-113380",
+  "date": "2024-12-20",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000088",
+  "equipment_tag": "K-4361",
+  "site": "KTF",
+  "work_order_id": "WO-113523",
+  "date": "2025-01-04",
+  "work_type": "corrective",
+  "failure_mode": "high discharge temperature",
+  "action_taken": "Cleaned intercooler, replaced discharge valve",
+  "parts": [
+   {
+    "part_number": "37-7710-01",
+    "description": "Discharge valve assembly",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 15.3,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000089",
+  "equipment_tag": "T-1492",
+  "site": "HBT",
+  "work_order_id": "WO-113524",
+  "date": "2025-01-04",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000090",
+  "equipment_tag": "K-1647B",
+  "site": "HBT",
+  "work_order_id": "WO-113552",
+  "date": "2025-01-07",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.6,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000091",
+  "equipment_tag": "P-3183B",
+  "site": "WQR",
+  "work_order_id": "WO-113553",
+  "date": "2025-01-07",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000092",
+  "equipment_tag": "V-2571B",
+  "site": "SHZ",
+  "work_order_id": "WO-113571",
+  "date": "2025-01-09",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.7,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000093",
+  "equipment_tag": "FV-4037B",
+  "site": "HBT",
+  "work_order_id": "WO-113590",
+  "date": "2025-01-11",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 21.5,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000094",
+  "equipment_tag": "V-2698",
+  "site": "SHZ",
+  "work_order_id": "WO-113648",
+  "date": "2025-01-17",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000095",
+  "equipment_tag": "C-2614",
+  "site": "TMQ",
+  "work_order_id": "WO-113743",
+  "date": "2025-01-27",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 3.5,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000096",
+  "equipment_tag": "P-3628B",
+  "site": "KTF",
+  "work_order_id": "WO-113744",
+  "date": "2025-01-27",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000097",
+  "equipment_tag": "C-2696A",
+  "site": "KTF",
+  "work_order_id": "WO-113772",
+  "date": "2025-01-30",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 34.8,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000098",
+  "equipment_tag": "P-1201A",
+  "site": "MRB",
+  "work_order_id": "WO-113867",
+  "date": "2025-02-09",
+  "work_type": "corrective",
+  "failure_mode": "bearing overheating",
+  "action_taken": "Replaced drive end bearing, renewed lube oil, trended temperature 24 h",
+  "parts": [
+   {
+    "part_number": "32-6312-01",
+    "description": "Bearing 6312 C3",
+    "quantity": 1
+   },
+   {
+    "part_number": "33-0046-01",
+    "description": "Lube oil ISO VG 46, 20 L",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 9.5,
+  "performed_by": "MRB rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000099",
+  "equipment_tag": "FV-3261",
+  "site": "ZFL",
+  "work_order_id": "WO-113925",
+  "date": "2025-02-15",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.5,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000100",
+  "equipment_tag": "V-2704",
+  "site": "TMQ",
+  "work_order_id": "WO-113926",
+  "date": "2025-02-15",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000101",
+  "equipment_tag": "FV-3522A",
+  "site": "KTF",
+  "work_order_id": "WO-114039",
+  "date": "2025-02-27",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.4,
+  "performed_by": "KTF instrument crew"
+ },
+ {
+  "record_id": "MH-000102",
+  "equipment_tag": "HX-1518B",
+  "site": "TMQ",
+  "work_order_id": "WO-114096",
+  "date": "2025-03-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 1.9,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000103",
+  "equipment_tag": "V-2571B",
+  "site": "SHZ",
+  "work_order_id": "WO-114211",
+  "date": "2025-03-17",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 26.7,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000104",
+  "equipment_tag": "FV-3522A",
+  "site": "KTF",
+  "work_order_id": "WO-114221",
+  "date": "2025-03-18",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 29.6,
+  "performed_by": "KTF instrument crew"
+ },
+ {
+  "record_id": "MH-000105",
+  "equipment_tag": "HX-2863A",
+  "site": "TMQ",
+  "work_order_id": "WO-114259",
+  "date": "2025-03-22",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000106",
+  "equipment_tag": "K-1647B",
+  "site": "HBT",
+  "work_order_id": "WO-114287",
+  "date": "2025-03-25",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000107",
+  "equipment_tag": "E-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-114316",
+  "date": "2025-03-28",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 2.5,
+  "performed_by": "MRB mechanical crew"
+ },
+ {
+  "record_id": "MH-000108",
+  "equipment_tag": "C-3636A",
+  "site": "SHZ",
+  "work_order_id": "WO-114335",
+  "date": "2025-03-30",
+  "work_type": "corrective",
+  "failure_mode": "corrosion under insulation",
+  "action_taken": "Stripped insulation, cleaned and painted, reinsulated",
+  "parts": [
+   {
+    "part_number": "47-0075-01",
+    "description": "Insulation, 75 mm, per m2",
+    "quantity": 6
+   }
+  ],
+  "downtime_hours": 12.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000109",
+  "equipment_tag": "K-3732B",
+  "site": "KTF",
+  "work_order_id": "WO-114336",
+  "date": "2025-03-30",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000110",
+  "equipment_tag": "P-3628B",
+  "site": "KTF",
+  "work_order_id": "WO-114337",
+  "date": "2025-03-30",
+  "work_type": "corrective",
+  "failure_mode": "impeller wear",
+  "action_taken": "Replaced impeller and wear rings",
+  "parts": [
+   {
+    "part_number": "35-3040-01",
+    "description": "Impeller",
+    "quantity": 1
+   },
+   {
+    "part_number": "36-3041-01",
+    "description": "Wear ring set",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 6.7,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000111",
+  "equipment_tag": "FV-2089",
+  "site": "ZFL",
+  "work_order_id": "WO-114345",
+  "date": "2025-03-31",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.4,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000112",
+  "equipment_tag": "P-3183B",
+  "site": "WQR",
+  "work_order_id": "WO-114364",
+  "date": "2025-04-02",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Laser aligned pump and motor, replaced coupling element",
+  "parts": [
+   {
+    "part_number": "34-0110-01",
+    "description": "Coupling element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 22.9,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000113",
+  "equipment_tag": "K-4083",
+  "site": "SHZ",
+  "work_order_id": "WO-114383",
+  "date": "2025-04-04",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000114",
+  "equipment_tag": "K-1349",
+  "site": "ZFL",
+  "work_order_id": "WO-114393",
+  "date": "2025-04-05",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000115",
+  "equipment_tag": "K-3867B",
+  "site": "ZFL",
+  "work_order_id": "WO-114402",
+  "date": "2025-04-06",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.4,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000116",
+  "equipment_tag": "FV-2928B",
+  "site": "ZFL",
+  "work_order_id": "WO-114412",
+  "date": "2025-04-07",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000117",
+  "equipment_tag": "FV-2089",
+  "site": "ZFL",
+  "work_order_id": "WO-114431",
+  "date": "2025-04-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 4.4,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000118",
+  "equipment_tag": "C-2614",
+  "site": "TMQ",
+  "work_order_id": "WO-114450",
+  "date": "2025-04-11",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 1.4,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000119",
+  "equipment_tag": "V-2571B",
+  "site": "SHZ",
+  "work_order_id": "WO-114469",
+  "date": "2025-04-13",
+  "work_type": "corrective",
+  "failure_mode": "level transmitter fault",
+  "action_taken": "Replaced level transmitter, recalibrated",
+  "parts": [
+   {
+    "part_number": "45-4100-01",
+    "description": "Level transmitter",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 21.8,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000120",
+  "equipment_tag": "K-3795B",
+  "site": "SHZ",
+  "work_order_id": "WO-114507",
+  "date": "2025-04-17",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 2.5,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000121",
+  "equipment_tag": "V-1119B",
+  "site": "TMQ",
+  "work_order_id": "WO-114536",
+  "date": "2025-04-20",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 22.6,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000122",
+  "equipment_tag": "C-3130",
+  "site": "KTF",
+  "work_order_id": "WO-114584",
+  "date": "2025-04-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 2.4,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000123",
+  "equipment_tag": "V-1119B",
+  "site": "TMQ",
+  "work_order_id": "WO-114717",
+  "date": "2025-05-09",
+  "work_type": "corrective",
+  "failure_mode": "internal corrosion found",
+  "action_taken": "Recorded wall thickness, scheduled repair at next shutdown",
+  "parts": [],
+  "downtime_hours": 15.8,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000124",
+  "equipment_tag": "P-2743A",
+  "site": "WQR",
+  "work_order_id": "WO-114851",
+  "date": "2025-05-23",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 3.1,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000125",
+  "equipment_tag": "V-2029",
+  "site": "HBT",
+  "work_order_id": "WO-114870",
+  "date": "2025-05-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.7,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000126",
+  "equipment_tag": "HX-2485A",
+  "site": "MRB",
+  "work_order_id": "WO-114889",
+  "date": "2025-05-27",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000127",
+  "equipment_tag": "C-2696A",
+  "site": "KTF",
+  "work_order_id": "WO-114908",
+  "date": "2025-05-29",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000128",
+  "equipment_tag": "K-2733B",
+  "site": "HBT",
+  "work_order_id": "WO-114956",
+  "date": "2025-06-03",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000129",
+  "equipment_tag": "C-2434",
+  "site": "TMQ",
+  "work_order_id": "WO-114966",
+  "date": "2025-06-04",
+  "work_type": "corrective",
+  "failure_mode": "level control unstable",
+  "action_taken": "Retuned level controller, checked control valve stroke",
+  "parts": [],
+  "downtime_hours": 11.4,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000130",
+  "equipment_tag": "K-2733B",
+  "site": "HBT",
+  "work_order_id": "WO-114967",
+  "date": "2025-06-04",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 1.1,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000131",
+  "equipment_tag": "C-2434",
+  "site": "TMQ",
+  "work_order_id": "WO-114975",
+  "date": "2025-06-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 5.9,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000132",
+  "equipment_tag": "FV-2928B",
+  "site": "ZFL",
+  "work_order_id": "WO-115013",
+  "date": "2025-06-09",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000133",
+  "equipment_tag": "T-2416A",
+  "site": "KTF",
+  "work_order_id": "WO-115061",
+  "date": "2025-06-14",
+  "work_type": "corrective",
+  "failure_mode": "level gauge fault",
+  "action_taken": "Replaced radar level gauge",
+  "parts": [
+   {
+    "part_number": "49-0810-01",
+    "description": "Radar level gauge",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 7.6,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000134",
+  "equipment_tag": "V-2704",
+  "site": "TMQ",
+  "work_order_id": "WO-115071",
+  "date": "2025-06-15",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 3.1,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000135",
+  "equipment_tag": "T-2251",
+  "site": "ZFL",
+  "work_order_id": "WO-115137",
+  "date": "2025-06-22",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 0.4,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000136",
+  "equipment_tag": "HX-3077",
+  "site": "MRB",
+  "work_order_id": "WO-115185",
+  "date": "2025-06-27",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000137",
+  "equipment_tag": "V-2812",
+  "site": "KTF",
+  "work_order_id": "WO-115204",
+  "date": "2025-06-29",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.1,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000138",
+  "equipment_tag": "K-4083",
+  "site": "SHZ",
+  "work_order_id": "WO-115357",
+  "date": "2025-07-15",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000139",
+  "equipment_tag": "V-2698",
+  "site": "SHZ",
+  "work_order_id": "WO-115376",
+  "date": "2025-07-17",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.6,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000140",
+  "equipment_tag": "C-1206B",
+  "site": "HBT",
+  "work_order_id": "WO-115395",
+  "date": "2025-07-19",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000141",
+  "equipment_tag": "C-2614",
+  "site": "TMQ",
+  "work_order_id": "WO-115396",
+  "date": "2025-07-19",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000142",
+  "equipment_tag": "V-2698",
+  "site": "SHZ",
+  "work_order_id": "WO-115405",
+  "date": "2025-07-20",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.7,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000143",
+  "equipment_tag": "V-3405A",
+  "site": "MRB",
+  "work_order_id": "WO-115481",
+  "date": "2025-07-28",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 1.9,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000144",
+  "equipment_tag": "V-1206",
+  "site": "SHZ",
+  "work_order_id": "WO-115491",
+  "date": "2025-07-29",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 10.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000145",
+  "equipment_tag": "C-3943",
+  "site": "MRB",
+  "work_order_id": "WO-115529",
+  "date": "2025-08-02",
+  "work_type": "corrective",
+  "failure_mode": "level control unstable",
+  "action_taken": "Retuned level controller, checked control valve stroke",
+  "parts": [],
+  "downtime_hours": 8.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000146",
+  "equipment_tag": "FV-4037B",
+  "site": "HBT",
+  "work_order_id": "WO-115530",
+  "date": "2025-08-02",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.8,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000147",
+  "equipment_tag": "K-4361",
+  "site": "KTF",
+  "work_order_id": "WO-115577",
+  "date": "2025-08-07",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 0.5,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000148",
+  "equipment_tag": "FV-2761",
+  "site": "HBT",
+  "work_order_id": "WO-115749",
+  "date": "2025-08-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.3,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000149",
+  "equipment_tag": "HX-1902",
+  "site": "MRB",
+  "work_order_id": "WO-115796",
+  "date": "2025-08-30",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.4,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000150",
+  "equipment_tag": "FV-2659B",
+  "site": "SHZ",
+  "work_order_id": "WO-115835",
+  "date": "2025-09-03",
+  "work_type": "corrective",
+  "failure_mode": "valve hunting",
+  "action_taken": "Replaced positioner, stroke tested",
+  "parts": [
+   {
+    "part_number": "50-0340-01",
+    "description": "Valve positioner",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.8,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000151",
+  "equipment_tag": "K-3442A",
+  "site": "WQR",
+  "work_order_id": "WO-115836",
+  "date": "2025-09-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.0,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000152",
+  "equipment_tag": "V-2812",
+  "site": "KTF",
+  "work_order_id": "WO-115837",
+  "date": "2025-09-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 4.7,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000153",
+  "equipment_tag": "HX-1902",
+  "site": "MRB",
+  "work_order_id": "WO-115854",
+  "date": "2025-09-05",
+  "work_type": "corrective",
+  "failure_mode": "tube leak",
+  "action_taken": "Located and plugged two leaking tubes, hydrotested",
+  "parts": [
+   {
+    "part_number": "41-0019-01",
+    "description": "Tube plug",
+    "quantity": 4
+   }
+  ],
+  "downtime_hours": 9.0,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000154",
+  "equipment_tag": "P-3628B",
+  "site": "KTF",
+  "work_order_id": "WO-115911",
+  "date": "2025-09-11",
+  "work_type": "corrective",
+  "failure_mode": "cavitation",
+  "action_taken": "Cleaned suction strainer, confirmed NPSH margin with operations",
+  "parts": [],
+  "downtime_hours": 34.3,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000155",
+  "equipment_tag": "HX-1902",
+  "site": "MRB",
+  "work_order_id": "WO-115930",
+  "date": "2025-09-13",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.5,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000156",
+  "equipment_tag": "FV-4037B",
+  "site": "HBT",
+  "work_order_id": "WO-115949",
+  "date": "2025-09-15",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.2,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000157",
+  "equipment_tag": "V-3545",
+  "site": "HBT",
+  "work_order_id": "WO-115959",
+  "date": "2025-09-16",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 1.7,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000158",
+  "equipment_tag": "T-2251",
+  "site": "ZFL",
+  "work_order_id": "WO-115978",
+  "date": "2025-09-18",
+  "work_type": "corrective",
+  "failure_mode": "roof seal damage",
+  "action_taken": "Replaced floating roof seal section",
+  "parts": [
+   {
+    "part_number": "48-2200-01",
+    "description": "Roof seal section",
+    "quantity": 3
+   }
+  ],
+  "downtime_hours": 12.5,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000159",
+  "equipment_tag": "C-3636A",
+  "site": "SHZ",
+  "work_order_id": "WO-116035",
+  "date": "2025-09-24",
+  "work_type": "corrective",
+  "failure_mode": "level control unstable",
+  "action_taken": "Retuned level controller, checked control valve stroke",
+  "parts": [],
+  "downtime_hours": 23.5,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000160",
+  "equipment_tag": "T-4415A",
+  "site": "SHZ",
+  "work_order_id": "WO-116036",
+  "date": "2025-09-24",
+  "work_type": "corrective",
+  "failure_mode": "level gauge fault",
+  "action_taken": "Replaced radar level gauge",
+  "parts": [
+   {
+    "part_number": "49-0810-01",
+    "description": "Radar level gauge",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 32.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000161",
+  "equipment_tag": "T-3543",
+  "site": "HBT",
+  "work_order_id": "WO-116112",
+  "date": "2025-10-02",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 1.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000162",
+  "equipment_tag": "E-2642B",
+  "site": "WQR",
+  "work_order_id": "WO-116140",
+  "date": "2025-10-05",
+  "work_type": "corrective",
+  "failure_mode": "fan motor trip",
+  "action_taken": "Replaced fan motor bearing, megger tested motor",
+  "parts": [
+   {
+    "part_number": "44-6205-01",
+    "description": "Bearing 6205",
+    "quantity": 2
+   }
+  ],
+  "downtime_hours": 24.0,
+  "performed_by": "WQR mechanical crew"
+ },
+ {
+  "record_id": "MH-000163",
+  "equipment_tag": "HX-3744A",
+  "site": "HBT",
+  "work_order_id": "WO-116169",
+  "date": "2025-10-08",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 2.1,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000164",
+  "equipment_tag": "K-4087B",
+  "site": "TMQ",
+  "work_order_id": "WO-116178",
+  "date": "2025-10-09",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000165",
+  "equipment_tag": "E-4575",
+  "site": "WQR",
+  "work_order_id": "WO-116207",
+  "date": "2025-10-12",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 0.7,
+  "performed_by": "WQR mechanical crew"
+ },
+ {
+  "record_id": "MH-000166",
+  "equipment_tag": "P-1099",
+  "site": "KTF",
+  "work_order_id": "WO-116208",
+  "date": "2025-10-12",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.1,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000167",
+  "equipment_tag": "E-2642B",
+  "site": "WQR",
+  "work_order_id": "WO-116217",
+  "date": "2025-10-13",
+  "work_type": "corrective",
+  "failure_mode": "fan motor trip",
+  "action_taken": "Replaced fan motor bearing, megger tested motor",
+  "parts": [
+   {
+    "part_number": "44-6205-01",
+    "description": "Bearing 6205",
+    "quantity": 2
+   }
+  ],
+  "downtime_hours": 10.5,
+  "performed_by": "WQR mechanical crew"
+ },
+ {
+  "record_id": "MH-000168",
+  "equipment_tag": "K-4087B",
+  "site": "TMQ",
+  "work_order_id": "WO-116245",
+  "date": "2025-10-16",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000169",
+  "equipment_tag": "K-3795B",
+  "site": "SHZ",
+  "work_order_id": "WO-116264",
+  "date": "2025-10-18",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 0.6,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000170",
+  "equipment_tag": "K-2265",
+  "site": "HBT",
+  "work_order_id": "WO-116283",
+  "date": "2025-10-20",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 5.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000171",
+  "equipment_tag": "P-1201A",
+  "site": "MRB",
+  "work_order_id": "WO-116417",
+  "date": "2025-11-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 3.0,
+  "performed_by": "MRB rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000172",
+  "equipment_tag": "T-4383A",
+  "site": "WQR",
+  "work_order_id": "WO-116436",
+  "date": "2025-11-05",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000173",
+  "equipment_tag": "FV-3657B",
+  "site": "SHZ",
+  "work_order_id": "WO-116551",
+  "date": "2025-11-17",
+  "work_type": "corrective",
+  "failure_mode": "valve sticking",
+  "action_taken": "Cleaned trim, lubricated stem, stroke tested",
+  "parts": [],
+  "downtime_hours": 14.0,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000174",
+  "equipment_tag": "E-4353",
+  "site": "SHZ",
+  "work_order_id": "WO-116570",
+  "date": "2025-11-19",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 5.6,
+  "performed_by": "SHZ mechanical crew"
+ },
+ {
+  "record_id": "MH-000175",
+  "equipment_tag": "V-2571B",
+  "site": "SHZ",
+  "work_order_id": "WO-116571",
+  "date": "2025-11-19",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 5.1,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000176",
+  "equipment_tag": "HX-1518B",
+  "site": "TMQ",
+  "work_order_id": "WO-116589",
+  "date": "2025-11-21",
+  "work_type": "corrective",
+  "failure_mode": "fouling, high pressure drop",
+  "action_taken": "Hydrojetted tube bundle, reinstalled",
+  "parts": [],
+  "downtime_hours": 17.1,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000177",
+  "equipment_tag": "K-1647B",
+  "site": "HBT",
+  "work_order_id": "WO-116637",
+  "date": "2025-11-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000178",
+  "equipment_tag": "HX-3744A",
+  "site": "HBT",
+  "work_order_id": "WO-116656",
+  "date": "2025-11-28",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000179",
+  "equipment_tag": "E-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-116675",
+  "date": "2025-11-30",
+  "work_type": "corrective",
+  "failure_mode": "fin fouling",
+  "action_taken": "Water washed fin banks",
+  "parts": [],
+  "downtime_hours": 33.0,
+  "performed_by": "MRB mechanical crew"
+ },
+ {
+  "record_id": "MH-000180",
+  "equipment_tag": "V-3545",
+  "site": "HBT",
+  "work_order_id": "WO-116742",
+  "date": "2025-12-07",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.4,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000181",
+  "equipment_tag": "V-3405A",
+  "site": "MRB",
+  "work_order_id": "WO-116751",
+  "date": "2025-12-08",
+  "work_type": "corrective",
+  "failure_mode": "relief valve passing",
+  "action_taken": "Removed PSV for bench test, fitted spare",
+  "parts": [
+   {
+    "part_number": "46-0112-01",
+    "description": "Pressure safety valve, spare",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 19.1,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000182",
+  "equipment_tag": "P-4157",
+  "site": "TMQ",
+  "work_order_id": "WO-116780",
+  "date": "2025-12-11",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.1,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000183",
+  "equipment_tag": "E-1567",
+  "site": "TMQ",
+  "work_order_id": "WO-116837",
+  "date": "2025-12-17",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 3.9,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000184",
+  "equipment_tag": "K-1647B",
+  "site": "HBT",
+  "work_order_id": "WO-116981",
+  "date": "2026-01-01",
+  "work_type": "corrective",
+  "failure_mode": "low lube oil pressure",
+  "action_taken": "Replaced lube oil filter, repaired pressure switch",
+  "parts": [
+   {
+    "part_number": "38-0220-01",
+    "description": "Lube oil filter element",
+    "quantity": 2
+   },
+   {
+    "part_number": "39-0031-01",
+    "description": "Pressure switch",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.3,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000185",
+  "equipment_tag": "P-1999",
+  "site": "MRB",
+  "work_order_id": "WO-117000",
+  "date": "2026-01-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.3,
+  "performed_by": "MRB rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000186",
+  "equipment_tag": "K-4087B",
+  "site": "TMQ",
+  "work_order_id": "WO-117019",
+  "date": "2026-01-05",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Balanced impeller, replaced journal bearing",
+  "parts": [
+   {
+    "part_number": "40-1180-01",
+    "description": "Journal bearing",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 16.6,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000187",
+  "equipment_tag": "FV-3522A",
+  "site": "KTF",
+  "work_order_id": "WO-117047",
+  "date": "2026-01-08",
+  "work_type": "corrective",
+  "failure_mode": "valve sticking",
+  "action_taken": "Cleaned trim, lubricated stem, stroke tested",
+  "parts": [],
+  "downtime_hours": 17.4,
+  "performed_by": "KTF instrument crew"
+ },
+ {
+  "record_id": "MH-000188",
+  "equipment_tag": "V-2812",
+  "site": "KTF",
+  "work_order_id": "WO-117048",
+  "date": "2026-01-08",
+  "work_type": "corrective",
+  "failure_mode": "internal corrosion found",
+  "action_taken": "Recorded wall thickness, scheduled repair at next shutdown",
+  "parts": [],
+  "downtime_hours": 18.3,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000189",
+  "equipment_tag": "E-3426",
+  "site": "TMQ",
+  "work_order_id": "WO-117152",
+  "date": "2026-01-19",
+  "work_type": "corrective",
+  "failure_mode": "fan belt failure",
+  "action_taken": "Replaced fan belts, set tension",
+  "parts": [
+   {
+    "part_number": "43-0520-01",
+    "description": "Fan belt set",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 32.9,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000190",
+  "equipment_tag": "V-1206",
+  "site": "SHZ",
+  "work_order_id": "WO-117172",
+  "date": "2026-01-21",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.2,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000191",
+  "equipment_tag": "K-2265",
+  "site": "HBT",
+  "work_order_id": "WO-117219",
+  "date": "2026-01-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000192",
+  "equipment_tag": "FV-2761",
+  "site": "HBT",
+  "work_order_id": "WO-117248",
+  "date": "2026-01-29",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 2.9,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000193",
+  "equipment_tag": "HX-2093",
+  "site": "KTF",
+  "work_order_id": "WO-117296",
+  "date": "2026-02-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.2,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000194",
+  "equipment_tag": "E-3426",
+  "site": "TMQ",
+  "work_order_id": "WO-117305",
+  "date": "2026-02-04",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 4.7,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000195",
+  "equipment_tag": "K-3732B",
+  "site": "KTF",
+  "work_order_id": "WO-117353",
+  "date": "2026-02-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [],
+  "downtime_hours": 1.9,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000196",
+  "equipment_tag": "HX-3744A",
+  "site": "HBT",
+  "work_order_id": "WO-117372",
+  "date": "2026-02-11",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000197",
+  "equipment_tag": "HX-3124A",
+  "site": "ZFL",
+  "work_order_id": "WO-117429",
+  "date": "2026-02-17",
+  "work_type": "corrective",
+  "failure_mode": "tube leak",
+  "action_taken": "Located and plugged two leaking tubes, hydrotested",
+  "parts": [
+   {
+    "part_number": "41-0019-01",
+    "description": "Tube plug",
+    "quantity": 4
+   }
+  ],
+  "downtime_hours": 34.3,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000198",
+  "equipment_tag": "HX-2093",
+  "site": "KTF",
+  "work_order_id": "WO-117468",
+  "date": "2026-02-21",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000199",
+  "equipment_tag": "T-4415A",
+  "site": "SHZ",
+  "work_order_id": "WO-117496",
+  "date": "2026-02-24",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000200",
+  "equipment_tag": "T-2378",
+  "site": "WQR",
+  "work_order_id": "WO-117506",
+  "date": "2026-02-25",
+  "work_type": "corrective",
+  "failure_mode": "level gauge fault",
+  "action_taken": "Replaced radar level gauge",
+  "parts": [
+   {
+    "part_number": "49-0810-01",
+    "description": "Radar level gauge",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 19.1,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000201",
+  "equipment_tag": "K-3442A",
+  "site": "WQR",
+  "work_order_id": "WO-117534",
+  "date": "2026-02-28",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000202",
+  "equipment_tag": "P-4157",
+  "site": "TMQ",
+  "work_order_id": "WO-117573",
+  "date": "2026-03-04",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.7,
+  "performed_by": "TMQ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000203",
+  "equipment_tag": "E-2642B",
+  "site": "WQR",
+  "work_order_id": "WO-117582",
+  "date": "2026-03-05",
+  "work_type": "corrective",
+  "failure_mode": "fan motor trip",
+  "action_taken": "Replaced fan motor bearing, megger tested motor",
+  "parts": [
+   {
+    "part_number": "44-6205-01",
+    "description": "Bearing 6205",
+    "quantity": 2
+   }
+  ],
+  "downtime_hours": 29.3,
+  "performed_by": "WQR mechanical crew"
+ },
+ {
+  "record_id": "MH-000204",
+  "equipment_tag": "V-2812",
+  "site": "KTF",
+  "work_order_id": "WO-117583",
+  "date": "2026-03-05",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000205",
+  "equipment_tag": "HX-3077",
+  "site": "MRB",
+  "work_order_id": "WO-117611",
+  "date": "2026-03-08",
+  "work_type": "corrective",
+  "failure_mode": "tube leak",
+  "action_taken": "Located and plugged two leaking tubes, hydrotested",
+  "parts": [
+   {
+    "part_number": "41-0019-01",
+    "description": "Tube plug",
+    "quantity": 4
+   }
+  ],
+  "downtime_hours": 19.4,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000206",
+  "equipment_tag": "P-1735A",
+  "site": "WQR",
+  "work_order_id": "WO-117612",
+  "date": "2026-03-08",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 4.9,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000207",
+  "equipment_tag": "C-1206B",
+  "site": "HBT",
+  "work_order_id": "WO-117811",
+  "date": "2026-03-29",
+  "work_type": "corrective",
+  "failure_mode": "corrosion under insulation",
+  "action_taken": "Stripped insulation, cleaned and painted, reinsulated",
+  "parts": [
+   {
+    "part_number": "47-0075-01",
+    "description": "Insulation, 75 mm, per m2",
+    "quantity": 6
+   }
+  ],
+  "downtime_hours": 7.4,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000208",
+  "equipment_tag": "P-2743A",
+  "site": "WQR",
+  "work_order_id": "WO-117831",
+  "date": "2026-03-31",
+  "work_type": "corrective",
+  "failure_mode": "cavitation",
+  "action_taken": "Cleaned suction strainer, confirmed NPSH margin with operations",
+  "parts": [],
+  "downtime_hours": 4.7,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000209",
+  "equipment_tag": "T-2251",
+  "site": "ZFL",
+  "work_order_id": "WO-117850",
+  "date": "2026-04-02",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL static equipment crew"
+ },
+ {
+  "record_id": "MH-000210",
+  "equipment_tag": "E-4186",
+  "site": "TMQ",
+  "work_order_id": "WO-117878",
+  "date": "2026-04-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 2.8,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000211",
+  "equipment_tag": "K-3732B",
+  "site": "KTF",
+  "work_order_id": "WO-117907",
+  "date": "2026-04-08",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 5.7,
+  "performed_by": "KTF rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000212",
+  "equipment_tag": "HX-3077",
+  "site": "MRB",
+  "work_order_id": "WO-117964",
+  "date": "2026-04-14",
+  "work_type": "corrective",
+  "failure_mode": "tube leak",
+  "action_taken": "Located and plugged two leaking tubes, hydrotested",
+  "parts": [
+   {
+    "part_number": "41-0019-01",
+    "description": "Tube plug",
+    "quantity": 4
+   }
+  ],
+  "downtime_hours": 5.5,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000213",
+  "equipment_tag": "P-2034A",
+  "site": "ZFL",
+  "work_order_id": "WO-117965",
+  "date": "2026-04-14",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000214",
+  "equipment_tag": "C-2557",
+  "site": "KTF",
+  "work_order_id": "WO-118022",
+  "date": "2026-04-20",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 26.7,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000215",
+  "equipment_tag": "V-2836",
+  "site": "WQR",
+  "work_order_id": "WO-118031",
+  "date": "2026-04-21",
+  "work_type": "corrective",
+  "failure_mode": "level transmitter fault",
+  "action_taken": "Replaced level transmitter, recalibrated",
+  "parts": [
+   {
+    "part_number": "45-4100-01",
+    "description": "Level transmitter",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 21.5,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000216",
+  "equipment_tag": "V-4285",
+  "site": "WQR",
+  "work_order_id": "WO-118088",
+  "date": "2026-04-27",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000217",
+  "equipment_tag": "K-3867B",
+  "site": "ZFL",
+  "work_order_id": "WO-118117",
+  "date": "2026-04-30",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 1.3,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000218",
+  "equipment_tag": "HX-2863A",
+  "site": "TMQ",
+  "work_order_id": "WO-118127",
+  "date": "2026-05-01",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 0.6,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000219",
+  "equipment_tag": "T-4383A",
+  "site": "WQR",
+  "work_order_id": "WO-118232",
+  "date": "2026-05-12",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000220",
+  "equipment_tag": "FV-4037B",
+  "site": "HBT",
+  "work_order_id": "WO-118260",
+  "date": "2026-05-15",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT instrument crew"
+ },
+ {
+  "record_id": "MH-000221",
+  "equipment_tag": "E-4186",
+  "site": "TMQ",
+  "work_order_id": "WO-118270",
+  "date": "2026-05-16",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000222",
+  "equipment_tag": "K-3795B",
+  "site": "SHZ",
+  "work_order_id": "WO-118271",
+  "date": "2026-05-16",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000223",
+  "equipment_tag": "T-2855B",
+  "site": "MRB",
+  "work_order_id": "WO-118272",
+  "date": "2026-05-16",
+  "work_type": "corrective",
+  "failure_mode": "level gauge fault",
+  "action_taken": "Replaced radar level gauge",
+  "parts": [
+   {
+    "part_number": "49-0810-01",
+    "description": "Radar level gauge",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 8.7,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000224",
+  "equipment_tag": "P-1201A",
+  "site": "MRB",
+  "work_order_id": "WO-118305",
+  "date": "2026-05-18",
+  "work_type": "corrective",
+  "failure_mode": "mechanical seal leak",
+  "action_taken": "Replaced mechanical seal cartridge, flushed seal plan, checked alignment. Seal faces scored, suspect dry running at start-up",
+  "parts": [
+   {
+    "part_number": "30-2201-01",
+    "description": "Mechanical seal cartridge",
+    "quantity": 1
+   },
+   {
+    "part_number": "31-0415-01",
+    "description": "O-ring kit",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 14.0,
+  "performed_by": "MRB rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000225",
+  "equipment_tag": "C-3186",
+  "site": "MRB",
+  "work_order_id": "WO-118327",
+  "date": "2026-05-22",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 3.8,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000226",
+  "equipment_tag": "HX-2629",
+  "site": "MRB",
+  "work_order_id": "WO-118423",
+  "date": "2026-06-01",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 4.3,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000227",
+  "equipment_tag": "HX-3744A",
+  "site": "HBT",
+  "work_order_id": "WO-118442",
+  "date": "2026-06-03",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM done per plan. no defects",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.8,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000228",
+  "equipment_tag": "V-2029",
+  "site": "HBT",
+  "work_order_id": "WO-118443",
+  "date": "2026-06-03",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000229",
+  "equipment_tag": "C-2557",
+  "site": "KTF",
+  "work_order_id": "WO-118461",
+  "date": "2026-06-05",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 20.3,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000230",
+  "equipment_tag": "P-2316",
+  "site": "ZFL",
+  "work_order_id": "WO-118462",
+  "date": "2026-06-05",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 2.2,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000231",
+  "equipment_tag": "FV-3657B",
+  "site": "SHZ",
+  "work_order_id": "WO-118480",
+  "date": "2026-06-07",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 22.4,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000232",
+  "equipment_tag": "C-2696A",
+  "site": "KTF",
+  "work_order_id": "WO-118499",
+  "date": "2026-06-09",
+  "work_type": "corrective",
+  "failure_mode": "tray damage suspected",
+  "action_taken": "Gamma scan arranged, results within limits",
+  "parts": [],
+  "downtime_hours": 5.4,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000233",
+  "equipment_tag": "C-3636A",
+  "site": "SHZ",
+  "work_order_id": "WO-118528",
+  "date": "2026-06-12",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ static equipment crew"
+ },
+ {
+  "record_id": "MH-000234",
+  "equipment_tag": "V-3405A",
+  "site": "MRB",
+  "work_order_id": "WO-118529",
+  "date": "2026-06-12",
+  "work_type": "corrective",
+  "failure_mode": "internal corrosion found",
+  "action_taken": "Recorded wall thickness, scheduled repair at next shutdown",
+  "parts": [],
+  "downtime_hours": 6.7,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000235",
+  "equipment_tag": "E-3426",
+  "site": "TMQ",
+  "work_order_id": "WO-118566",
+  "date": "2026-06-16",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.5,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000236",
+  "equipment_tag": "K-3442A",
+  "site": "WQR",
+  "work_order_id": "WO-118567",
+  "date": "2026-06-16",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000237",
+  "equipment_tag": "T-2378",
+  "site": "WQR",
+  "work_order_id": "WO-118585",
+  "date": "2026-06-18",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000238",
+  "equipment_tag": "C-1206B",
+  "site": "HBT",
+  "work_order_id": "WO-118604",
+  "date": "2026-06-20",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 3.8,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000239",
+  "equipment_tag": "HX-1518B",
+  "site": "TMQ",
+  "work_order_id": "WO-118633",
+  "date": "2026-06-23",
+  "work_type": "corrective",
+  "failure_mode": "tube leak",
+  "action_taken": "Located and plugged two leaking tubes, hydrotested",
+  "parts": [
+   {
+    "part_number": "41-0019-01",
+    "description": "Tube plug",
+    "quantity": 4
+   }
+  ],
+  "downtime_hours": 7.4,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000240",
+  "equipment_tag": "FV-2089",
+  "site": "ZFL",
+  "work_order_id": "WO-118652",
+  "date": "2026-06-25",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 3.7,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000241",
+  "equipment_tag": "P-2034A",
+  "site": "ZFL",
+  "work_order_id": "WO-118661",
+  "date": "2026-06-26",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Laser aligned pump and motor, replaced coupling element",
+  "parts": [
+   {
+    "part_number": "34-0110-01",
+    "description": "Coupling element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 33.7,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000242",
+  "equipment_tag": "P-2316",
+  "site": "ZFL",
+  "work_order_id": "WO-118690",
+  "date": "2026-06-29",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "PM: checked and cleaned, all readings normal",
+  "parts": [],
+  "downtime_hours": 2.3,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000243",
+  "equipment_tag": "V-3568",
+  "site": "TMQ",
+  "work_order_id": "WO-118757",
+  "date": "2026-07-06",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 4.8,
+  "performed_by": "TMQ static equipment crew"
+ },
+ {
+  "record_id": "MH-000244",
+  "equipment_tag": "E-1201B",
+  "site": "MRB",
+  "work_order_id": "WO-118786",
+  "date": "2026-07-09",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 0.9,
+  "performed_by": "MRB mechanical crew"
+ },
+ {
+  "record_id": "MH-000245",
+  "equipment_tag": "FV-2659B",
+  "site": "SHZ",
+  "work_order_id": "WO-118814",
+  "date": "2026-07-12",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [
+   {
+    "part_number": "53-0100-01",
+    "description": "Filter element",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 1.1,
+  "performed_by": "SHZ instrument crew"
+ },
+ {
+  "record_id": "MH-000246",
+  "equipment_tag": "HX-3077",
+  "site": "MRB",
+  "work_order_id": "WO-118852",
+  "date": "2026-07-16",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 4.9,
+  "performed_by": "MRB static equipment crew"
+ },
+ {
+  "record_id": "MH-000247",
+  "equipment_tag": "K-4083",
+  "site": "SHZ",
+  "work_order_id": "WO-118853",
+  "date": "2026-07-16",
+  "work_type": "corrective",
+  "failure_mode": "high discharge temperature",
+  "action_taken": "Cleaned intercooler, replaced discharge valve",
+  "parts": [
+   {
+    "part_number": "37-7710-01",
+    "description": "Discharge valve assembly",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 10.7,
+  "performed_by": "SHZ rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000248",
+  "equipment_tag": "E-1567",
+  "site": "TMQ",
+  "work_order_id": "WO-118900",
+  "date": "2026-07-21",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Thickness survey done, readings within limits",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "TMQ mechanical crew"
+ },
+ {
+  "record_id": "MH-000249",
+  "equipment_tag": "E-4353",
+  "site": "SHZ",
+  "work_order_id": "WO-118948",
+  "date": "2026-07-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ mechanical crew"
+ },
+ {
+  "record_id": "MH-000250",
+  "equipment_tag": "V-4285",
+  "site": "WQR",
+  "work_order_id": "WO-119034",
+  "date": "2026-08-04",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Quarterly PM completed, filters changed",
+  "parts": [],
+  "downtime_hours": 1.3,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000251",
+  "equipment_tag": "K-3880B",
+  "site": "ZFL",
+  "work_order_id": "WO-119101",
+  "date": "2026-08-11",
+  "work_type": "corrective",
+  "failure_mode": "high vibration",
+  "action_taken": "Balanced impeller, replaced journal bearing",
+  "parts": [
+   {
+    "part_number": "40-1180-01",
+    "description": "Journal bearing",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 28.9,
+  "performed_by": "ZFL rotating equipment crew"
+ },
+ {
+  "record_id": "MH-000252",
+  "equipment_tag": "V-4285",
+  "site": "WQR",
+  "work_order_id": "WO-119120",
+  "date": "2026-08-13",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "WQR static equipment crew"
+ },
+ {
+  "record_id": "MH-000253",
+  "equipment_tag": "C-2557",
+  "site": "KTF",
+  "work_order_id": "WO-119129",
+  "date": "2026-08-14",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "KTF static equipment crew"
+ },
+ {
+  "record_id": "MH-000254",
+  "equipment_tag": "FV-2089",
+  "site": "ZFL",
+  "work_order_id": "WO-119177",
+  "date": "2026-08-19",
+  "work_type": "preventive",
+  "failure_mode": null,
+  "action_taken": "Routine PM: lubricated, checked alignment, vibration within limits",
+  "parts": [],
+  "downtime_hours": 1.3,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000255",
+  "equipment_tag": "T-3543",
+  "site": "HBT",
+  "work_order_id": "WO-119206",
+  "date": "2026-08-22",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Statutory inspection complete, certificate renewed",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "HBT static equipment crew"
+ },
+ {
+  "record_id": "MH-000256",
+  "equipment_tag": "FV-1785",
+  "site": "WQR",
+  "work_order_id": "WO-119244",
+  "date": "2026-08-26",
+  "work_type": "corrective",
+  "failure_mode": "actuator air leak",
+  "action_taken": "Replaced actuator diaphragm",
+  "parts": [
+   {
+    "part_number": "52-0150-01",
+    "description": "Actuator diaphragm",
+    "quantity": 1
+   }
+  ],
+  "downtime_hours": 35.9,
+  "performed_by": "WQR instrument crew"
+ },
+ {
+  "record_id": "MH-000257",
+  "equipment_tag": "FV-2928B",
+  "site": "ZFL",
+  "work_order_id": "WO-119245",
+  "date": "2026-08-26",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Annual inspection, no findings",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "ZFL instrument crew"
+ },
+ {
+  "record_id": "MH-000258",
+  "equipment_tag": "FV-3657B",
+  "site": "SHZ",
+  "work_order_id": "WO-119349",
+  "date": "2026-09-06",
+  "work_type": "inspection",
+  "failure_mode": null,
+  "action_taken": "Inspection: minor external corrosion noted, paint touch-up requested",
+  "parts": [],
+  "downtime_hours": 0.0,
+  "performed_by": "SHZ instrument crew"
+ }
+]

@@ -44,7 +44,7 @@ temperature 0, run a few hours apart: 9 of the 20 replies differ
 Linux container it was 9/20, on a Colab T4 10/20. The untuned 1B is not stable; the tuned
 model's replies were identical across all of those runs bar one reply.
 Both files are real. For S12 show the `06_` table - it is what the
-room's own notebook prints. Playbook entry 10 has the detail.
+room's own notebook prints. Playbook E10 has the detail.
 
 If a live notebook 06 dies, show the table with no model at all:
 

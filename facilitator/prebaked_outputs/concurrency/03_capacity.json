@@ -1,0 +1,11 @@
+{
+  "model": "llama3.2:1b",
+  "measured_on": "local; no NVIDIA GPU; parallel slots 1",
+  "latency_target_seconds": 10,
+  "single_request_seconds": 1.56,
+  "single_request_tokens_per_second": 100.0,
+  "max_concurrency_inside_target": 8,
+  "p95_at_that_level": 7.8,
+  "requests_per_second_at_that_level": 1.03,
+  "requests_per_hour": 3708
+}

@@ -12,6 +12,10 @@ anything here is a raise-with-Ritesh change, not a quiet edit.
 | 4 | Eval output format | **Final** — implemented in `scripts/run_eval.py` + `scripts/eval_scoring.py`; rubric in `data/eval/rubric.md` awaits Ritesh's sign-off |
 | 5 | Index interface | **Shape fixed now; finalised in P13** (Day 5 capstone build) |
 
+Also binding, though not one of the five: the **mock ERP API surface**
+(end of this file, P10) - Day 4 agent labs and the Day 5 MCP server
+call it.
+
 ---
 
 ## Contract 1 — corpus layout and frontmatter
@@ -166,6 +170,7 @@ share one row shape:
 | Site code | three invented letters | `MRB`, `SHZ` |
 | Ticket ID | `INC-` + 6 digits | `INC-004412` |
 | Work order | `WO-` + 6 digits | `WO-118305` |
+| Maintenance record (mock ERP) | `MH-` + 6 digits | `MH-000224` |
 | IT asset | 3-letter prefix + 5 digits (`LAP DSK MON PRN PHN MOB`) | `LAP-04412` |
 | Dates | ISO 8601 | `2026-08-14` |
 
@@ -561,3 +566,119 @@ Each result dict (a "hit") has exactly these keys:
   so the capstone runs end to end with no dependency on the Day 3
   pipeline. The Day 3 pipeline can be wrapped to the same Protocol
   with a thin adapter.
+
+---
+
+## Service surface — mock ERP API (P10)
+
+**Final.** Implemented in `services/mock_erp/` (FastAPI), documented
+for people in `services/mock_erp/README.md` and at `/docs`, as a file
+in `services/mock_erp/openapi.json`; enforced by
+`tests/test_mock_erp.py`. Consumers: Day 4 agent labs (S23, S24), the
+Day 5 reference MCP server (S26), capstone briefs 3 and 4.
+
+### Where it is
+
+- Base URL from `MOCK_ERP_URL` (default `http://127.0.0.1:8000`).
+  Start it with `uvicorn services.mock_erp.main:app` (laptop) or
+  `services.mock_erp.launch.start_in_background(port=8000)` (a
+  notebook, Colab or local; returns `.base_url`, `.health`; reuses an
+  ERP already on the port; `stop(erp)`).
+- Auth: none unless `MOCK_ERP_API_KEY` is set; then every endpoint but
+  `/health` and `/docs` needs `X-API-Key: <value>` (401 otherwise). An
+  environment secret, not production auth (BUILD_SPEC section 14).
+
+### Endpoints (the whole list)
+
+```
+GET  /health                              always open
+GET  /equipment                           ?site ?equipment_type ?criticality ?status   (by tag)
+GET  /equipment/{tag}
+GET  /maintenance-history                 ?equipment_tag ?site ?work_type ?failure_mode ?since ?until  (newest first)
+GET  /maintenance-history/{record_id}
+GET  /work-orders                         ?equipment_tag ?site ?status ?work_type ?priority ?source_ticket  (newest first)
+GET  /work-orders/{work_order_id}
+POST /work-orders                         THE ONE WRITE
+```
+
+- **Exactly one write.** No other method on any path is accepted (405).
+  A second write endpoint (a reset, an update, a cancel) is a contract
+  change: it changes what the Day 4 approval interrupt and the MCP
+  server have to gate.
+- Lists: `?limit` 1-100 (default 20), `?offset`; reply
+  `{"total", "limit", "offset", "next_offset", "items"}`, `next_offset`
+  null on the last page. Unknown query parameters are a 422.
+- Ids in paths and filters are case-insensitive; replies are upper case.
+
+### Record shapes
+
+```json
+Equipment:         {"tag": "P-1201A", "site": "MRB", "unit": "12", "equipment_type": "pump",
+                    "description": "Crude transfer pump", "manufacturer": "...", "model": "...",
+                    "serial_number": "...", "rating": "...", "install_date": "2008-12-09",
+                    "criticality": "A", "status": "in_service", "open_work_orders": ["WO-195893"]}
+MaintenanceRecord: {"record_id": "MH-000224", "equipment_tag": "P-1201A", "site": "MRB",
+                    "work_order_id": "WO-118305", "date": "2026-05-18", "work_type": "corrective",
+                    "failure_mode": "mechanical seal leak", "action_taken": "...",
+                    "parts": [{"part_number": "30-2201-01", "description": "...", "quantity": 1}],
+                    "downtime_hours": 14.0, "performed_by": "MRB rotating equipment crew"}
+WorkOrder:         {"work_order_id": "WO-118305", "equipment_tag": "P-1201A", "site": "MRB",
+                    "work_type": "corrective", "priority": 2, "status": "completed",
+                    "title": "...", "description": "...", "requested_by": "...",
+                    "approved_by": "...", "source_ticket": null, "raised_via": "erp_screen",
+                    "created": "2026-05-14T09:52:00+04:00", "target_date": "2026-05-16",
+                    "completed_date": "2026-05-18"}
+```
+
+Allowed values: `site` `HBT KTF MRB SHZ TMQ WQR ZFL`; `equipment_type`
+`pump compressor heat_exchanger air_cooler vessel column tank
+control_valve`; equipment `status` `in_service standby out_of_service`;
+`criticality` `A B C`; `work_type` `corrective preventive inspection`;
+work order `status` `released in_progress on_hold completed cancelled`;
+`priority` 1 (emergency, target today) 2 (2 days) 3 (7 days) 4 (28
+days); `raised_via` `erp_screen api`.
+
+### The write
+
+`POST /work-orders`, body (unknown fields refused):
+
+```json
+{"equipment_tag": "P-1201A", "work_type": "corrective", "priority": 2,
+ "title": "5-80 chars", "description": "10-2000 chars",
+ "requested_by": "2-80 chars", "approved_by": "2-80 chars, REQUIRED",
+ "source_ticket": "INC-004412 or null"}
+```
+
+- `201` + the new `WorkOrder` (`status: "released"`, `raised_via:
+  "api"`, `site` from the equipment master, id = highest existing + 1)
+  + `Location: /work-orders/<id>`.
+- `409 conflict` + `existing_work_order_id` if `source_ticket` already
+  has a work order. `422` if the tag is not in the master or a field is
+  wrong. Nothing is written on any error.
+- `approved_by` is recorded, never verified. The gate lives upstream:
+  the agent loop's approval interrupt (Day 4 S24), then the MCP
+  server, which refuses the write without an approval (governance
+  pack template 4; the audit line in template 5.1.2 records
+  `upstream: {"system": "mock_erp", "status": 201}`).
+
+### Errors
+
+Always `{"error": "<code>", "message": "<sentence>"}`; `problems:
+[{"where", "problem", "got"}]` on `validation_failed`;
+`existing_work_order_id` on `conflict`. Codes: 400 `malformed_body`,
+401 `unauthorised`, 404 `not_found`, 405 `method_not_allowed`, 409
+`conflict`, 415 `unsupported_media_type`, 422 `validation_failed`.
+
+### State and data
+
+- In memory; a restart reloads the seed and forgets every write. There
+  is no reset endpoint on purpose.
+- Seed data is generated (`python -m services.mock_erp.seed --seed 42`),
+  byte-deterministic, and fingerprinted in `/health`
+  (`data_fingerprint`, `84e0cc199798` for the committed files).
+  Every plant tag and work order the ticket corpus mentions exists in
+  it; `P-1201A` / `WO-118305` (May 2026 seal replacement) is the brief
+  4 story.
+- Additive changes (a new optional filter, a new response field) are
+  allowed. Renaming or removing a field, changing a status code, or
+  adding a write is a raise-with-Ritesh change.

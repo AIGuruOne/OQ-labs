@@ -43,12 +43,12 @@ every time.
 - Pinned versions only, exact, no ranges.
 
 ## Commands
-- Environment check: `python setup/setup_check.py`
+- Environment check: `python setup/setup_check.py` (`--network`: can this network reach every host the week needs - run it on the OQ network)
 - Eval: `python scripts/run_eval.py --dataset <path> --endpoint <name>` (`--label`, `--out`, `--json-mode`, `--resume`, `--replies <file>`, `--limit`, `--all`)
 - Compare runs: `python scripts/run_eval.py --compare <a_summary.json> <b_summary.json> [...]`
 - Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
 - Data quality: `python scripts/quality_checks.py --dataset data/finetune` (a folder, or `--dataset <train file> --val <val file>`; `--all` lists every finding)
-- Mock ERP: `uvicorn services.mock_erp.main:app --reload`
+- Mock ERP: `uvicorn services.mock_erp.main:app --reload` (on Windows drop `--reload`: the reload hangs, playbook 17). Walk every endpoint: `python -m services.mock_erp.tour` (`--base-url`, `--api-key`). Regenerate seed: `python -m services.mock_erp.seed --seed 42`; OpenAPI file: `python -m services.mock_erp.write_openapi`
 - Tickets: `python scripts/generate_tickets.py --count 600 --seed 42`
 - Ticket checks: `python scripts/check_tickets.py --tickets corpus/tickets/tickets_raw.jsonl --labels data/finetune/ticket_labels.jsonl --schema data/finetune/ticket_schema.json`
 - Dataset: `python scripts/build_dataset.py --seed 42` (add `--no-plant --finetune-dir <dir> --eval-dir <dir>` for a clean copy)
@@ -57,6 +57,8 @@ every time.
 - Base vs tuned (notebook 06) headless, ~3 min with Ollama 0.12.10 + `llama3.2:1b`: `python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/06_compare_base_tuned.ipynb`
 - Fundamentals (notebook 01) headless, ~40 s, needs `OPENAI_API_KEY`: delete `checkpoints/local/01_*.json`, then `python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/01_fundamentals.ipynb`
 - Local inference (notebook 02) headless, ~60 s with Ollama running and `llama3.2:1b` pulled, needs `OPENAI_API_KEY` for one call: delete `checkpoints/local/02_*.json`, `ollama stop llama3.2:1b`, then `OLLAMA_BASE_URL=http://localhost:11435 python -m nbconvert --to notebook --execute --output-dir <elsewhere> <copy of solutions/02_local_inference.ipynb placed under checkpoints/>`
+- Load test (notebook 03): `python scripts/concurrency_test.py --endpoint local` (`--levels 1,2,4,8,16`, `--requests 16`, `--max-tokens 64`, `--timeout 60`, `--base-url <url>/v1 --model <name>` for any OpenAI-compatible server, `--out`, `--run-id`, `--note`). Exit 2 = nothing measured (preflight failed), never a hang.
+- Concurrency (notebook 03) headless, ~2.5 min with Ollama 0.12.10 + `llama3.2:1b`: delete `checkpoints/local/03_*.json` and `checkpoints/local/concurrency`, then `OLLAMA_BASE_URL=http://localhost:11437 python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/03_concurrency.ipynb` (a port with NO server, so the notebook starts one and can read `Parallel:N` from its log)
 - Tests: `python -m pytest tests/`
 
 ---
@@ -265,7 +267,7 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   urgency discussion). Tuned vs its own base on the held-out 20:
   routing 7->16, requested_action 1->16, whole record 2->4, urgency
   4->7, invented values 3->0. Urgency 7/20 is BELOW the untuned 3B's
-  13/20 - explained in that README and playbook entry 8; on the 72
+  13/20 - explained in that README and playbook E8; on the 72
   validation tickets urgency is 55/72. Do NOT retrain to lift the
   held-out urgency number: that is tuning to the exam.
 - Ollama serving costs a little: the same adapter through PyTorch
@@ -330,7 +332,7 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   replies change between sittings or machines (schema-valid seen at 9,
   12 and 13 of 20); one extra warm-up request is enough. The tuned
   replies were byte-identical on Windows and Linux. Quote the base
-  column as "about", never chase a one-ticket difference (playbook 10).
+  column as "about", never chase a one-ticket difference (playbook E10).
 - A Colab CPU runtime cannot run this lab (two cores: a ticket exceeds
   the endpoint's 120 s timeout), so the Ollama cell stops at once on
   Colab without a GPU, and its message no longer offers a laptop.
@@ -410,7 +412,7 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   `ollama-linux-amd64.tgz` URL now returns 404, so every 2024-25
   "Ollama in Colab" tutorial command is broken. The versioned
   `?version=0.12.10` `.tgz` still resolves (1,875,523,113 bytes).
-  Playbook entry 15. `/v1/chat/completions` on 0.12.10 returns `usage`
+  Playbook E15. `/v1/chat/completions` on 0.12.10 returns `usage`
   and `finish_reason`; `/api/chat` returns `*_duration` in ns.
 - **Measured 2026-09-22.** Local (Windows, Ollama 0.12.10 on port
   11435, model pulled, integrated AMD GPU 77%): whole solution
@@ -432,9 +434,9 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   not running -> helper starts it (6 s); not installed -> guide
   pointer; model not pulled -> `EndpointError` 404 / `OllamaError`
   "Run the pull cell first"; port held by a non-Ollama process ->
-  entry 13. Playbook entries 13-15 carry the exact text.
+  E13. Playbook E13-E15 carry the exact text.
 - The untuned 1B's ticket reply is NOT stable across machines (playbook
-  10 again): valid JSON with 2/6 fields on Windows, missing its closing
+  E10 again): valid JSON with 2/6 fields on Windows, missing its closing
   brace (`not JSON`) in the Linux container, same request, temperature
   0. TODO 1's "repeatable" setting came back DIFFERENT on Windows and
   IDENTICAL on Linux. The header, the ticket markdown and TODO 1's
@@ -453,6 +455,62 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   notebook has not run on Colab (the same helper did, inside 06's T4
   run). Not tested: a Mac; copying `~/.ollama/models` between machines
   as the offline backup (the guide marks it untested).
+
+### Concurrency lab, notebook 03 + sizing worksheet (P9)
+- 15-minute budget, the tightest in the slice: two TODOs (the levels,
+  the latency target), one load test of 80 requests, one text chart,
+  one table, three numbers for `facilitator/sizing_worksheet.md`.
+  Measured locally 2.5 to 4 min whole notebook; Colab T4 STILL OWED
+  (expect install 56 s + pull 28 s + about a minute). A Colab CPU
+  runtime is REFUSED by the server cell (80 x 30 s = 40 min).
+- `scripts/concurrency_test.py` is the load driver: closed-loop threads
+  per level, one POST to `{base}/chat/completions` per request (Contract
+  3's protocol, nothing Ollama-specific), a preflight request that exits
+  2 with a sentence if the endpoint cannot answer (never a hang: connect
+  wait capped at 10 s), failures counted per cause and never averaged
+  in, exit 0 whenever the test ran. Pure helpers (`percentile` nearest
+  rank, `summarise_level`, `highest_level_within`, `render_table`,
+  `text_chart`, `parallel_slots_from_log`) are what the notebook
+  imports; the test itself runs through `compare_utils.run_command`.
+  The chart is PLAIN TEXT on purpose: matplotlib is not in
+  `requirements.txt` (Colab has 3.10.0; adding it is a raise-with-
+  Ritesh change) and text survives a projector and a headless run.
+- **`OLLAMA_NUM_PARALLEL` on 0.12.10 defaults to 1** (verified in
+  `envconfig/config.go` at tag v0.12.10; `sched.go` uses
+  `max(NumParallel, 1)`, no auto-4). The FAQ still says "auto-selects 4
+  or 1" - the docs are older than the code. `/api/ps` does not report
+  it; the server log's model-load line does (`Parallel:N`), which is
+  what `parallel_slots_from_log` reads, so the notebook only knows the
+  number for a server IT started (`unknown` for a laptop's app).
+  Measured with 4 slots: knee moves to 8 callers, ceiling 3.6x higher,
+  p95 still 4x at 16. Degradation shows either way with levels up to 16.
+- FOUND 2026-09-22, quote carefully: on the build laptop throughput
+  RISES from 1 to 4 callers on a one-slot server (0.33 -> 1.05 req/s)
+  before it plateaus. The model's own clock says 1.6 s a request; a
+  lone caller sees 3.0 s; queued requests land every 0.95 s. Where the
+  gap goes was NOT established (Windows? the OpenAI-compat layer?) and
+  is unmeasured on a T4. The notebook and the tests assert the PLATEAU
+  (last two levels within 15%) and the p95 climb (>= 3x), never a
+  fixed throughput gain. The 11435 server started by hand on
+  2026-09-20 behaves the same way (its environment was never recorded).
+- The integrated AMD GPU's share of the model moves the numbers by a
+  third (62% -> 100% share: 4 m 05 s -> 2 m 27 s, knee 4 -> 8 callers)
+  without changing the shape. Runs 1-2 vs 3-4 in `docs/timing_log.md`.
+  Kill scratch Ollama servers before a reference run.
+- A server the notebook starts on Windows dies with the kernel
+  (`start_server` uses `start_new_session` only on POSIX), so every
+  headless run on port 11437 is a fully cold path. Not changed here.
+- Both .ipynb files come from one scratch generator NOT in the repo
+  (same practice as 01/02/06); the solution's outputs are merged from
+  an executed copy by cell id. Edit both files with the same change
+  (parity test). To refresh: the command above, then copy the four
+  `03_*` files into `facilitator/prebaked_outputs/concurrency/` and
+  update the worked example in `sizing_worksheet.md` (its table is the
+  retained run's, by value).
+- The worksheet's worked example (brief 1, 200 tickets/day, 3x peak,
+  10 s target) comes out at 1 server used 2% of the time at peak: the
+  sheet's conclusion is the matrix's - capacity never justifies
+  hosting at desk volume. No human group has timed the sheet.
 
 ### Day 1 paper artifacts (P12)
 - `facilitator/` holds the Day 1 hand-outs: `decision_matrix_template.md`
@@ -542,6 +600,64 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   Oman is used anywhere in the repo), while gate G2 asks whether data
   may leave the country. The example flags it as OPEN for the data
   owner rather than resolving it.
+
+### Mock ERP API (P10)
+- `services/mock_erp/`: FastAPI, in memory, loaded from
+  `data/*.json` at startup (~1 s). Equipment master (86), maintenance
+  history (258), work orders (295). Surface is binding for Day 4 and
+  the Day 5 MCP server: `docs/contracts.md`, "Service surface".
+- **EXACTLY ONE WRITE: `POST /work-orders`** (raise + release to the
+  site crew, `status: released`, no update/cancel/delete anywhere,
+  `approved_by` required but never verified, 409 on a repeated
+  `source_ticket`). `tests/test_mock_erp.py` fails on a second write,
+  checked by route table AND by trying every method on every path. No
+  reset endpoint on purpose - a restart is the reset.
+- CHOSEN 2026-09-22: the write is a work order (brief 4, Day 4
+  approval interrupt), NOT an equipment-record update. The governance
+  example (`facilitator/governance_pack/examples/brief3_vision_capture_filled.md`)
+  still names `update_equipment_record` as "the one write endpoint of
+  the mock ERP" - that is now false. Raised with Utkarsh as a
+  decision, not silently edited.
+- Seed data is GENERATED (`python -m services.mock_erp.seed --seed 42`,
+  stdlib, reads the ticket corpus). Never hand-edit; the test
+  regenerates and byte-compares. `/health` shows `data_fingerprint`
+  (`84e0cc199798` now). Every plant tag (28) and work order (8) a ticket
+  mentions exists; `P-1201A` / `WO-118305` (seal, completed
+  2026-05-18) is the brief 4 story; P-1201A has no open work. Part
+  numbers are `NN-NNNN-NN` so nothing but a tag looks like a tag
+  (tested). Regenerating after a ticket-corpus change changes ids:
+  rerun tests, `write_openapi`, refresh
+  `facilitator/prebaked_outputs/mock_erp/tour_output.txt`.
+- Errors are ONE shape `{"error", "message", ...}`, including
+  FastAPI's own: malformed JSON -> 400 (FastAPI says 422
+  `json_invalid`), JSON sent as text/plain -> 415 (FastAPI says 422
+  `model_attributes_type`), unknown query params -> 422 (query models
+  with `extra="forbid"`, FastAPI >= 0.115). Keep the handlers in
+  `main.py` if FastAPI is ever bumped and retest.
+- FastAPI 0.137+ made `app.routes` a TREE (`_IncludedRouter`, private).
+  Do not walk it; read the module's `router` / `service_router`.
+- Query-string ints: `Literal[1, 2, 3, 4]` REJECTS `"2"` from a query
+  string; the filter uses `int` with `ge/le`, the body keeps `Literal`.
+- A pydantic field named `date` typed `date` breaks the class
+  (`unevaluable-type-annotation`): models use `datetime.date`.
+- Colab: `launch.start_in_background(port=8000)` (child process, log
+  to a temp file, polls `/health`, reuses an ERP already on the port,
+  refuses a foreign server). Cells are in the service README. Tested
+  in `python:3.12-slim` and `python:3.13-slim` containers through a
+  Jupyter kernel (two fresh kernels, identical output; the child dies
+  with the kernel). NOT yet run on a real Colab runtime - owed, with
+  the `serve_kernel_port_as_iframe` check (unverified; the `_window`
+  variant is deprecated/broken per Colab's source).
+- Windows + `uvicorn --reload` (uvicorn 0.52.4 StatReload): detects the
+  change, then hangs restarting the worker - reproduced with a 3-line
+  app, with and without a console, upstream issue. Also scans all
+  18,094 `.py` under the repo (incl. `.venv`) at 7.2 s a pass. Linux
+  reload works (0.7-1.1 s). Do not fix by changing the uvicorn pin.
+- Auth: `MOCK_ERP_API_KEY` (env or `.env`) -> `X-API-Key` required on
+  everything but `/health` and `/docs`; empty = open (lab default).
+  `MOCK_ERP_URL` in `.env.example` for consumers.
+- Timestamps carry `+04:00`; dates ISO. New maintenance-record id
+  convention `MH-` + 6 digits (contracts naming table).
 
 ### Eval harness (P4)
 - Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring
@@ -671,3 +787,57 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   (changelog newest 2.1.278). NOT verified, so not taught: the `#`
   memory shortcut and the exact stable version. It needs a decision
   from Ritesh on how 10-15 people authenticate (no free tier).
+
+### Failure playbook (P15)
+- `docs/failure_playbook.md` has THREE parts. Part 1: 15 room entries
+  (`## N. title`), each with the fields They say / Radius / Diagnose /
+  Fix / Fallback after 60 s / Tested, in that order. They are ordered
+  by likelihood x blast radius, with an index table on the first screen.
+  Part 2: the demo fallback ladder and Ritesh's Sat 26 check table.
+  Part 3: exact-error reference E1-E18.
+  `tests/test_failure_playbook.py` holds that shape (index lines < 40,
+  anchors land, trust level on every entry, paths exist).
+- Numbering rule for citations: "playbook entry N" (N <= 15) = room
+  entry N; "playbook EN" = Part 3. E-numbers are the entry numbers used
+  before 2026-09-23, so an old "entry 17" still means E17 (the test
+  resolves every citation in the repo). Add a new exact-error entry at
+  the END of Part 3 as the next E-number; never renumber.
+- Every Part 1 entry states REPRODUCED / SIMULATED / NOT REPRODUCED. An
+  entry from research only must say so - nobody trusts an untested fix
+  under pressure. Colab itself (blocked network, disconnect, GPU quota,
+  RAM crash, Drive popup) could NOT be reproduced from the build
+  machine; Drive mount failure was SIMULATED with a stand-in
+  `google.colab` module running the real first cell.
+- Found and fixed while reproducing (2026-09-22):
+  - `utils.ensure_api_key` now re-reads `.env`. Before, a `.env` fixed
+    mid-session was not seen until a kernel restart, though the cell
+    said "re-run this cell". A wrong key already loaded still needs a
+    restart, by design.
+  - `setup_check.py` FAILs on Python 3.14 (was WARN): pinned
+    numpy 2.1.3 has no 3.14 wheel, and pip fails in 13 s with
+    `Unknown compiler(s)`. 3.13 stays WARN: every pin has a 3.13 wheel
+    (checked with `pip download --only-binary`).
+  - `setup_check.py --network` probes 11 hosts. Each needs the exact
+    status it gave on an open network; a proxy's own 403 page counts as
+    FAIL. The Python view is not the browser's.
+- Measured facts the playbook relies on:
+  - `HTTP_PROXY` set makes a running local Ollama look dead ("Is
+    Ollama running?"). `NO_PROXY=localhost,127.0.0.1` in `.env` fixes
+    it.
+  - pip behind a blocked proxy ends with the misleading `No matching
+    distribution found ... (from versions: none)`: 22 s if the proxy
+    refuses, 103 s if it drops.
+  - A wheelhouse of `requirements.txt` is 115 files, 70 MB, and
+    installs offline in 25 s. It must be built per OS and Python; a Mac
+    one cannot be cross-built from Windows (pywin32 marker).
+  - An interrupted `ollama pull` resumes. Copying a model's manifest
+    and blobs into another store works (Windows tested).
+  - A notebook 03 disconnect mid-load-test costs the whole test,
+    because the driver saves only at the end.
+- Git Bash `sed -i` rewrote CRLF files as LF (the whole file shows as
+  changed). Several tracked files are CRLF (`git ls-files --eol`).
+  Edit those with the Edit tool, or restore CRLF afterwards.
+- STILL OWED: every Sat 26 row from the actual OQ room (Ritesh). The
+  15-second lookup was timed with a fresh model session (7-8 s per
+  entry, first screen only), NOT with a person. A human stopwatch at the
+  dry run is the real measurement.

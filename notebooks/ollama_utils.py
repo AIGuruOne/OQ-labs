@@ -45,7 +45,7 @@ LINUX_INSTALL_DIR = "/usr/local"
 
 # Tickets plus the system prompt are under 1,000 tokens. A small fixed
 # context keeps memory low whatever the machine's default is
-# (docs/failure_playbook.md entry 2).
+# (docs/failure_playbook.md E2).
 CONTEXT_LENGTH = 4096
 
 DEFAULT_BASE_URL = "http://localhost:11434"

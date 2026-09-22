@@ -131,8 +131,14 @@ def ensure_api_key(in_colab: bool, name: str = "OPENAI_API_KEY") -> bool:
         print(f"{name}: NOT SET. Add it under the key icon on the left, then re-run.")
         return False
 
-    # Local: importing config.endpoints loads the repo-root .env.
-    import config.endpoints  # noqa: F401
+    # Local: importing config.endpoints loads the repo-root .env - but only
+    # on the FIRST import in this kernel. Read the file again, so a .env
+    # fixed after the kernel started is seen when this cell is re-run
+    # (docs/failure_playbook.md entry 4). A value already in the
+    # environment still wins over the file.
+    import config.endpoints
+
+    config.endpoints._load_dotenv()
 
     if os.environ.get(name):
         print(f"{name}: found in .env")
