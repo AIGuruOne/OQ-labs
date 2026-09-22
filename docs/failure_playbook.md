@@ -155,7 +155,9 @@ Format per entry: symptom → cause → fix → seen on.
   machines it is wider: the same Ollama 0.12.10 in a Linux container
   changed 12 of the 20 base replies (schema-valid 9/20 there, 12/20 on
   Windows; whole record 2/20 on both) and **0 of the 20 tuned
-  replies**.
+  replies**. On a Colab T4 (2026-09-21) the base scored 10/20
+  schema-valid and routing 5/20, while the tuned column matched the
+  other machines ticket for ticket.
 - **Fix:** nothing to fix - use it. It is the "base model is
   inconsistent" point of BUILD_SPEC section 3, measured. Do not chase
   the difference, and do not build an argument on a single base

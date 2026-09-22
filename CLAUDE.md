@@ -172,6 +172,12 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   (header cell and final cell; both versions).
 - Notebooks 04's two versions are the same cells except the three TODO
   cells. If you edit one, make the same edit in the other.
+- `solutions/04_dataset_builder.ipynb` outputs are Utkarsh's Colab
+  (free-tier CPU runtime) run of 2026-09-21, not a local run. Its
+  output differs from a local run only in paths. If the dataset or
+  the checker changes, re-execute it in Colab and install the outputs
+  the same way; a local re-execution is fine for checking but should
+  not replace the retained Colab output.
 
 ### Quality checks (P3)
 - `scripts/quality_checks.py`: five checks, each `check_x(dataset,
@@ -203,7 +209,7 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   INSIDE each split only, so nothing is reported twice.
 - After any change to the dataset or the checker: run the tests, then
   re-execute `solutions/04_dataset_builder.ipynb` (its retained output
-  contains the full report).
+  contains the full report) - in Colab, see the P2 note above.
 
 ### Fine-tune lab (P5)
 - Stack is plain transformers 5.16.1 + peft 0.20.0 + bitsandbytes
@@ -336,15 +342,36 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   write elsewhere, copy outputs in, refresh the `06_*` files in
   `facilitator/prebaked_outputs/eval/`. The solution's TODO 3 numbers
   must match its own retained table (tested).
-- `solutions/06` retained outputs are a LOCAL run on the build machine
-  (Ollama 0.12.10), i.e. the unsupported path - the only one available
-  here. Replace them with the first clean Colab T4 run, as was done for
-  notebook 05, and update the header's measured minutes.
-- STILL OWED for P6: two stopwatch runs on a cold free-tier Colab T4
-  (nobody has yet seen Ollama 0.12.10 use the T4 inside Colab - check
-  the warm-up line), the Colab disconnect test, and a run with a real
-  participant-trained adapter (the fallback tests used a copy of the
-  pre-baked one).
+- `solutions/06_compare_base_tuned.ipynb` outputs are Utkarsh's real
+  Colab T4 run (2026-09-21), scoring his OWN adapter from Drive
+  (fingerprint b1c0e3d4 - the same weights as the pre-baked one, which
+  was copied from that run). It was the participant notebook with the
+  TODOs filled in by hand: TODO 1 and 2 had the solution's values;
+  TODO 3 keeps the solution's reference answer, with its counts taken
+  from the T4 table (that cell prints only `checkpoint saved`). Never
+  re-execute it locally - the retained output must stay a T4 run.
+  Execution counts are out of order in it (the examples cell ran before
+  the compare cell); that is how it was run, leave it.
+- T4 facts from that run: Ollama 0.12.10 install 56 s, pull 28 s,
+  100% of the model in GPU memory, 0.8 s a ticket, 4.2 min from the
+  settings cell to the end INCLUDING hand-filling the TODOs. Base
+  column on the T4: schema-valid 10/20, routing 5/20. Tuned column:
+  identical to the local and Linux runs, ticket for ticket.
+- Colab does NOT save per-cell timings in these files (no
+  `executionInfo`, in 04, 05 or 06). A downloaded .ipynb therefore
+  cannot supply a section 11 wall-clock figure - only a stopwatch can.
+  Do not write a whole-notebook minute count into `docs/timing_log.md`
+  that nobody measured.
+- `facilitator/prebaked_outputs/eval/06_*` are from a LOCAL run (the
+  T4 run's files are on Utkarsh's Drive), and the README there says so.
+- STILL OWED for P6: ONE section 11 measurement - fresh runtime, fresh
+  kernel, solution version, Run all, stopwatch from the first cell -
+  and the Colab disconnect test. (Done since P6 was committed: Ollama
+  0.12.10 using the T4 inside Colab, and a run with a
+  participant-trained adapter picked up from Drive.)
+- STILL OWED for P5: unchanged. The `05_finetune.ipynb` handed over on
+  2026-09-21 was the same run already retained in `solutions/05`
+  (all 19 outputs identical), not a second run.
 
 ### Eval harness (P4)
 - Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring

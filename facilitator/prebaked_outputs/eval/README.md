@@ -13,7 +13,7 @@ them: `data/eval/rubric.md`.
 | `2026-09-20_tuned_heldout_20_*` | `oq-ticket-tuned` = `llama3.2:1b` + `checkpoints/adapter_prebaked`, Ollama 0.12.10, 4096-token context, CPU | `python scripts/register_adapter.py --adapter checkpoints/adapter_prebaked` then `python scripts/run_eval.py --dataset data/eval/heldout_20.jsonl --endpoint tuned --label tuned`. Run twice, identical scores |
 | `2026-09-20_base-1b_heldout_20_*` | llama3.2:1b untuned - the SAME model the adapter sits on, so this is the fair "before" column | `OLLAMA_MODEL=llama3.2:1b python scripts/run_eval.py --dataset data/eval/heldout_20.jsonl --endpoint local --label base-1b` |
 | `comparison_base1b_vs_tuned.*` | the Day 2 S12 table: same model, before and after | `--compare` on those two summaries |
-| `06_base_llama3.2-1b_*`, `06_tuned_prebaked_b1c0e3d4_*`, `06_base_vs_tuned/comparison.*` | **the pre-baked output of notebook 06** (Day 2 S12): exactly the files the notebook leaves in `CHECKPOINT_DIR/eval`, from the run whose output is retained in `solutions/06_compare_base_tuned.ipynb`. Same models as the two rows above | run the solution notebook with no adapter of your own, so it falls back to `checkpoints/adapter_prebaked` |
+| `06_base_llama3.2-1b_*`, `06_tuned_prebaked_b1c0e3d4_*`, `06_base_vs_tuned/comparison.*` | **the pre-baked output of notebook 06** (Day 2 S12): exactly the files the notebook leaves in `CHECKPOINT_DIR/eval`, from a run on the build machine (Ollama 0.12.10, pre-baked adapter) on 2026-09-21. Same models as the two rows above. NOT the run retained in `solutions/06_compare_base_tuned.ipynb`: that one is Utkarsh's Colab T4 run and its files are on his Drive. The tuned column is the same in both, ticket for ticket; the base column differs (schema-valid 13/20 here, 10/20 on the T4), as the next section explains | run the solution notebook with no adapter of your own, so it falls back to `checkpoints/adapter_prebaked` |
 | `comparison_four_way.*` | untuned 1B, tuned 1B, untuned 3B, gpt-4o-mini | `--compare` on all four summaries |
 | `2026-09-20_tuned-val72_val_clean_*` (summary + report only) | the tuned model on the 72 cleaned validation tickets - a natural sample, where urgency is 55/72. Dataset file is notebook 04's `val_clean.jsonl` (git-ignored checkpoint; rebuild it with notebook 04) | `--dataset <val_clean.jsonl> --endpoint tuned --label tuned-val72` |
 | `2026-09-20_tuned-pytorch_heldout_20_*` (summary + report only) | DIAGNOSTIC: the same adapter through PyTorch/PEFT (bfloat16, CPU) instead of Ollama, via `run_eval.run_evaluation(ask=...)`. Shows the urgency score is the model's, not a serving artefact | not a CLI run |
@@ -41,7 +41,7 @@ S12 discussion rather than a surprise in it.
 `06_base_llama3.2-1b_*` (P6) are the same model, prompt, tickets and
 temperature 0, run a few hours apart: 9 of the 20 replies differ
 (schema-valid 12/20 and 13/20, category 8 and 9, urgency 4 and 5). In a
-Linux container it was 9/20. The untuned 1B is not stable; the tuned
+Linux container it was 9/20, on a Colab T4 10/20. The untuned 1B is not stable; the tuned
 model's replies were identical across all of those runs bar one reply.
 Both files are real. For S12 show the `06_` table - it is what the
 room's own notebook prints. Playbook entry 10 has the detail.
