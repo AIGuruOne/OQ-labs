@@ -55,6 +55,8 @@ every time.
 - Register the tuned adapter with Ollama: `python scripts/register_adapter.py --adapter <folder>` (`--name`, `--base`, `--print-modelfile`)
 - Fine-tune plumbing test, any machine, ~5 min: `OQ_SMOKE_TEST=1 python -m nbconvert --to notebook --execute --output <out.ipynb> solutions/05_finetune.ipynb` (write the output ELSEWHERE, never over the solution)
 - Base vs tuned (notebook 06) headless, ~3 min with Ollama 0.12.10 + `llama3.2:1b`: `python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/06_compare_base_tuned.ipynb`
+- Fundamentals (notebook 01) headless, ~40 s, needs `OPENAI_API_KEY`: delete `checkpoints/local/01_*.json`, then `python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/01_fundamentals.ipynb`
+- Local inference (notebook 02) headless, ~60 s with Ollama running and `llama3.2:1b` pulled, needs `OPENAI_API_KEY` for one call: delete `checkpoints/local/02_*.json`, `ollama stop llama3.2:1b`, then `OLLAMA_BASE_URL=http://localhost:11435 python -m nbconvert --to notebook --execute --output-dir <elsewhere> <copy of solutions/02_local_inference.ipynb placed under checkpoints/>`
 - Tests: `python -m pytest tests/`
 
 ---
@@ -373,6 +375,174 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   2026-09-21 was the same run already retained in `solutions/05`
   (all 19 outputs identical), not a second run.
 
+### Local inference, notebook 02 + Ollama guide (P8)
+- Framing is **self-hosted vs vendor API**, not laptop vs cloud: the
+  Colab runtime stands in for OQ's Azure VM. The header and a test
+  (`tests/test_notebook_02.py`) pin that wording. The model is
+  `llama3.2:1b` (the Day 2 model: one pull serves 02, 03, 05, 06), set
+  in the settings cell and pushed into `OLLAMA_MODEL` so
+  `get_endpoint("local")` follows it. `.env.example` keeps `llama3.2:3b`
+  (P4's reference) - that is deliberate, not a mismatch.
+- Ollama comes ONLY from `ollama_utils.ensure_server` / `ensure_model`
+  (shared with 06). No second install cell, no `curl`, no `install.sh`
+  in any notebook (tested). Additive changes made here:
+  `start_server` notices `ollama serve` dying at once and raises
+  `explain_server_exit(...)` (port clash reported in 4 s with the real
+  log line and the next free port, instead of a 60 s wait);
+  `warm_up` also returns `context_length` from `/api/ps`.
+- `notebooks/inference_utils.py` holds the 02 helpers: `model_card`
+  (/api/show), `chat_timed` (native /api/chat: nanosecond timings ->
+  tokens per second), `run_experiments` (same prompt, N settings, twice
+  each), `parse_json_reply`, `compare_records`, `marks_text`,
+  `side_by_side`. Pure functions are tested in
+  `tests/test_inference_utils.py` with stubbed HTTP.
+- The key cell (`utils.ensure_api_key`) sits right after the install
+  cell per Contract 2 point 6 but has NO assert: a missing key costs
+  the comparison cell (TODO 2, which asserts `key_ok`), never the
+  self-hosted part. Tested.
+- The PULL CELL is separable and idempotent (`ensure_model` skips when
+  the model is listed; skip path 2 s). Its time is saved to `02_pull`
+  apart from run time. On Colab the pull-ahead cannot help - the
+  runtime is ephemeral (install 56 s + pull 28 s on a T4, from 06's
+  run); it helps laptops only. The header says so.
+- **Research findings 2026-09-22:** current Ollama is v0.34.2
+  (2026-09-15); its Linux asset is `.tar.zst` and the unversioned
+  `ollama-linux-amd64.tgz` URL now returns 404, so every 2024-25
+  "Ollama in Colab" tutorial command is broken. The versioned
+  `?version=0.12.10` `.tgz` still resolves (1,875,523,113 bytes).
+  Playbook entry 15. `/v1/chat/completions` on 0.12.10 returns `usage`
+  and `finish_reason`; `/api/chat` returns `*_duration` in ns.
+- **Measured 2026-09-22.** Local (Windows, Ollama 0.12.10 on port
+  11435, model pulled, integrated AMD GPU 77%): whole solution
+  notebook about a minute, 50 tokens/s. Clean `python:3.12-slim`
+  container, `--cpus=2`: install by hand 226 s, pull 160 s, first call
+  10 s incl. load, notebook 160 s, **3.1 tokens/s**, ticket reply 31 s.
+  Same container, Colab code path (`ensure_server(in_colab=True)`
+  after removing Ollama and the model store): install 209 s, pull
+  132 s with progress lines, warm-up 7.7 s. The SAME container pinned
+  with `--cpuset-cpus=0,1` (two real cores) is pathological on this
+  machine, as P6 found: install 208 s, pull 139 s, then the first
+  hand-typed call took 194 s and the notebook died on a 600 s read
+  timeout (`not-installed` message still verified there). So the
+  Colab CPU runtime is UNMEASURED: the notebook does not refuse it
+  but tells people to take the T4; never quote a CPU-runtime speed
+  as a Colab figure. Real pull path on Windows
+  (`qwen2.5:0.5b`, 0.4 GB, scratch copy of the notebook): 49 s with
+  progress lines. Failure modes provoked and their messages checked:
+  not running -> helper starts it (6 s); not installed -> guide
+  pointer; model not pulled -> `EndpointError` 404 / `OllamaError`
+  "Run the pull cell first"; port held by a non-Ollama process ->
+  entry 13. Playbook entries 13-15 carry the exact text.
+- The untuned 1B's ticket reply is NOT stable across machines (playbook
+  10 again): valid JSON with 2/6 fields on Windows, missing its closing
+  brace (`not JSON`) in the Linux container, same request, temperature
+  0. TODO 1's "repeatable" setting came back DIFFERENT on Windows and
+  IDENTICAL on Linux. The header, the ticket markdown and TODO 1's
+  markdown say this; do not write text promising a format win or
+  determinism, and do not chase the difference.
+- Both .ipynb files are generated from one cell list by a scratch
+  script NOT in the repo (same practice as 01 and 06). Edit both files
+  with the same change (parity test). To refresh the solution: delete
+  `checkpoints/local/02_*.json`, `ollama stop llama3.2:1b`, execute
+  headless from a copy under `checkpoints/` with
+  `OLLAMA_BASE_URL=http://localhost:11435`, copy the output over
+  `solutions/02_local_inference.ipynb`, copy the six `02_*.json` into
+  `facilitator/prebaked_outputs/local_inference/`.
+- STILL OWED for P8: the cold Colab run (T4 and CPU runtime) with a
+  stopwatch, and the Colab disconnect test - the Colab branch of this
+  notebook has not run on Colab (the same helper did, inside 06's T4
+  run). Not tested: a Mac; copying `~/.ollama/models` between machines
+  as the offline backup (the guide marks it untested).
+
+### Day 1 paper artifacts (P12)
+- `facilitator/` holds the Day 1 hand-outs: `decision_matrix_template.md`
+  (S3), `architecture_spec_template.md` + `cost_model.xlsx` +
+  `cost_model.md` (S4), `spec_review_checklist.md` (S5),
+  `use_case_briefs.md` (handed out at the START of S4, groups confirmed
+  at the close). `facilitator/README.md` is the map. Filled examples for
+  brief 1 are in `facilitator/examples/`.
+- `cost_model.xlsx` is GENERATED by `scripts/build_cost_model.py`
+  (stdlib only - it writes the zip-of-XML itself, with live formulas;
+  no spreadsheet library because the dependency list is frozen). Never
+  hand-edit the .xlsx: `tests/test_cost_model.py` fails if it differs
+  from the script. Prices live in `PRICES` + `SOURCES` in the script;
+  edit there, rerun, commit. Verified 2026-09-22 by recalculating in
+  Excel 16 (COM, in the test) and LibreOffice headless.
+- Pricing sources: OpenAI, Anthropic, Gemini from vendor pages
+  (primary); Azure VM prices from the Azure retail prices API
+  (primary); Azure OpenAI regional/data-zone uplift is SECONDARY and
+  marked VERIFY for Ritesh. T4 and A100 SKUs are NOT offered in UAE
+  North / Qatar Central - the A10 (NV12ads A10 v5, $1.30/h) is the
+  Gulf-region GPU in the model.
+- Token counts in scenario A are MEASURED with the Llama 3.2
+  tokenizer: system prompt 250, ticket mean 72 / p95 211, reply mean
+  57. The worked conclusion is that at desk volume the API costs under
+  $14/month and a hosted VM $1,434/month (a third of it people);
+  break-even against Sonnet 5 is 1.76M requests/month. Hosting is
+  justified by the gates (residency), never by cost - the matrix and
+  the briefs say so and lab text must not claim otherwise.
+- The decision matrix worked example (ticket triage) comes out B (buy
+  through the tenant) at 430 vs D at 305; the filled spec example takes
+  the flip case (gate G1 = no) and chooses D. Both are deliberate:
+  Day 2 builds D, the paper shows when that is and is not the answer.
+- The filled spec quotes the pre-baked eval numbers and the cost model
+  by value; `tests/test_facilitator_docs.py` fails if those files
+  change. After refreshing `facilitator/prebaked_outputs/eval/` or the
+  prices, update the example's table too.
+- The spec template is 11 sections whose minute budgets sum to 75
+  (tested). The checklist is 43 questions. Neither was timed by a
+  human group yet - Ritesh's Day 1 dry-run is the measurement.
+- Briefs 2 and 3 name Day 3 files that do not exist yet
+  (`data/eval/rag_adversarial.jsonl`, `golden_answers.jsonl`,
+  `image_ground_truth/`) and brief 5 names `capstone/reference_index/`
+  (P13). `PENDING_PATHS` in the docs test lists them; remove an entry
+  when the file lands so the path check covers it.
+
+### Governance pack, Day 5 S29 (P14)
+- `facilitator/governance_pack/`: eight templates (`01_`..`08_`), a
+  README with the 30-minute session split (Ritesh presents from the
+  filled example; groups fill template 1 and the tool table of 4 in
+  the room; the rest is take-away with the owner named in template 1),
+  `sources.md`, and `examples/brief3_vision_capture_filled.md`.
+  `tests/test_governance_pack.py` enforces the shape: one "Why this
+  exists" paragraph per template (60-260 words, cites a source),
+  first line `# <n>. <title> (<m> min)` with the budgets summing to
+  80 and none over 15, at least 8 fillable rows and a sign-off, every
+  `[Sn]` defined in sources.md and every source used, paths real or in
+  its PENDING_PATHS, and the example mirroring every `## n.m` section
+  with no blank answers.
+- Sources are cited as `[S1]`..`[S14]`, each with link, date and a
+  "primary"/"secondary" verification note (checked 2026-09-22). NEVER
+  add a framework citation from memory: open the page, add a row to
+  `sources.md`, then cite. Legal figures (Oman PDPL, 72-hour breach
+  clock) are marked VERIFY for the DPO on purpose; keep that.
+- The pack defines the three audit event lines (`llm_call`,
+  `tool_call`, `index_write`) in template 5. **P13's reference MCP
+  server must write the `tool_call` line exactly as 5.1.2 lists it**
+  (`trace_id`, `access`, `approval{required,decision,by,ts,reason}`,
+  `status` ok/error/refused, `upstream`, hashes, `ms`), and the
+  capstone scaffold's ingestion path must write `index_write`. The
+  write tool must refuse without an approval (status `refused`) and
+  start read-only by default - template 4 and the example say so.
+- MCP facts come from the 2026-07-28 spec (opened): human in the loop
+  is a SHOULD, annotations are untrusted unless the server is trusted,
+  servers MUST rate-limit, MRTR `input_required` replaced
+  server-initiated elicitation. Do not describe the older elicitation
+  flow.
+- The worked example is brief 3 (vision), chosen because it carries
+  the Day 3 known-bad extraction, the gated ERP write and the index
+  write at once. Its extraction scores are "not measured" on purpose
+  (Day 3 builds the image set and the scorer); a test asserts that
+  phrase appears. Do not fill them with invented numbers - when the
+  Day 3 score table lands, quote the file. The fill time in it is
+  machine generation time (4.8 min) and says so; no human group has
+  timed the pack. Ritesh's Day 5 dry run is the first measurement.
+- Open question raised by the example, for Ritesh/Utkarsh: the week's
+  "self-hosted VM in the tenant" is UAE North (no Azure region in
+  Oman is used anywhere in the repo), while gate G2 asks whether data
+  may leave the country. The example flags it as OPEN for the data
+  owner rather than resolving it.
+
 ### Eval harness (P4)
 - Two files on purpose: `scripts/eval_scoring.py` holds EVERY scoring
   rule (pure functions, no network, no files); `scripts/run_eval.py`
@@ -436,3 +606,68 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   load. Run a second server instead of touching the app:
   `OLLAMA_HOST=127.0.0.1:11435 OLLAMA_CONTEXT_LENGTH=4096 ollama serve`
   and set `OLLAMA_BASE_URL=http://localhost:11435` for the run.
+
+### Fundamentals notebook 01, two paths (P7)
+- ONE notebook, TWO paths (BUILD_SPEC section 2, S1). Part A = setup +
+  a 10-minute diagnostic; Part B = fundamentals, FULL path only; Part
+  C = structured outputs + agent loop, both paths. The COMPRESSED path
+  is "run Part A, then Runtime > Run after on the PART C STARTS HERE
+  cell". Part C must never use a name defined only in Part B
+  (`tests/test_notebook_01.py` scans for it; the compressed path was
+  also executed as its own notebook, 2026-09-22, clean).
+- Signposting is triple: cell tag `full-path-only` (tooling), first
+  line `# [FULL PATH ONLY]` (what a person sees), and three headings
+  `THE FORK`, `PART C STARTS HERE`, plus the cell map in the header.
+  Keep all three in sync; the tests check tag <-> comment agreement
+  and that Part B is one contiguous block between the two headings.
+- The diagnostic is 3 probes scored 2 + 2 + 4 = 8, READY at >= 6.
+  Probe 1 (resend the history) and probe 2 (a dict with three keys)
+  carry half the points ON PURPOSE so a guessed quiz cannot reach
+  READY. Room rule, printed by the score cell: READY hands >= two
+  thirds -> COMPRESSED. Do not turn it into a percentage or a per-
+  person path: the room moves as one.
+- The three diagnostic TODOs (1-3) deliberately do NOT fail loudly: a
+  gap left as `...` prints `NOT ATTEMPTED -> 0` and the notebook
+  carries on (a diagnostic must never stop the room). TODOs 4-7 use
+  the normal `assert x is not ..., "TODO n is not filled in yet"`.
+  `tests/test_notebook_01.py` enforces both behaviours.
+- The quiz answer key lives in `fundamentals_utils.QUIZ_ANSWER_KEY`,
+  readable by anyone. Accepted: it is a diagnostic, not an exam, and
+  the notebook says so.
+- The agent loop is a TEXT protocol (`{"tool":..., "args":...}` /
+  `{"final":...}` in JSON mode) on purpose, not the API's native
+  `tools` field: it works unchanged on all three endpoints including
+  the 1B tuned model, and every moving part is visible in one cell.
+  Day 4 introduces native tool calling. Tools read only synthetic data
+  (`fu.ASSET_REGISTER`, the ticket corpus); asset rows agree with the
+  ticket's site and signer (tested).
+- `utils.ensure_api_key(IN_COLAB)` is the ONLY place a notebook gets
+  the hosted key on Colab (Colab Secrets, then a hidden paste).
+  Conventions doc "Cell 3b", Contract 2 point 6. The Colab branch has
+  NOT run on Colab yet (2026-09-22): the first Colab run of 01 is owed.
+- Both .ipynb files are generated from one cell list by a scratch
+  script that is NOT in the repo (same as 06). Edit both files with
+  the same change; the parity test fails otherwise. To refresh the
+  solution: delete `checkpoints/local/01_*.json`, execute headless
+  (command above), copy the output over `solutions/01_fundamentals.ipynb`,
+  copy the five `01_*.json` into `facilitator/prebaked_outputs/fundamentals/`.
+- `solutions/01_fundamentals.ipynb` retained output is a LOCAL run
+  (2026-09-22, gpt-4o-mini). Expected final line: `READY (8 / 8)`,
+  schema-valid 5 / 5, whole record 1 / 5, agent final answer in 3
+  steps. gpt-4o-mini at temperature 0 is NOT byte-stable: across six
+  headless runs on 2026-09-22 the five-ticket table changed by one
+  field (impact on INC-004603, sometimes the queue on INC-004183);
+  whole record was 1 / 5 in five runs and 0 / 5 in one. Schema-valid
+  5 / 5 and the 3-step agent trace were identical every time. Quote
+  whole record as "0 or 1 of 5"; never chase a one-field difference.
+  The test asserts only what was stable.
+- Measured (section 11 protocol, local, machine time): FULL 42.0 s /
+  41.0 s (the retained pair; an earlier pair was 38.9 s / 39.0 s),
+  COMPRESSED 24.7 s / 21.1 s. The 60 / 45 min budgets are participant
+  time. STILL OWED: a cold Colab run with the key in Colab Secrets,
+  and the disconnect test.
+- `facilitator/claude_code_session.md` is the reclaimed-45-minutes
+  session. Facts verified 2026-09-22 against code.claude.com/docs
+  (changelog newest 2.1.278). NOT verified, so not taught: the `#`
+  memory shortcut and the exact stable version. It needs a decision
+  from Ritesh on how 10-15 people authenticate (no free tier).

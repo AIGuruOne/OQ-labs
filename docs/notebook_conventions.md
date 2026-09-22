@@ -96,6 +96,32 @@ Rules:
   to `requirements.txt` (ask Ritesh first — dependency additions are a
   raise-first change).
 
+## Cell 3b — the hosted-API key (only notebooks that call the hosted endpoint)
+
+A cloned repo on Colab has no `.env`, so a notebook that uses
+`get_endpoint("hosted")` puts this cell right after the install cell.
+`utils.ensure_api_key` looks in the environment, then (Colab) in
+**Colab Secrets** under the name `OPENAI_API_KEY`, then asks for a
+one-time hidden paste; locally it relies on `.env`. It never prints
+the key. Tell participants once: key icon in the left sidebar, secret
+named exactly `OPENAI_API_KEY`, *Notebook access* on.
+
+```python
+import utils  # shared helpers from notebooks/utils.py
+
+key_ok = utils.ensure_api_key(IN_COLAB)
+assert key_ok, "No OPENAI_API_KEY. Follow the message above, then re-run this cell."
+```
+
+Reference: `notebooks/01_fundamentals.ipynb`, cell `key`.
+
+When the hosted call is only a comparison at the end of an otherwise
+local lab (notebook 02), keep the cell in the same place but replace
+the `assert` with a printed warning, and put `assert key_ok, "..."` at
+the top of the one cell that needs the key. A missing key then costs
+that cell, not the lab. Reference: `notebooks/02_local_inference.ipynb`,
+cells `key` and `hosted-todo`.
+
 ## Cell 4 onward — the lab
 
 - **One idea per cell.** A markdown cell before every code cell says

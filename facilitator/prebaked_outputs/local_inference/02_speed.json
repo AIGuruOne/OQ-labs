@@ -1,0 +1,13 @@
+{
+  "reply": "An IT service desk is a centralized point of contact for customers to report and request technical issues or support with computer systems, networks, and other technology services, providing prompt resolution and assistance.",
+  "done_reason": "stop",
+  "prompt_tokens": 37,
+  "reply_tokens": 38,
+  "load_seconds": 0.11,
+  "prompt_seconds": 0.07,
+  "generate_seconds": 1.02,
+  "total_seconds": 1.24,
+  "tokens_per_second": 37.3,
+  "model": "llama3.2:1b",
+  "measured_on": "local CPU"
+}

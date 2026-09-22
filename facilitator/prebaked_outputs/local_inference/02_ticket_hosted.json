@@ -1,0 +1,7 @@
+{
+  "ticket_id": "INC-004183",
+  "model": "gpt-4o-mini",
+  "endpoint": "Endpoint(name='hosted', model='gpt-4o-mini', base_url='https://api.openai.com/v1')",
+  "reply": "{\n  \"category\": \"software\",\n  \"affected_system\": \"TEAMS\",\n  \"asset_tag\": null,\n  \"urgency\": \"high\",\n  \"impact\": \"single_user\",\n  \"requested_action\": \"Resolve microphone issue in TEAMS\",\n  \"routing_queue\": \"apps_support\"\n}",
+  "seconds": 2.44
+}

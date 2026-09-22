@@ -1,0 +1,69 @@
+{
+  "ticket_id": "INC-004183",
+  "rows": [
+    [
+      "model",
+      "llama3.2:1b",
+      "gpt-4o-mini"
+    ],
+    [
+      "runs at",
+      "http://localhost:11435/v1",
+      "https://api.openai.com/v1"
+    ],
+    [
+      "who saw the ticket",
+      "this machine only",
+      "the vendor's servers"
+    ],
+    [
+      "seconds, 1 request",
+      5.17,
+      2.44
+    ],
+    [
+      "format",
+      "not JSON",
+      "valid JSON object"
+    ],
+    [
+      "exact fields",
+      "no readable record (0/6)",
+      "4/6 right; wrong: affected_system, routing_queue"
+    ],
+    [
+      "requested_action",
+      "-",
+      "Resolve microphone issue in TEAMS"
+    ],
+    [
+      "expected action",
+      "Fix the user's microphone in Teams",
+      "Fix the user's microphone in Teams"
+    ]
+  ],
+  "table": "                       | self-hosted (Ollama)                 | vendor API                          \n----------------------------------------------------------------------------------------------------\nmodel                  | llama3.2:1b                          | gpt-4o-mini                         \nruns at                | http://localhost:11435/v1            | https://api.openai.com/v1           \nwho saw the ticket     | this machine only                    | the vendor's servers                \nseconds, 1 request     | 5.17                                 | 2.44                                \nformat                 | not JSON                             | valid JSON object                   \nexact fields           | no readable record (0/6)             | 4/6 right; wrong: affected_system...\nrequested_action       | -                                    | Resolve microphone issue in TEAMS   \nexpected action        | Fix the user's microphone in Teams   | Fix the user's microphone in Teams  ",
+  "local": {
+    "ticket_id": "INC-004183",
+    "model": "llama3.2:1b",
+    "endpoint": "Endpoint(name='local', model='llama3.2:1b', base_url='http://localhost:11435/v1')",
+    "reply": "{\n  \"category\": \"access\",\n  \"affected_system\": null,\n  \"asset_tag\": null,\n  \"urgency\": \"medium\",\n  \"impact\": \"single_user\",\n  \"requested_action\": \"Activate mic in TEAMS and reset password for Claimpoint\",\n  \"routing_queue\": \"identity_access\"",
+    "seconds": 5.17
+  },
+  "hosted": {
+    "ticket_id": "INC-004183",
+    "model": "gpt-4o-mini",
+    "endpoint": "Endpoint(name='hosted', model='gpt-4o-mini', base_url='https://api.openai.com/v1')",
+    "reply": "{\n  \"category\": \"software\",\n  \"affected_system\": \"TEAMS\",\n  \"asset_tag\": null,\n  \"urgency\": \"high\",\n  \"impact\": \"single_user\",\n  \"requested_action\": \"Resolve microphone issue in TEAMS\",\n  \"routing_queue\": \"apps_support\"\n}",
+    "seconds": 2.44
+  },
+  "expected": {
+    "category": "software",
+    "affected_system": "Teams",
+    "asset_tag": null,
+    "urgency": "high",
+    "impact": "single_user",
+    "requested_action": "Fix the user's microphone in Teams",
+    "routing_queue": "end_user_computing"
+  }
+}

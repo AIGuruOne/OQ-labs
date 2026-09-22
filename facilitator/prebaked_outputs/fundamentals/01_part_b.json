@@ -1,0 +1,46 @@
+{
+  "roles_demo": {
+    "terse": "Check your internet connection and restart your router. If the issue persists, try reinstalling the VPN client or contacting your IT support.",
+    "tutor": "If your VPN drops every ten minutes, here are four steps you can take to troubleshoot the issue:\n\n1. **Check Your Internet Connection**: Ensure that your internet connection is stable. You can do this by running a speed test or trying to browse other websites without the VPN. If your internet is unstable, the VPN will likely drop as well.\n\n2. **Change VPN Server**: Sometimes, the server you are connected to may be experiencing issues. Try switching to a different server within your VPN application to see if that resolves the disconnection problem.\n\n3. **Update VPN Software**: Make sure that your VPN client is up to date. Software updates often include bug fixes and improvements that can enhance stability and performance. Check the VPN provider's website or app for any available updates.\n\n4. **Adjust VPN Settings**: Look into the settings of your VPN client. Some options, like \"Keep Alive\" or \"Reconnect on Disconnect,\" can help maintain a stable connection. Additionally, consider changing"
+  },
+  "memory_demo": {
+    "alone": "I'm sorry, but I don't have access to previous interactions or any specific asset tags you may have provided.",
+    "with_history": "LAP-04412"
+  },
+  "tokens_demo": {
+    "short_usage": {
+      "prompt_tokens": 22,
+      "completion_tokens": 25,
+      "total_tokens": 47,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    },
+    "full_usage": {
+      "prompt_tokens": 22,
+      "completion_tokens": 165,
+      "total_tokens": 187,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "audio_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "audio_tokens": 0,
+        "accepted_prediction_tokens": 0,
+        "rejected_prediction_tokens": 0
+      }
+    }
+  },
+  "prompting_demo": {
+    "vague": "This ticket can be categorized into two main issues:\n\n1. **Technical Support - Audio Issue**: The user is experiencing a microphone issue in Microsoft Teams where the other party cannot hear their voice, despite the microphone working in other applications.\n\n2. **Account Management - Password Reset**: The user is requesting a password reset for their Claimpoint account due to expiration.\n\nOverall Category: **IT Support Request**",
+    "good": "software"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "repeatable": {
+    "settings": {
+      "temperature": 0.0,
+      "seed": 42
+    },
+    "replies": [
+      "\"I'm so sorry to inform you that your laptop, LAP-04412, will be going in for a replacement tomorrow - I know how much it's been with you and I hope everything gets sorted out quickly.\"",
+      "\"I'm so sorry to inform you that your laptop, LAP-04412, will be going in for a replacement tomorrow - I know how much it's been with you and I hope everything gets sorted out quickly.\""
+    ],
+    "finish_reasons": [
+      "stop",
+      "stop"
+    ],
+    "reply_tokens": [
+      44,
+      44
+    ],
+    "identical": true,
+    "seconds": [
+      3.56,
+      3.53
+    ]
+  },
+  "creative": {
+    "settings": {
+      "temperature": 1.0
+    },
+    "replies": [
+      "\"I wanted to let you know that your laptop, LAP-04412, will be being replaced tomorrow as part of routine maintenance. If you have any urgent work or need assistance in the meantime, please stay tuned for further updates and try to complete all tasks before then.\"",
+      "\"I'm so sorry, but tomorrow I'll be on an unexpected trip and won't be able to make it for our meeting! I've made plans with my colleagues to cover responsibilities in the meantime, and you should follow up with them directly.\""
+    ],
+    "finish_reasons": [
+      "stop",
+      "stop"
+    ],
+    "reply_tokens": [
+      55,
+      50
+    ],
+    "identical": false,
+    "seconds": [
+      3.84,
+      3.7
+    ]
+  },
+  "capped": {
+    "settings": {
+      "temperature": 0.0,
+      "max_tokens": 12
+    },
+    "replies": [
+      "\"I'm so sorry to inform you that your laptop, LAP",
+      "\"I'm so sorry to inform you that your laptop, LAP"
+    ],
+    "finish_reasons": [
+      "length",
+      "length"
+    ],
+    "reply_tokens": [
+      12,
+      12
+    ],
+    "identical": true,
+    "seconds": [
+      2.53,
+      2.54
+    ]
+  }
+}

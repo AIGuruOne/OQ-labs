@@ -86,3 +86,60 @@ def load_pickle(checkpoint_dir, name: str, default=_NO_DEFAULT):
         return default
     with open(path, "rb") as handle:
         return pickle.load(handle)
+
+
+# ---------------------------------------------------------------------------
+# The hosted-API key — .env locally, Colab Secrets on Colab.
+# ---------------------------------------------------------------------------
+
+
+def ensure_api_key(in_colab: bool, name: str = "OPENAI_API_KEY") -> bool:
+    """Put the hosted-API key into os.environ and say where it came from.
+
+    Locally the key lives in the repo-root `.env` (config.endpoints loads
+    it on import). On Colab the cloned repo has no `.env`, so the key
+    comes from Colab Secrets (the key icon in the left sidebar, name it
+    exactly OPENAI_API_KEY and switch on "Notebook access"), and failing
+    that from a one-time paste prompt that is never echoed.
+
+    Returns True when the key is set. Never prints any part of the key.
+    """
+    import os
+
+    if os.environ.get(name):
+        print(f"{name}: found in the environment")
+        return True
+
+    if in_colab:
+        try:
+            from google.colab import userdata
+
+            os.environ[name] = userdata.get(name)
+            print(f"{name}: found in Colab Secrets")
+            return True
+        except Exception:  # noqa: BLE001 - no secret, or access not granted
+            pass
+        import getpass
+
+        pasted = getpass.getpass(
+            f"{name} not in Colab Secrets. Paste it here (not shown): "
+        ).strip()
+        if pasted:
+            os.environ[name] = pasted
+            print(f"{name}: taken from the paste prompt (this runtime only)")
+            return True
+        print(f"{name}: NOT SET. Add it under the key icon on the left, then re-run.")
+        return False
+
+    # Local: importing config.endpoints loads the repo-root .env.
+    import config.endpoints  # noqa: F401
+
+    if os.environ.get(name):
+        print(f"{name}: found in .env")
+        return True
+    print(
+        f"{name}: NOT SET. Copy setup/.env.example to .env at the repo "
+        "root, fill it in, and re-run this cell. Check the spelling of "
+        "the variable name."
+    )
+    return False

@@ -1,0 +1,7 @@
+{
+  "ticket_id": "INC-004183",
+  "model": "llama3.2:1b",
+  "endpoint": "Endpoint(name='local', model='llama3.2:1b', base_url='http://localhost:11435/v1')",
+  "reply": "{\n  \"category\": \"access\",\n  \"affected_system\": null,\n  \"asset_tag\": null,\n  \"urgency\": \"medium\",\n  \"impact\": \"single_user\",\n  \"requested_action\": \"Activate mic in TEAMS and reset password for Claimpoint\",\n  \"routing_queue\": \"identity_access\"",
+  "seconds": 5.17
+}

@@ -37,12 +37,24 @@ python setup/setup_check.py
 an explained WARN before Day 1. It needs no packages installed — you
 can run it before step 3 to check your machine.
 
+**Day 2 on a laptop** also needs Ollama (a model server, not a Python
+package) and one pulled model. Install it and run
+`ollama pull llama3.2:1b` (1.3 GB) **before Day 2** — at the Day 1 tech
+check, not over venue Wi-Fi in the session. Full guide, including
+what to do when your machine behaves differently: `setup/ollama_setup.md`.
+On Colab the notebooks install Ollama themselves.
+
 ## Setup (Colab)
 
 Nothing to install by hand. Open any notebook via its **Open in Colab**
 badge; the first cells detect Colab, install pinned requirements, and
 mount Google Drive for checkpoints. Free tier is enough — no notebook
 in this repo requires Colab Pro.
+
+Notebooks that call the hosted model (Day 1's `01_fundamentals` is the
+first) read the key from **Colab Secrets**: key icon in the left
+sidebar, add a secret named exactly `OPENAI_API_KEY`, switch on
+*Notebook access*. Do it once; it persists across runtimes.
 
 ## Layout
 
@@ -57,6 +69,7 @@ in this repo requires Colab Pro.
 | `services/` | Mock ERP API and reference MCP server (Day 5) |
 | `setup/` | Environment check and setup guides |
 | `docs/` | Interface contracts, timing log, failure playbook |
+| `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 5 governance pack, pre-baked outputs |
 
 ## Commands
 

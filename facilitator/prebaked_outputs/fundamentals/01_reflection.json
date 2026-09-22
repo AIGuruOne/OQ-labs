@@ -1,0 +1,4 @@
+{
+  "approval_gate": "The dispatch line `observation = TOOLS[tool_name](**tool_args)`: before it, check whether tool_name is in a WRITE set and, if so, ask a human (input() today, an approval queue in production) and return {'error': 'not approved'} as the observation when they say no.",
+  "step_cap": "Nothing else stops the loop: a model that keeps calling tools, or never replies with 'final', would run and bill forever. MAX_STEPS turns that into a loud, cheap failure."
+}

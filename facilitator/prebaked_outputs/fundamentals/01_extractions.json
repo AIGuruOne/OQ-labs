@@ -1,0 +1,112 @@
+[
+  {
+    "ticket_id": "INC-004183",
+    "attempts": 1,
+    "record": {
+      "category": "software",
+      "affected_system": "TEAMS",
+      "asset_tag": null,
+      "urgency": "high",
+      "impact": "single_user",
+      "requested_action": "Resolve microphone issue in TEAMS",
+      "routing_queue": "apps_support"
+    },
+    "verdicts": {
+      "category": true,
+      "affected_system": false,
+      "asset_tag": true,
+      "urgency": true,
+      "impact": true,
+      "routing_queue": false,
+      "requested_action": false
+    }
+  },
+  {
+    "ticket_id": "INC-004454",
+    "attempts": 1,
+    "record": {
+      "category": "other",
+      "affected_system": null,
+      "asset_tag": null,
+      "urgency": "medium",
+      "impact": "team",
+      "requested_action": "Provide IT support for Logistics event",
+      "routing_queue": "service_desk_l1"
+    },
+    "verdicts": {
+      "category": true,
+      "affected_system": true,
+      "asset_tag": true,
+      "urgency": true,
+      "impact": true,
+      "routing_queue": true,
+      "requested_action": false
+    }
+  },
+  {
+    "ticket_id": "INC-004467",
+    "attempts": 1,
+    "record": {
+      "category": "network",
+      "affected_system": null,
+      "asset_tag": null,
+      "urgency": "critical",
+      "impact": "team",
+      "requested_action": "Investigate network speed issues",
+      "routing_queue": "network_ops"
+    },
+    "verdicts": {
+      "category": true,
+      "affected_system": true,
+      "asset_tag": true,
+      "urgency": false,
+      "impact": false,
+      "routing_queue": true,
+      "requested_action": false
+    }
+  },
+  {
+    "ticket_id": "INC-004603",
+    "attempts": 1,
+    "record": {
+      "category": "other",
+      "affected_system": null,
+      "asset_tag": null,
+      "urgency": "medium",
+      "impact": "single_user",
+      "requested_action": "Investigate ticket ownership",
+      "routing_queue": "service_desk_l1"
+    },
+    "verdicts": {
+      "category": true,
+      "affected_system": true,
+      "asset_tag": true,
+      "urgency": false,
+      "impact": true,
+      "routing_queue": true,
+      "requested_action": false
+    }
+  },
+  {
+    "ticket_id": "INC-004682",
+    "attempts": 1,
+    "record": {
+      "category": "software",
+      "affected_system": "auto cad",
+      "asset_tag": null,
+      "urgency": "medium",
+      "impact": "team",
+      "requested_action": "Install auto cad",
+      "routing_queue": "apps_support"
+    },
+    "verdicts": {
+      "category": true,
+      "affected_system": false,
+      "asset_tag": true,
+      "urgency": false,
+      "impact": true,
+      "routing_queue": false,
+      "requested_action": false
+    }
+  }
+]

@@ -115,17 +115,52 @@ def start_server(log_path):
     if os.name == "posix":
         # Its own session: interrupting a notebook cell must not stop the server.
         options["start_new_session"] = True
-    subprocess.Popen(["ollama", "serve"], stdout=log_file, stderr=subprocess.STDOUT,
-                     env=environment, **options)
+    process = subprocess.Popen(["ollama", "serve"], stdout=log_file, stderr=subprocess.STDOUT,
+                               env=environment, **options)
 
     deadline = time.time() + SERVER_START_TIMEOUT_SECONDS
     while time.time() < deadline:
         version = server_version(base_url)
         if version is not None:
             return version
+        if process.poll() is not None:
+            # It died at once. The log's last line says why - usually the port.
+            raise OllamaError(explain_server_exit(base_url, log_path))
         time.sleep(1)
     raise OllamaError(f"`ollama serve` was started but {base_url} did not answer within "
                       f"{SERVER_START_TIMEOUT_SECONDS} s. Read the log: {log_path}")
+
+
+def last_log_line(log_path):
+    """The last non-empty line of a log file, or '' if there is none."""
+    try:
+        lines = [line for line in Path(log_path).read_text(encoding="utf-8", errors="replace").splitlines()
+                 if line.strip()]
+    except OSError:
+        return ""
+    return lines[-1].strip() if lines else ""
+
+
+def explain_server_exit(base_url, log_path):
+    """Turn the last log line of a dead `ollama serve` into a sentence that says what to do.
+
+    The one seen in the wild is the port: another program (usually the Ollama
+    desktop app, or a stale `ollama serve`) already holds it. If that program
+    were an Ollama server we would have talked to it instead of starting one -
+    so whatever holds the port is NOT an Ollama server, or is one that is not
+    answering.
+    """
+    reason = last_log_line(log_path)
+    port = urlparse(base_url).port or 11434
+    message = f"`ollama serve` stopped at once. Its last log line: {reason or '(empty log)'}"
+    if "address already in use" in reason.lower() or "only one usage of each socket address" in reason.lower():
+        message += (f"\n  Port {port} is held by another program that is not answering as Ollama."
+                    f"\n  Either stop that program, or serve on a free port: set"
+                    f"\n  OLLAMA_BASE_URL=http://localhost:{port + 1} in .env (or os.environ) and run this cell again."
+                    f"\n  (`OLLAMA_HOST=127.0.0.1:{port + 1} ollama serve` is the same thing by hand.)")
+    else:
+        message += f"\n  Full log: {log_path}"
+    return message
 
 
 def ensure_server(in_colab, log_dir):
@@ -217,10 +252,13 @@ def warm_up(model_name, base_url=None):
     """Load model_name into memory with one tiny request, so the first
     real ticket does not pay for the load. Returns:
 
-        {"seconds": how long load + reply took, "gpu_share": 0.0 to 1.0}
+        {"seconds": how long load + reply took, "gpu_share": 0.0 to 1.0,
+         "context_length": the context the server gave the model}
 
     gpu_share is the server's own report of how much of the model sits
     in GPU memory (any GPU Ollama supports, not only NVIDIA). 0.0 = all CPU.
+    context_length comes from /api/ps too: OLLAMA_CONTEXT_LENGTH on a server
+    this helper started, the app's setting on a desktop app, None if unknown.
     """
     base_url = base_url or server_url()
     started = time.time()
@@ -235,8 +273,12 @@ def warm_up(model_name, base_url=None):
     seconds = round(time.time() - started, 1)
 
     gpu_share = 0.0
+    context_length = None
     running = requests.get(f"{base_url}/api/ps", timeout=10).json().get("models", [])
     for model in running:
         if model.get("name", "").split(":latest")[0] == model_name.split(":latest")[0] and model.get("size"):
             gpu_share = round(model.get("size_vram", 0) / model["size"], 2)
-    return {"seconds": seconds, "gpu_share": gpu_share}
+            # The context the SERVER gave this model (OLLAMA_CONTEXT_LENGTH or the
+            # desktop app's setting) - not the model's own maximum.
+            context_length = model.get("context_length")
+    return {"seconds": seconds, "gpu_share": gpu_share, "context_length": context_length}

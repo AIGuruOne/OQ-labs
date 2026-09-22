@@ -15,6 +15,15 @@ Format per entry: symptom → cause → fix → seen on.
   misspelling when it sees one).
 - **Fix:** `cp setup/.env.example .env`, set `OPENAI_API_KEY=...`
   exactly, re-run `python setup/setup_check.py`.
+- **On Colab** (notebook 01 is the first that needs the hosted key
+  there): the cloned repo has no `.env`. The key cell
+  (`utils.ensure_api_key`) looks in Colab Secrets - key icon in the
+  left sidebar, secret named exactly `OPENAI_API_KEY`, *Notebook
+  access* switched on - and otherwise asks for a hidden one-time
+  paste. A paste lasts for that runtime only; a disconnect means
+  pasting again, a Secret does not. The Colab branch is untested on
+  Colab as of 2026-09-22 (local branch tested); first Colab run of
+  notebook 01 confirms it or lands here as its own entry.
 - **Seen on:** 2026-09-19 (build machine).
 
 ### 2. Ollama: `model requires more system memory (15.9 GiB) than is available`
@@ -204,8 +213,75 @@ Format per entry: symptom → cause → fix → seen on.
 - **Seen on:** 2026-09-20 (python:3.12-slim containers, `--cpuset-cpus=0,1`
   and `--cpus=2`, Ollama 0.12.10).
 
+### 13. Port already in use: `ollama serve stopped at once. Its last log line: Error: listen tcp 127.0.0.1:11434: bind: ...`
+- **Symptom:** the Ollama cell of notebook 02/03/06 stops within a few
+  seconds with that message. On Windows the log line ends `Only one
+  usage of each socket address (protocol/network address/port) is
+  normally permitted`; on Linux/macOS `address already in use`. By
+  hand, `ollama serve` prints the same line and exits.
+- **Cause:** another program holds the port. The helper only tries to
+  start a server when nothing on the port *answers as Ollama*
+  (`/api/version`), so it is not simply "the desktop app is running"
+  - that case is used silently. It is a non-Ollama program on 11434,
+  or an Ollama that has hung.
+- **Fix:** the message names the next free port. Either stop the other
+  program, or set `OLLAMA_BASE_URL=http://localhost:11435` (in `.env`,
+  or `os.environ` in the settings cell) and run the cell again: the
+  helper starts `ollama serve` on that port (`OLLAMA_HOST` is derived
+  from it) and everything downstream follows the variable. By hand:
+  `OLLAMA_HOST=127.0.0.1:11435 OLLAMA_CONTEXT_LENGTH=4096 ollama serve`.
+  Before 2026-09-22 this case waited the full 60 s and then said only
+  "did not answer"; `ollama_utils.start_server` now notices the exit
+  and reports the log line at once (4 s measured).
+- **Seen on:** 2026-09-22 (build machine, Windows 11: a Python HTTP
+  server parked on the port on purpose; `tests/test_inference_utils.py`).
+
+### 14. `Model 'llama3.2:1b' not found on Ollama (HTTP 404). Pull it first` / `Ollama is not installed on this machine`
+- **Symptom:** the first of these from `get_endpoint("local").chat(...)`
+  (`EndpointError`); or `OllamaError: llama3.2:1b is not on this server.
+  Run the pull cell first.` from the notebook-02 helpers; or `Ollama is
+  not installed on this machine. Install it once: setup/ollama_setup.md`
+  from the server cell on a laptop. Also `Endpoint 'local' unreachable
+  at http://localhost:11434/v1/chat/completions. Is Ollama running?`
+  when nothing listens at all.
+- **Cause:** in order: the server is up but the model was never pulled
+  (or the name is misspelt - `llama3.2:1b`, not `llama3.2-1b`); the
+  `ollama` program is not on `PATH` (freshly installed on Windows: the
+  Jupyter kernel and old terminals keep the old `PATH`); no server is
+  running and none could be started.
+- **Fix:** run notebook 02's **PULL CELL** (or `ollama pull llama3.2:1b`;
+  1.3 GB, the day before if on venue Wi-Fi); restart the kernel / open a
+  new terminal after installing; start the Ollama app, or run the server
+  cell again - `ensure_server` starts `ollama serve` itself when the
+  program is installed (6 s measured). Section 6 of
+  `setup/ollama_setup.md` has every message with its fix.
+- **Seen on:** 2026-09-22 (build machine, all four messages provoked on
+  purpose against Ollama 0.12.10; the not-installed message also in a
+  clean Linux container).
+
+### 15. The classic Ollama Linux install one-liner returns `404 Not Found`
+- **Symptom:** `curl -fsSL https://ollama.com/download/ollama-linux-amd64.tgz | tar -xzf - -C /usr`
+  (the command in most 2024-2025 Colab tutorials) fails: curl gets a
+  404 and tar complains about an empty archive. `install.sh` itself
+  wants a `zstd` tool that a Colab image may lack.
+- **Cause:** Ollama's current releases (0.34.x, September 2026) publish
+  Linux as `.tar.zst`; the unversioned `.tgz` URL now redirects to a
+  release that has no such asset. Ollama also added a first-run
+  sign-in prompt to the `ollama` command in 0.34.2.
+- **Fix:** none needed for the labs - `ollama_utils.install_on_linux`
+  fetches the **versioned** `.tgz` (`?version=0.12.10`, 1.88 GB,
+  redirecting to the GitHub release asset), which still exists and is
+  the release every reference number was measured on. Do not "fix" a
+  notebook by piping `install.sh`; it installs a moving release that
+  refuses the tuned adapter (entry 11). If the pinned URL ever
+  disappears, the same file is at
+  `https://github.com/ollama/ollama/releases/download/v0.12.10/ollama-linux-amd64.tgz`.
+- **Seen on:** 2026-09-22 (`curl -sIL` on both URLs from the build
+  machine: the pinned one answers `200`, `Content-Length: 1875523113`;
+  the unversioned one `404`).
+
 *(Remaining entries — Colab blocked, runtime disconnect on Colab
-itself, Ollama won't start, model pull too slow, pip blocked,
-OOM, port in use, Drive not mounting — get filled in as they are
-actually hit during dry runs. Owner: both slices, whoever hits it
-first writes it up.)*
+itself, model pull too slow, pip blocked, OOM, Drive not mounting —
+get filled in as they are actually hit during dry runs. "Ollama won't
+start" and "port in use" are entries 13 and 14. Owner: both slices,
+whoever hits it first writes it up.)*

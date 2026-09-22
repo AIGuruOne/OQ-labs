@@ -1,0 +1,8 @@
+{
+  "total": 8,
+  "verdict": "READY",
+  "probe_1": 2,
+  "probe_2": 2,
+  "quiz": 4,
+  "model": "gpt-4o-mini"
+}

@@ -188,6 +188,21 @@ binding parts:
 5. Checkpoint at every milestone via `notebooks/utils.py`
    (`save_json` / `load_json` / `save_pickle` / `load_pickle`);
    milestone cells load-if-exists.
+6. (Added 2026-09-22, P7, additive.) A notebook that calls the hosted
+   endpoint puts `utils.ensure_api_key(IN_COLAB)` right after the
+   install cell: `.env` locally, Colab Secrets (`OPENAI_API_KEY`) or a
+   one-time hidden paste on Colab. The key is never printed. Reference
+   cell: `notebooks/01_fundamentals.ipynb`, cell `key`. (Added
+   2026-09-22, P8, additive.) A notebook whose hosted call is a
+   side-by-side extra, not the lab itself, keeps the cell in the same
+   place but prints a warning instead of asserting, and asserts
+   `key_ok` in the one cell that needs the key - so a missing key
+   costs that cell, not the lab. Reference: `02_local_inference`.
+7. (P7.) A notebook with two facilitator paths marks the skippable
+   cells with the cell tag `full-path-only` AND a first-line comment
+   `# [FULL PATH ONLY]`, keeps them in one contiguous block, and makes
+   the cells after the block independent of it (tested in
+   `tests/test_notebook_01.py`). Only notebook 01 has two paths today.
 
 ---
 
