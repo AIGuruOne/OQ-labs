@@ -53,6 +53,19 @@ verified; nothing is cited from memory.
 | `governance_pack/08_monitoring_drift.md` | 8 | The weekly numbers with thresholds and the runbook each starts; drift signals; automation bias |
 | `governance_pack/examples/brief3_vision_capture_filled.md` | — | The pack filled for brief 3 (nameplate and diagram capture): the brief that has the known-bad extraction, the gated ERP write and the index write. Extraction scores are written as *not measured* until Day 3 produces them |
 
+## Day 5 capstone (P13)
+
+The scaffold itself is `capstone/` (its README is the group's guide).
+These are the paper that goes with it.
+
+| File | Session | Minutes | What it is |
+|---|---|---|---|
+| `production_engineering_handout.md` | S27 hand-out, read in S28 | 10 | What changes between the lab and a service OQ can run: errors, retries, timeouts, observability, cost, versioning, rollback, eval in production, access, data. Then what the week did not cover (CI, containers, packaging, UI, concurrency, OIDC) named as real work |
+| `deployment_checklist.md` | 13:15 final polish | 30 | 22 checks in five blocks (runs, a number, a wrong-answer path, logged and costed, someone can take it over), each with the command that proves it, and a three-way verdict the group says first in S30 |
+| `peer_scoring_sheet.md` | S30, 14:00 | 65 | Six criteria scored 0 / 1 / 2 with visible anchors, silent 90-second scoring after each demo, medians read out, and a "steal this" column. Slot plan for 4-5 and for 6 groups |
+| `examples/deployment_checklist_brief5_filled.md` | reference | — | The checklist run against the brief 5 build in `capstone/examples/`: verdict "handover-ready with named gaps", five real gaps the checklist found |
+| `prebaked_outputs/capstone/` | S27-S30 insurance | — | The brief 5 build's run: status, tickets, the injection ticket, four evals and their comparison, the audit lines. A LOCAL run (Windows build laptop, Ollama 0.12.10, gpt-4o-mini) |
+
 ## Other hand-outs
 
 | File | Session | What it is |

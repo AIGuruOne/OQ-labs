@@ -1,0 +1,24 @@
+Mock ERP up at http://127.0.0.1:8000 in 1.3 s (pid 99480). Docs: http://127.0.0.1:8000/docs
+Server log: <temp>\mock_erp_8000.log
+MCP server up at http://127.0.0.1:8100/mcp in 1.8 s, read-only (pid 78092).
+====================================================================================================
+CAPSTONE WIRING (FALLBACK = your own piece was not usable; the pre-baked one is in use)
+----------------------------------------------------------------------------------------------------
+use case   capstone.examples.brief5_similar_tickets: Brief 5: similar-ticket assist (neighbours +
+           proposed queue with evidence)
+endpoint   hosted: gpt-4o-mini @ https://api.openai.com/v1
+index      FALLBACK: reference-bm25-tickets build c2b71eb64b23, 580 items
+           MY_INDEX is not set; reference index built now and saved to reference_index.json; 580
+           index_write lines
+adapter    FALLBACK: <repo>\checkpoints\adapter_prebaked (fingerprint
+           b1c0e3d4)
+           MY_ADAPTER_DIR is not set; using the pre-baked adapter
+tuned      registered: oq-ticket-tuned registered by the scaffold from the pre-baked adapter
+           b1c0e3d4 on 2026-09-22
+ERP + MCP  up: ERP http://127.0.0.1:8000 data 84e0cc199798; MCP http://127.0.0.1:8100/mcp (started,
+           read-only); tool used: get_equipment
+audit      checkpoints\local\capstone_brief5\audit
+cost cap   $0.0000 spent this month of $5.00
+====================================================================================================
+MCP server at http://127.0.0.1:8100/mcp stopped (pid 78092).
+Mock ERP at http://127.0.0.1:8000 stopped (pid 99480).

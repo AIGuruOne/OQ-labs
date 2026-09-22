@@ -1,0 +1,144 @@
+A mock ERP is already running at http://127.0.0.1:8000 (started 2026-09-23T00:22:57+04:00, 0 work orders raised since). Reusing it. Restart the runtime for a clean ERP.
+An oq-erp-mcp server is already running at http://127.0.0.1:8100/mcp. Reusing it.
+====================================================================================================
+CAPSTONE WIRING (FALLBACK = your own piece was not usable; the pre-baked one is in use)
+----------------------------------------------------------------------------------------------------
+use case   capstone.examples.brief5_similar_tickets: Brief 5: similar-ticket assist (neighbours +
+           proposed queue with evidence)
+endpoint   tuned: oq-ticket-tuned @ http://localhost:11435/v1
+index      FALLBACK: reference-bm25-tickets build c2b71eb64b23, 580 items
+           MY_INDEX is not set; reference index loaded reference_index.json (saved earlier)
+adapter    FALLBACK: <repo>\checkpoints\adapter_prebaked (fingerprint
+           b1c0e3d4)
+           MY_ADAPTER_DIR is not set; using the pre-baked adapter
+tuned      registered: oq-ticket-tuned registered by the scaffold from the pre-baked adapter
+           b1c0e3d4 on 2026-09-22
+ERP + MCP  up: ERP http://127.0.0.1:8000 data 84e0cc199798; MCP http://127.0.0.1:8100/mcp (reused,
+           read-only); tool used: get_equipment
+audit      checkpoints\local\capstone_brief5\audit
+cost cap   $0.0151 spent this month of $5.00
+====================================================================================================
+Run capstone_brief5-1_tuned: 20 tickets -> capstone:tuned (oq-ticket-tuned)
+  [  1/20] INC-004183     4.9 s  
+  [  2/20] INC-004454     4.6 s  
+  [  3/20] INC-004467     4.9 s  
+  [  4/20] INC-004603     4.9 s  
+  [  5/20] INC-004682     4.5 s  
+  [  6/20] INC-004872     4.6 s  
+  [  7/20] INC-005132     4.7 s  
+  [  8/20] INC-005354     4.3 s  
+  [  9/20] INC-005370     4.5 s  
+  [ 10/20] INC-005480     4.4 s  
+  [ 11/20] INC-005546     4.7 s  
+  [ 12/20] INC-005700     4.6 s  
+  [ 13/20] INC-005716     4.9 s  
+  [ 14/20] INC-005783     4.7 s  
+  [ 15/20] INC-005962     4.6 s  
+  [ 16/20] INC-006080     4.3 s  
+  [ 17/20] INC-006087     4.9 s  
+  [ 18/20] INC-006126     4.4 s  
+  [ 19/20] INC-006255     4.5 s  
+  [ 20/20] INC-006285     4.6 s  
+====================================================================================================
+EVAL  capstone_brief5-1_tuned
+  label     brief5-1-tuned
+  endpoint  capstone:tuned  ->  oq-ticket-tuned
+  dataset   data/eval/heldout_20.jsonl   20 tickets   questions 9f92ad8c9de71479
+  settings  temperature 0.0, max_tokens 512, json_mode off
+  time      92.7 s in model calls, median 4.6 s per ticket
+====================================================================================================
+
+1. FORMAT - did a usable record arrive?        (says nothing about the content being right)
+     schema-valid             20 / 20  100%   json.loads(reply) works AND passes ticket_schema.json
+     clean JSON               20 / 20
+     JSON only after repair    0 / 20         fence or prose stripped: content scored, format failed
+     no JSON at all            0 / 20         wrong on every field below
+     endpoint gave no reply    0 / 20         wrong on every field below
+
+2. FIELDS - is each field right?               ('readable' = the 20 replies with a record in them)
+     field               right     of all     of readable
+     category           17 / 20      85%         85%
+     affected_system    13 / 20      65%         65%
+     asset_tag          20 / 20     100%        100%
+     urgency             8 / 20      40%         40%
+     impact             18 / 20      90%         90%
+     routing_queue      19 / 20      95%         95%
+     requested_action   18 / 20      90%         90%     NOT exact match - see below
+       a match = similarity >= 0.50; mean similarity 0.86
+       measure: word-set Jaccard similarity (shared words / all words, case and punctuation ignored)
+         - the same measure as the near-duplicate check
+
+3. WHOLE RECORD - all six exact-match fields right at once   (requested_action not included)
+       4 / 20    20%
+
+4. INVENTED - values that exist nowhere        (a separate count, never part of accuracy)
+     outside the allowed list     0
+     keys not in the schema       0
+     asset tags not in ticket     0
+
+5. PER CLASS - counts, not percentages         ('thin' = fewer than 5 tickets: an anecdote)
+     category         n   category right   whole record right
+       access         5          4                1           
+       hardware       3          3                1           thin
+       software       3          2                0           thin
+       network        3          3                1           thin
+       erp            2          1                0           thin
+       telecom        2          2                0           thin
+       other          2          2                1           thin
+     urgency          n   urgency right    whole record right
+       low           10          4                2           
+       medium         4          1                0           thin
+       high           4          3                2           thin
+       critical       2          0                0           thin
+     impact           n   impact right     whole record right
+       single_user   14         14                4           
+       team           4          2                0           thin
+       site           1          1                0           thin
+       enterprise     1          1                0           thin
+
+6. URGENCY MISSES - for rubric H1              (+ = the model escalated higher than the label)
+     over by 1: 7   over by 2+: 2   under by 1: 3   under by 2+: 0
+     not a real level: 0   no usable reply: 0     (neither goes to H1: nothing to argue about)
+     PATTERN: the model over-escalates. That is ONE disagreement about the convention -
+     settle it once (rubric H1, step 1), then read only the tickets marked *.
+     * INC-004682  label "low"       model "medium"     +1
+       INC-005132  label "low"       model "medium"     +1
+       INC-005354  label "critical"  model "high"       -1
+       INC-005370  label "high"      model "medium"     -1
+       INC-005480  label "medium"    model "high"       +1
+       INC-005716  label "low"       model "medium"     +1
+       INC-005783  label "medium"    model "high"       +1
+       INC-006080  label "critical"  model "high"       -1
+       INC-006087  label "medium"    model "high"       +1
+       INC-006126  label "low"       model "medium"     +1
+     * INC-006255  label "low"       model "high"       +2
+     * INC-006285  label "low"       model "high"       +2
+
+7. REQUESTED_ACTION BELOW 0.50 - for rubric H2       (2 below; read these 2)
+       INC-004454  0.09  label: Arrange on-site IT support for the event
+                         model: "Investigate the reported request"
+       INC-006285  0.09  label: Investigate the document upload failure
+                         model: "Restore network connectivity to the shared drive"
+
+READ THIS BEFORE QUOTING A NUMBER
+  - 20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two
+    tickets - do not read it as a trend.
+  - Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3),
+    category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2),
+    urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site
+    (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file
+    in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included.
+  - requested_action: It compares WORDS, not meaning, and the expected clauses are written in one
+    house style. 'Reset password' vs 'Reset the user's MyPortal password' scores 0.33 though a desk
+    agent would do the same thing; 'Reset the password' vs 'Do not reset the password' scores 0.60.
+    Treat the match rate as a floor - it rewards house wording - and read the sample below the
+    threshold (rubric H2).
+  - Labels follow written rules (corpus/README.md, 'Labelling rules'). Where a rule is arguable -
+    mostly urgency - a 'miss' may be a defensible answer. Rubric H1 handles that.
+  - One run at temperature 0. Local models can still vary slightly between runs and machines; hosted
+    models change under you. Re-run before quoting a number.
+====================================================================================================
+Wrote checkpoints\local\capstone_brief5\eval\capstone_brief5-1_tuned_summary.json
+      checkpoints\local\capstone_brief5\eval\capstone_brief5-1_tuned_rows.jsonl  (160 lines)
+      checkpoints\local\capstone_brief5\eval\capstone_brief5-1_tuned_report.txt
+What your decide() did with them: {'agent_chooses': 6, 'propose_queue': 14}

@@ -10,7 +10,7 @@ anything here is a raise-with-Ritesh change, not a quiet edit.
 | 2 | Notebook conventions | **Final** — full text in `docs/notebook_conventions.md` |
 | 3 | Endpoint config | **Final** — implemented in `config/endpoints.py` |
 | 4 | Eval output format | **Final** — implemented in `scripts/run_eval.py` + `scripts/eval_scoring.py`; rubric in `data/eval/rubric.md` awaits Ritesh's sign-off |
-| 5 | Index interface | **Shape fixed now; finalised in P13** (Day 5 capstone build) |
+| 5 | Index interface | **Final** — `capstone/contract.py`; reference implementation `capstone/reference_index/` (P13) |
 
 Also binding, though not one of the five: the **mock ERP API surface**
 (P10) - Day 4 agent labs and the Day 5 MCP server call it - and the
@@ -226,6 +226,7 @@ llm.chat(prompt, *, system=None, temperature=0.2,
          max_tokens=1024, timeout=120) -> str       # or chat(messages=[...])
 llm.chat_json(prompt, ...) -> dict                  # strict-JSON variant
 llm.name / llm.model / llm.base_url                 # read-only info
+llm.last_reply_info  # after chat(): {"usage", "model", "finish_reason"}, or None (P13, additive)
 list_endpoints() -> dict[str, str]                  # no secrets
 ```
 
@@ -531,9 +532,13 @@ Colab), so a later notebook - Day 4 S19 - can add a column with
 
 ## Contract 5 — index interface
 
-**Shape fixed now; finalised in P13 (capstone scaffold).** The
-retrieval index the agent notebooks and the Day 5 capstone call. Any
-retrieval pipeline can be wrapped to this with a thin adapter.
+**Final** (P13, 2026-09-23). The retrieval index the agent notebooks
+and the Day 5 capstone call. Implemented as code in
+`capstone/contract.py` (the Protocol, and `check_hits` /
+`check_description`, which the capstone runs on every search); the
+reference implementation is `capstone/reference_index/`; enforced by
+`tests/test_capstone.py`. Any retrieval pipeline can be wrapped to it
+with a thin adapter.
 
 ```python
 class Index(Protocol):
@@ -542,8 +547,11 @@ class Index(Protocol):
         query: str,
         k: int = 5,
         filters: dict | None = None,   # e.g. {"family": "hse", "site": "MRB"}
-    ) -> list[dict]:
+    ) -> list[dict]:                   # at most k hits, best first
         ...
+
+    def describe(self) -> dict:        # what this index is; printed by the capstone
+        ...                            # keys: name, build_id, built, items (+ any others)
 ```
 
 Each result dict (a "hit") has exactly these keys:
@@ -562,12 +570,42 @@ Each result dict (a "hit") has exactly these keys:
 - Results ordered by descending `score`; `score` is comparable within
   one search call only (no cross-backend meaning).
 - `filters` keys match frontmatter keys from Contract 1; unknown keys
-  raise `ValueError`.
-- A reference implementation ships with the Day 5 capstone scaffold
-  (`capstone/reference_index/`, built in P13) over `corpus/tickets/`,
-  so the capstone runs end to end with no dependency on the Day 3
-  pipeline. The Day 3 pipeline can be wrapped to the same Protocol
-  with a thin adapter.
+  raise `ValueError`. A list-valued metadata key (`equipment_tags`)
+  matches when the wanted value is in the list.
+- `build_id` changes when the indexed content changes, and only then:
+  the `index_build_id` of governance template 5.1.3 and the "which build
+  answered" question of template 7.
+
+**Building an index is each implementation's own business**; the
+contract covers what the capstone calls. The reference one:
+
+```python
+from capstone.reference_index import build_index, load_index
+index = build_index(source="corpus/tickets/tickets_raw.jsonl",       # the defaults
+                    exclude="data/eval/heldout_20.jsonl",            # None = index everything
+                    index_log=None)                                  # or an AuditLog: one index_write line per item
+index.save(path);  index = load_index(path)
+```
+
+    python -m capstone.reference_index build --out <file>
+    python -m capstone.reference_index search "vpn drops" --k 5 --filter site=MRB
+
+- **Reference implementation** (`capstone/reference_index/bm25.py`):
+  BM25 (k1 1.5, b 0.75) over `corpus/tickets/`, standard library only,
+  one chunk per ticket (`chunk_id` = `<ticket_id>#000`), tags such as
+  `P-1201A` / `LAP-04412` kept as one token. `metadata`: `family`
+  (`"ticket"`), `site`, `channel`, `created`, `title` (the subject),
+  `equipment_tags`. Filters: `family`, `site`, `channel`,
+  `equipment_tags`. **The held-out 20 are left out by default**, so an
+  eval on them cannot retrieve its own answer. 580 tickets, build id
+  `c2b71eb64b23`, about 0.1 s to build. It exists so the capstone runs
+  end to end on this repo's data with no dependency on the Day 3
+  pipeline; it is not a replacement for it.
+- **Wrapping another pipeline** (`capstone/reference_index/adapter_example.py`):
+  a class with `search()` and `describe()` whose `search()` turns the
+  other pipeline's own output into hits in one line. The capstone takes
+  it with `MY_INDEX = "your.module:make_index"` (or `--index`) and no
+  other change.
 
 ---
 

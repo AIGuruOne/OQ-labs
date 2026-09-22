@@ -1,0 +1,43 @@
+====================================================================================================
+CAPSTONE WIRING (FALLBACK = your own piece was not usable; the pre-baked one is in use)
+----------------------------------------------------------------------------------------------------
+use case   capstone.examples.brief5_similar_tickets: Brief 5: similar-ticket assist (neighbours +
+           proposed queue with evidence)
+endpoint   hosted: gpt-4o-mini @ https://api.openai.com/v1
+index      FALLBACK: reference-bm25-tickets build c2b71eb64b23, 580 items
+           MY_INDEX is not set; reference index loaded reference_index.json (saved earlier)
+adapter    FALLBACK: <repo>\checkpoints\adapter_prebaked (fingerprint
+           b1c0e3d4)
+           MY_ADAPTER_DIR is not set; using the pre-baked adapter
+tuned      registered: oq-ticket-tuned registered by the scaffold from the pre-baked adapter
+           b1c0e3d4 on 2026-09-22
+ERP + MCP  OFF: not started (--no-services, or not needed for this command)
+audit      checkpoints\local\capstone_brief5\audit
+cost cap   $0.0006 spent this month of $5.00
+====================================================================================================
+TICKET INC-006432
+  | Subject: warehouse label printer cutting off tags like HX-2629, whole stores teaam stuck
+  | Dear Support,
+  | The label printer of warehouse is printing the tag shifted, like HX-2629 is coming half onky....
+NEIGHBOURS (reference-bm25-tickets): 5
+  1. INC-005944 score 39.51 forgot password Claim Point
+  2. INC-005176 score 36.79 support required
+  3. INC-004769 score 33.73 URGENT problem
+  4. INC-006483 score 31.08 request
+  5. INC-004106 score 31.05 Need help
+EQUIPMENT (MCP get_equipment): 1
+  HX-2629: NOT FOUND / ERROR - ERP/MCP not running
+MODEL (hosted: gpt-4o-mini) 2.11 s, 510 tokens in, 70 out
+  category hardware
+  affected_system label printer
+  asset_tag prn-01388
+  urgency medium
+  impact team
+  requested_action Fix the misaligned label printer
+  routing_queue end_user_computing
+VALID      False  asset_tag: 'prn-01388' does not match '^[A-Z]{3}-[0-9]{5}$'
+DECISION show_neighbours_only: asset_tag: 'prn-01388' does not match '^[A-Z]{3}-[0-9]{5}$'
+  proposed_queue identity_access
+  proposed_by neighbour vote
+  evidence ["INC-005944 identity_access", "INC-005176 end_user_computing", "INC-004769 identity_a...
+AUDIT trace e631b426c1e890f277b6a3f86ddffed0 in checkpoints\local\capstone_brief5\audit\llm_call....

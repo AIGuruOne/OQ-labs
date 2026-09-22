@@ -108,3 +108,23 @@ time: typing and reading, which only a room can measure.
 | `test_inspector.py` (no Inspector) | 2026-09-22 | same | 13.5-15.6 s | 6 min (step 8) | 59 checks, 58 PASS + 1 SKIP (the Inspector). Starts its own ERP and two servers |
 | `test_inspector.py --inspector` | 2026-09-22 | same, Node 24.11.0, Inspector 2.7.0 already in the npx cache | 17.6-23.8 s | 6 min (step 8) | 62 / 62 PASS. The first `npx` download of the Inspector is extra: the package installed in 21 s over home broadband |
 | **The room: 77 typed lines + 8 runs** | - | people | **not yet measured** | 80 min | STILL OWED: Ritesh's Day 5 dry run. On paper: 77 lines at an assumed 2 lines a minute = ~40 min, 8 runs x ~3 min = 24, setup 5 -> 69 of 80. At 1 line a minute it does not fit; `mcp_build_sequence.md` has the 09:17 rule (paste step 6) for that |
+
+## Day 5 S27 + S28: capstone assembly (105 min, not a notebook)
+
+Groups build on `capstone/` rather than follow steps, so the only thing
+that can be timed without people is the machine part and one author's
+assembly of a brief. The brief 5 build is 78 added lines over the
+starter (`capstone/examples/brief5_similar_tickets.py`, about 17 of them
+docstring).
+
+| What | Date | Where | Measured | Budget | Notes |
+|---|---|---|---|---|---|
+| `capstone.run status`, cold (empty `--out`) | 2026-09-23 | local, Windows 11, Python 3.11 | 8-11 s | - | ERP 0.8-1.3 s + MCP server 1.0-1.3 s to start, reference index built (580 tickets, 0.02 s) and saved. Most of the rest is Python start-up and the stop at exit |
+| one ticket, hosted (gpt-4o-mini) | 2026-09-23 | same | 10 s whole command; pipeline 1.5-3.2 s | - | pipeline = index search + MCP lookup + model call + checks |
+| one ticket, tuned (Ollama 0.12.10, `oq-ticket-tuned`, port 11435) | 2026-09-23 | same, integrated AMD GPU | 18 s whole command; pipeline 4.6-8.7 s | - | first call includes the model load |
+| `register-adapter` (pre-baked) | 2026-09-23 | same | 4.6 s | - | model already pulled |
+| `capstone.run eval`, held-out 20 | 2026-09-23 | same | hosted 39-44 s; tuned 86-98 s | - | four runs, twice each (two out folders): counts identical between the two sittings |
+| Brief 5 assembled by the author, from copying the starter to four evals and the comparison | 2026-09-23 | same | about 7 min | 105 min | **author time, not a group's**: the author wrote the scaffold. Two bugs found and fixed on the way (a `\n` mangled by a shell heredoc, a repo-root path) |
+| README Colab cells, stand-in `google.colab`, Jupyter kernel | 2026-09-23 | `python:3.12-slim` and `python:3.13-slim` containers | 16-22 s for the cells | - | env cell, `%pip install mcp==2.2.0`, key from the stand-in Secrets, status, one ticket, a 3-ticket eval, brief 5 with an MCP lookup, all on the "Drive" path. NOT run on Colab itself |
+| Deployment checklist, filled for the brief 5 build | 2026-09-23 | same laptop | about 25 min | 30 min | author time, including the four evals. `facilitator/examples/deployment_checklist_brief5_filled.md` |
+| **The room: a group of 2-3 building its brief** | - | people | **not yet measured** | 105 min | STILL OWED: the Day 5 dry run. On paper: README 10 min, untouched run 5, the four functions 40-60 (78 lines for brief 5), evals 5, the rest is slack for a Day 3/4 artifact that did not come out |

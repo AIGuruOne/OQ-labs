@@ -71,9 +71,10 @@ sidebar, add a secret named exactly `OPENAI_API_KEY`, switch on
 | `config/endpoints.py` | One switch for local Ollama / hosted API / tuned adapter |
 | `scripts/` | Eval harness, data generators, quality checks |
 | `services/` | Mock ERP API and reference MCP server (Day 5) |
+| `capstone/` | Day 5 capstone scaffold: one file per group (`my_usecase.py`), the Contract 5 reference index, a worked brief 5 build |
 | `setup/` | Environment check and setup guides |
 | `docs/` | Interface contracts, timing log, failure playbook |
-| `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 5 governance pack, pre-baked outputs |
+| `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 5 governance pack, production handout, deployment checklist, peer scoring sheet, pre-baked outputs |
 
 ## Commands
 

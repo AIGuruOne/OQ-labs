@@ -1,0 +1,517 @@
+{
+  "contract": "eval-comparison/1",
+  "dataset": "data/eval/heldout_20.jsonl",
+  "dataset_sha256": "9f92ad8c9de71479",
+  "n_items": 20,
+  "runs": [
+    {
+      "name": "starter-1-hosted",
+      "run_id": "capstone_starter-1_hosted",
+      "endpoint": "capstone:hosted",
+      "model": "gpt-4o-mini",
+      "json_mode": false
+    },
+    {
+      "name": "starter-1-tuned",
+      "run_id": "capstone_starter-1_tuned",
+      "endpoint": "capstone:tuned",
+      "model": "oq-ticket-tuned",
+      "json_mode": false
+    },
+    {
+      "name": "brief5-1-hosted",
+      "run_id": "capstone_brief5-1_hosted",
+      "endpoint": "capstone:hosted",
+      "model": "gpt-4o-mini",
+      "json_mode": false
+    },
+    {
+      "name": "brief5-1-tuned",
+      "run_id": "capstone_brief5-1_tuned",
+      "endpoint": "capstone:tuned",
+      "model": "oq-ticket-tuned",
+      "json_mode": false
+    }
+  ],
+  "metrics": [
+    {
+      "metric": "schema_valid_rate",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 1.0,
+        "starter-1-tuned": 1.0,
+        "brief5-1-hosted": 1.0,
+        "brief5-1-tuned": 1.0
+      }
+    },
+    {
+      "metric": "category",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.95,
+        "starter-1-tuned": 0.75,
+        "brief5-1-hosted": 1.0,
+        "brief5-1-tuned": 0.85
+      }
+    },
+    {
+      "metric": "affected_system",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.75,
+        "starter-1-tuned": 0.7,
+        "brief5-1-hosted": 0.75,
+        "brief5-1-tuned": 0.65
+      }
+    },
+    {
+      "metric": "asset_tag",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 1.0,
+        "starter-1-tuned": 1.0,
+        "brief5-1-hosted": 1.0,
+        "brief5-1-tuned": 1.0
+      }
+    },
+    {
+      "metric": "urgency",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.4,
+        "starter-1-tuned": 0.35,
+        "brief5-1-hosted": 0.4,
+        "brief5-1-tuned": 0.4
+      }
+    },
+    {
+      "metric": "impact",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.9,
+        "starter-1-tuned": 0.95,
+        "brief5-1-hosted": 0.9,
+        "brief5-1-tuned": 0.9
+      }
+    },
+    {
+      "metric": "requested_action",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.3,
+        "starter-1-tuned": 0.8,
+        "brief5-1-hosted": 0.8,
+        "brief5-1-tuned": 0.9
+      }
+    },
+    {
+      "metric": "routing_queue",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.85,
+        "starter-1-tuned": 0.8,
+        "brief5-1-hosted": 1.0,
+        "brief5-1-tuned": 0.95
+      }
+    },
+    {
+      "metric": "requested_action_mean_similarity",
+      "kind": "score",
+      "values": {
+        "starter-1-hosted": 0.368,
+        "starter-1-tuned": 0.808,
+        "brief5-1-hosted": 0.781,
+        "brief5-1-tuned": 0.856
+      }
+    },
+    {
+      "metric": "overall_exact_match",
+      "kind": "rate",
+      "values": {
+        "starter-1-hosted": 0.3,
+        "starter-1-tuned": 0.2,
+        "brief5-1-hosted": 0.35,
+        "brief5-1-tuned": 0.2
+      }
+    },
+    {
+      "metric": "invented_values",
+      "kind": "count",
+      "values": {
+        "starter-1-hosted": 0,
+        "starter-1-tuned": 0,
+        "brief5-1-hosted": 0,
+        "brief5-1-tuned": 0
+      }
+    },
+    {
+      "metric": "seconds_per_item_median",
+      "kind": "seconds",
+      "values": {
+        "starter-1-hosted": 1.67,
+        "starter-1-tuned": 4.33,
+        "brief5-1-hosted": 1.6,
+        "brief5-1-tuned": 4.6
+      }
+    }
+  ],
+  "per_class": {
+    "category": [
+      {
+        "class": "access",
+        "n": 5,
+        "thin": false,
+        "field_correct": {
+          "starter-1-hosted": 5,
+          "starter-1-tuned": 4,
+          "brief5-1-hosted": 5,
+          "brief5-1-tuned": 4
+        }
+      },
+      {
+        "class": "hardware",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 3,
+          "starter-1-tuned": 3,
+          "brief5-1-hosted": 3,
+          "brief5-1-tuned": 3
+        }
+      },
+      {
+        "class": "software",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 3,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 3,
+          "brief5-1-tuned": 2
+        }
+      },
+      {
+        "class": "network",
+        "n": 3,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 3,
+          "starter-1-tuned": 3,
+          "brief5-1-hosted": 3,
+          "brief5-1-tuned": 3
+        }
+      },
+      {
+        "class": "erp",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 1,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 2,
+          "brief5-1-tuned": 1
+        }
+      },
+      {
+        "class": "telecom",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 2,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 2,
+          "brief5-1-tuned": 2
+        }
+      },
+      {
+        "class": "other",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 2,
+          "starter-1-tuned": 2,
+          "brief5-1-hosted": 2,
+          "brief5-1-tuned": 2
+        }
+      }
+    ],
+    "urgency": [
+      {
+        "class": "low",
+        "n": 10,
+        "thin": false,
+        "field_correct": {
+          "starter-1-hosted": 2,
+          "starter-1-tuned": 3,
+          "brief5-1-hosted": 2,
+          "brief5-1-tuned": 4
+        }
+      },
+      {
+        "class": "medium",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 1,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 1,
+          "brief5-1-tuned": 1
+        }
+      },
+      {
+        "class": "high",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 3,
+          "starter-1-tuned": 3,
+          "brief5-1-hosted": 3,
+          "brief5-1-tuned": 3
+        }
+      },
+      {
+        "class": "critical",
+        "n": 2,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 2,
+          "starter-1-tuned": 0,
+          "brief5-1-hosted": 2,
+          "brief5-1-tuned": 0
+        }
+      }
+    ],
+    "impact": [
+      {
+        "class": "single_user",
+        "n": 14,
+        "thin": false,
+        "field_correct": {
+          "starter-1-hosted": 12,
+          "starter-1-tuned": 14,
+          "brief5-1-hosted": 12,
+          "brief5-1-tuned": 14
+        }
+      },
+      {
+        "class": "team",
+        "n": 4,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 4,
+          "starter-1-tuned": 3,
+          "brief5-1-hosted": 4,
+          "brief5-1-tuned": 2
+        }
+      },
+      {
+        "class": "site",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 1,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 1,
+          "brief5-1-tuned": 1
+        }
+      },
+      {
+        "class": "enterprise",
+        "n": 1,
+        "thin": true,
+        "field_correct": {
+          "starter-1-hosted": 1,
+          "starter-1-tuned": 1,
+          "brief5-1-hosted": 1,
+          "brief5-1-tuned": 1
+        }
+      }
+    ]
+  },
+  "per_item": [
+    {
+      "item_id": "INC-004183",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 4,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-004454",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-004467",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 6,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-004603",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 6,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-004682",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 4,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-004872",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 6,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-005132",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-005354",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 4,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-005370",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 3,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005480",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 4,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 4
+      }
+    },
+    {
+      "item_id": "INC-005546",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 6,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 6
+      }
+    },
+    {
+      "item_id": "INC-005700",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005716",
+      "exact_fields_correct": {
+        "starter-1-hosted": 2,
+        "starter-1-tuned": 2,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 3
+      }
+    },
+    {
+      "item_id": "INC-005783",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-005962",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006080",
+      "exact_fields_correct": {
+        "starter-1-hosted": 6,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 6,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006087",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006126",
+      "exact_fields_correct": {
+        "starter-1-hosted": 5,
+        "starter-1-tuned": 3,
+        "brief5-1-hosted": 5,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006255",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 5,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 5
+      }
+    },
+    {
+      "item_id": "INC-006285",
+      "exact_fields_correct": {
+        "starter-1-hosted": 4,
+        "starter-1-tuned": 3,
+        "brief5-1-hosted": 4,
+        "brief5-1-tuned": 2
+      }
+    }
+  ],
+  "limitations": [
+    "20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two tickets - do not read it as a trend.",
+    "Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3), category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2), urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included."
+  ]
+}

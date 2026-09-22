@@ -153,6 +153,7 @@ class Endpoint:
 
     def __init__(self, config: EndpointConfig):
         self._config = config
+        self.last_reply_info = None     # set by chat(): usage, model, finish_reason
 
     # -- read-only info -----------------------------------------------------
 
@@ -250,6 +251,14 @@ class Endpoint:
             )
 
         body = response.json()
+        # Kept for callers that log what a call cost (the Day 5 capstone's
+        # audit line): tokens, the model version that answered, and whether
+        # the reply was cut off by max_tokens.
+        self.last_reply_info = {
+            "usage": body.get("usage"),
+            "model": body.get("model"),
+            "finish_reason": body["choices"][0].get("finish_reason"),
+        }
         return body["choices"][0]["message"]["content"]
 
     def chat_json(

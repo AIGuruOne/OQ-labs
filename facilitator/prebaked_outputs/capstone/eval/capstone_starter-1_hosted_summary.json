@@ -1,0 +1,536 @@
+{
+  "contract": "eval-summary/1",
+  "run_id": "capstone_starter-1_hosted",
+  "label": "starter-1-hosted",
+  "endpoint": "capstone:hosted",
+  "model": "gpt-4o-mini",
+  "dataset": "data/eval/heldout_20.jsonl",
+  "dataset_sha256": "9f92ad8c9de71479",
+  "system_prompt_matches": true,
+  "created": "2026-09-23T01:55:50",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 512,
+    "json_mode": false
+  },
+  "item_ids": [
+    "INC-004183",
+    "INC-004454",
+    "INC-004467",
+    "INC-004603",
+    "INC-004682",
+    "INC-004872",
+    "INC-005132",
+    "INC-005354",
+    "INC-005370",
+    "INC-005480",
+    "INC-005546",
+    "INC-005700",
+    "INC-005716",
+    "INC-005783",
+    "INC-005962",
+    "INC-006080",
+    "INC-006087",
+    "INC-006126",
+    "INC-006255",
+    "INC-006285"
+  ],
+  "skipped_dataset_lines": [],
+  "n_items": 20,
+  "n_parsed": 20,
+  "parse": {
+    "clean": 20,
+    "recovered": 0,
+    "failed": 0,
+    "no_reply": 0
+  },
+  "schema_valid_rate": 1.0,
+  "per_field_accuracy": {
+    "category": 0.95,
+    "affected_system": 0.75,
+    "asset_tag": 1.0,
+    "urgency": 0.4,
+    "impact": 0.9,
+    "requested_action": 0.3,
+    "routing_queue": 0.85
+  },
+  "per_field_accuracy_when_parsed": {
+    "category": 0.95,
+    "affected_system": 0.75,
+    "asset_tag": 1.0,
+    "urgency": 0.4,
+    "impact": 0.9,
+    "requested_action": 0.3,
+    "routing_queue": 0.85
+  },
+  "requested_action": {
+    "measure": "word-set Jaccard similarity (shared words / all words, case and punctuation ignored) - the same measure as the near-duplicate check",
+    "match_threshold": 0.5,
+    "mean_similarity": 0.368,
+    "limits": "It compares WORDS, not meaning, and the expected clauses are written in one house style. 'Reset password' vs 'Reset the user's MyPortal password' scores 0.33 though a desk agent would do the same thing; 'Reset the password' vs 'Do not reset the password' scores 0.60. Treat the match rate as a floor - it rewards house wording - and read the sample below the threshold (rubric H2)."
+  },
+  "overall_exact_match": 0.3,
+  "overall_exact_match_fields": [
+    "category",
+    "affected_system",
+    "asset_tag",
+    "urgency",
+    "impact",
+    "routing_queue"
+  ],
+  "invented": {
+    "total": 0,
+    "by_kind": {
+      "not_in_allowed_list": 0,
+      "unexpected_field": 0,
+      "asset_tag_not_in_ticket": 0
+    },
+    "examples": []
+  },
+  "per_class": {
+    "category": {
+      "access": {
+        "n": 5,
+        "field_correct": 5,
+        "record_exact": 2,
+        "thin": false
+      },
+      "hardware": {
+        "n": 3,
+        "field_correct": 3,
+        "record_exact": 1,
+        "thin": true
+      },
+      "software": {
+        "n": 3,
+        "field_correct": 3,
+        "record_exact": 0,
+        "thin": true
+      },
+      "network": {
+        "n": 3,
+        "field_correct": 3,
+        "record_exact": 1,
+        "thin": true
+      },
+      "erp": {
+        "n": 2,
+        "field_correct": 1,
+        "record_exact": 1,
+        "thin": true
+      },
+      "telecom": {
+        "n": 2,
+        "field_correct": 2,
+        "record_exact": 0,
+        "thin": true
+      },
+      "other": {
+        "n": 2,
+        "field_correct": 2,
+        "record_exact": 1,
+        "thin": true
+      }
+    },
+    "urgency": {
+      "low": {
+        "n": 10,
+        "field_correct": 2,
+        "record_exact": 2,
+        "thin": false
+      },
+      "medium": {
+        "n": 4,
+        "field_correct": 1,
+        "record_exact": 1,
+        "thin": true
+      },
+      "high": {
+        "n": 4,
+        "field_correct": 3,
+        "record_exact": 1,
+        "thin": true
+      },
+      "critical": {
+        "n": 2,
+        "field_correct": 2,
+        "record_exact": 2,
+        "thin": true
+      }
+    },
+    "impact": {
+      "single_user": {
+        "n": 14,
+        "field_correct": 12,
+        "record_exact": 3,
+        "thin": false
+      },
+      "team": {
+        "n": 4,
+        "field_correct": 4,
+        "record_exact": 1,
+        "thin": true
+      },
+      "site": {
+        "n": 1,
+        "field_correct": 1,
+        "record_exact": 1,
+        "thin": true
+      },
+      "enterprise": {
+        "n": 1,
+        "field_correct": 1,
+        "record_exact": 1,
+        "thin": true
+      }
+    }
+  },
+  "urgency_errors": {
+    "shape": {
+      "over_by_1": 10,
+      "over_by_2_or_more": 2,
+      "under_by_1": 0,
+      "under_by_2_or_more": 0,
+      "not_a_level": 0,
+      "no_usable_reply": 0
+    },
+    "misses": [
+      {
+        "item_id": "INC-004467",
+        "expected": "high",
+        "predicted": "critical",
+        "step": 1
+      },
+      {
+        "item_id": "INC-004603",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-004682",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-005132",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-005480",
+        "expected": "medium",
+        "predicted": "high",
+        "step": 1
+      },
+      {
+        "item_id": "INC-005716",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-005783",
+        "expected": "medium",
+        "predicted": "high",
+        "step": 1
+      },
+      {
+        "item_id": "INC-005962",
+        "expected": "low",
+        "predicted": "high",
+        "step": 2
+      },
+      {
+        "item_id": "INC-006087",
+        "expected": "medium",
+        "predicted": "high",
+        "step": 1
+      },
+      {
+        "item_id": "INC-006126",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-006255",
+        "expected": "low",
+        "predicted": "medium",
+        "step": 1
+      },
+      {
+        "item_id": "INC-006285",
+        "expected": "low",
+        "predicted": "high",
+        "step": 2
+      }
+    ]
+  },
+  "review": {
+    "H1_urgency": [
+      "INC-005962",
+      "INC-006285",
+      "INC-004467"
+    ],
+    "H1_arguable_total": 12,
+    "H1_direction": "over-escalates",
+    "H2_requested_action": [
+      "INC-004183",
+      "INC-004467",
+      "INC-004872",
+      "INC-005480",
+      "INC-005716"
+    ],
+    "H2_below_threshold_total": 14
+  },
+  "seconds_total": 36.2,
+  "seconds_per_item_median": 1.67,
+  "items": [
+    {
+      "item_id": "INC-004183",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.333,
+      "wrong_fields": [
+        "requested_action",
+        "routing_queue"
+      ]
+    },
+    {
+      "item_id": "INC-004454",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 0.4,
+      "wrong_fields": [
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-004467",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.333,
+      "wrong_fields": [
+        "urgency",
+        "impact",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-004603",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.1,
+      "wrong_fields": [
+        "urgency",
+        "impact",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-004682",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.111,
+      "wrong_fields": [
+        "urgency",
+        "requested_action",
+        "routing_queue"
+      ]
+    },
+    {
+      "item_id": "INC-004872",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 0.2,
+      "wrong_fields": [
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005132",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.625,
+      "wrong_fields": [
+        "affected_system",
+        "urgency"
+      ]
+    },
+    {
+      "item_id": "INC-005354",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 0.143,
+      "wrong_fields": [
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005370",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.071,
+      "wrong_fields": [
+        "affected_system",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005480",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.2,
+      "wrong_fields": [
+        "urgency",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005546",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 0.0,
+      "wrong_fields": [
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005700",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 0.333,
+      "wrong_fields": [
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005716",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 2,
+      "record_exact": false,
+      "action_similarity": 0.091,
+      "wrong_fields": [
+        "category",
+        "affected_system",
+        "urgency",
+        "requested_action",
+        "routing_queue"
+      ]
+    },
+    {
+      "item_id": "INC-005783",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.333,
+      "wrong_fields": [
+        "urgency",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-005962",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.667,
+      "wrong_fields": [
+        "urgency"
+      ]
+    },
+    {
+      "item_id": "INC-006080",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 6,
+      "record_exact": true,
+      "action_similarity": 1.0,
+      "wrong_fields": []
+    },
+    {
+      "item_id": "INC-006087",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 1.0,
+      "wrong_fields": [
+        "urgency"
+      ]
+    },
+    {
+      "item_id": "INC-006126",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 5,
+      "record_exact": false,
+      "action_similarity": 0.625,
+      "wrong_fields": [
+        "urgency"
+      ]
+    },
+    {
+      "item_id": "INC-006255",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.286,
+      "wrong_fields": [
+        "affected_system",
+        "urgency",
+        "requested_action"
+      ]
+    },
+    {
+      "item_id": "INC-006285",
+      "parse": "clean",
+      "schema_valid": true,
+      "exact_fields_correct": 4,
+      "record_exact": false,
+      "action_similarity": 0.5,
+      "wrong_fields": [
+        "affected_system",
+        "urgency"
+      ]
+    }
+  ],
+  "limitations": [
+    "20 tickets: one ticket is 5 percentage points. A gap of 10 points between two runs is two tickets - do not read it as a trend.",
+    "Thin classes, fewer than 5 tickets each: category=hardware (n=3), category=software (n=3), category=network (n=3), category=erp (n=2), category=telecom (n=2), category=other (n=2), urgency=medium (n=4), urgency=high (n=4), urgency=critical (n=2), impact=team (n=4), impact=site (n=1), impact=enterprise (n=1). Their per-class scores are anecdotes, not measurements. No file in this repo has enough rare-class tickets to prove rare-class quality - val.jsonl included.",
+    "requested_action: It compares WORDS, not meaning, and the expected clauses are written in one house style. 'Reset password' vs 'Reset the user's MyPortal password' scores 0.33 though a desk agent would do the same thing; 'Reset the password' vs 'Do not reset the password' scores 0.60. Treat the match rate as a floor - it rewards house wording - and read the sample below the threshold (rubric H2).",
+    "Labels follow written rules (corpus/README.md, 'Labelling rules'). Where a rule is arguable - mostly urgency - a 'miss' may be a defensible answer. Rubric H1 handles that.",
+    "One run at temperature 0. Local models can still vary slightly between runs and machines; hosted models change under you. Re-run before quoting a number."
+  ]
+}

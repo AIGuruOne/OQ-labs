@@ -60,6 +60,7 @@ every time.
 - Local inference (notebook 02) headless, ~60 s with Ollama running and `llama3.2:1b` pulled, needs `OPENAI_API_KEY` for one call: delete `checkpoints/local/02_*.json`, `ollama stop llama3.2:1b`, then `OLLAMA_BASE_URL=http://localhost:11435 python -m nbconvert --to notebook --execute --output-dir <elsewhere> <copy of solutions/02_local_inference.ipynb placed under checkpoints/>`
 - Load test (notebook 03): `python scripts/concurrency_test.py --endpoint local` (`--levels 1,2,4,8,16`, `--requests 16`, `--max-tokens 64`, `--timeout 60`, `--base-url <url>/v1 --model <name>` for any OpenAI-compatible server, `--out`, `--run-id`, `--note`). Exit 2 = nothing measured (preflight failed), never a hang.
 - Concurrency (notebook 03) headless, ~2.5 min with Ollama 0.12.10 + `llama3.2:1b`: delete `checkpoints/local/03_*.json` and `checkpoints/local/concurrency`, then `OLLAMA_BASE_URL=http://localhost:11437 python -m nbconvert --to notebook --execute --output-dir <elsewhere> solutions/03_concurrency.ipynb` (a port with NO server, so the notebook starts one and can read `Parallel:N` from its log)
+- Capstone (Day 5): `python -m capstone.run status | ticket <INC-id> | ticket --text "..." | eval | register-adapter` (`--usecase capstone.examples.brief5_similar_tickets`, `--endpoint`, `--index <file or module:function>`, `--adapter`, `--out`, `--no-services`, `--keep-services`, `--resume`). Reference index: `python -m capstone.reference_index build --out <file>` / `search "<query>" --k 5 --filter site=MRB`; second implementation: `python -m capstone.reference_index.adapter_example`
 - Tests: `python -m pytest tests/`
 
 ---
@@ -918,3 +919,65 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   install mcp==2.2.0`, no restart needed). NOT tested: Colab itself,
   a Mac, the Inspector web UI's approval form (the UI starts; nobody
   clicked through it), a human room.
+
+### Capstone scaffold + Contract 5 reference index, Day 5 S27-S30 (P13)
+- NARROWED build (BUILD_SPEC section 13, freeze eve 2026-09-23): reference
+  index, thin scaffold, mock ERP, ONE MCP tool (`get_equipment`, read).
+  CUT and listed in `capstone/README.md` section 7 + the production
+  handout: the gated write in the scaffold (brief 4 uses
+  `services/mcp_server_reference/call.py` `call_with_approval`), an HTTP
+  service around `Capstone.run_ticket()` (briefs 1 and 5 ask for one), p95
+  under load, retries, scheduled index rebuild.
+- **Contract 5 is FINAL**: `search(query, k=5, filters=None)` + `describe()`
+  (added; keys name/build_id/built/items). Code in `capstone/contract.py`;
+  `check_hits` runs on EVERY search in the scaffold. Reference impl
+  `capstone/reference_index/bm25.py`: stdlib BM25, one chunk per ticket
+  (`<id>#000`), tags one token, filters family/site/channel/equipment_tags,
+  **held-out 20 excluded by default** (580 items, build id `c2b71eb64b23`).
+  Adapter example (`adapter_example.py`, word-overlap) is the proof a second
+  implementation swaps in with `--index module:function`, no scaffold edit.
+- BM25 over whole-ticket queries LOOKS bad by eye (boilerplate and the
+  generator's filler sentences pull in odd subjects) but a 5-neighbour
+  queue vote is right on 15/20 held-out. Stopwords / shorter queries moved
+  it within noise (14-16/20), so the index was left plain. Measure, do not
+  eyeball.
+- Groups edit ONE file: `capstone/my_usecase.py` (SETTINGS + gather_context,
+  build_messages, check_output, decide). The model call, logging and cost
+  cap are the scaffold's (`capstone/wiring.py`). Use-case files import
+  `REPO_ROOT` from `capstone.wiring` (a copied file one folder deeper broke
+  with `Path(__file__).parent.parent`). A test pins both use-case files'
+  signatures.
+- Fallbacks print `FALLBACK` + the reason (index: `MY_INDEX`; adapter:
+  `MY_ADAPTER_DIR`, checked with `compare_utils.adapter_problem`). Which
+  adapter backs the Ollama `tuned` model is known ONLY if the scaffold
+  registered it (`<out>/tuned_registration.json`); otherwise status says
+  "registered outside the scaffold: which adapter is unknown".
+- Audit: `llm_call` lines = governance template 5.1.1 fields in order,
+  `index_write` = 5.1.3 (both parsed FROM the template in the test);
+  McpWire's `trace_id` is set to the pipeline's, so `tool_call` lines join.
+  `config/endpoints.py` gained `last_reply_info` (usage, model,
+  finish_reason) - additive Contract 3 change, documented.
+- `eval` feeds the pipeline to `run_eval.run_evaluation` as `ask`: it
+  scores the MODEL'S REPLY, before the group's checks. Starter-tuned
+  reproduces the pre-baked adapter's documented scores exactly (routing
+  16, requested_action 16, record 4, urgency 7). Reference table in
+  `capstone/README.md` is tied to `facilitator/prebaked_outputs/capstone/
+  eval/comparison.json` by a test - refresh both together.
+- The tickets the scaffold searches with are `format_ticket_text` output,
+  the same text the eval sends. A corpus ticket is never its own neighbour
+  (`Tools.search` drops its id).
+- Price in the use case is the cost model's gpt-5.4-mini row ($0.75 /
+  $4.50); gpt-4o-mini is NOT in the cost model - it is an estimate and the
+  filled checklist names that as a gap (D4). Never quote it as a real cost.
+- Colab: README cells tested ONLY in `python:3.12-slim` / `3.13-slim`
+  containers through a Jupyter kernel with a stand-in `google.colab`
+  (Drive path, Secrets). NOT run on Colab; the `tuned` cell (Ollama on a
+  T4) NOT run at all in Colab form. Owed.
+- Real gaps the checklist found in the brief 5 example, kept on purpose
+  (`facilitator/examples/deployment_checklist_brief5_filled.md`): a
+  one-field format error discards a correct queue; an injection moved
+  urgency/impact (not the route); subjects can carry first names.
+- STILL OWED: the room. 105 min for a group is unmeasured (author built
+  brief 5 in ~7 min, 78 lines); checklist (30) and peer sheet (65) never
+  timed with people. Day 5 dry run.
+

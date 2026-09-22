@@ -37,7 +37,6 @@ PENDING_PATHS = {
     "data/eval/rag_adversarial.jsonl",
     "data/eval/golden_answers.jsonl",
     "data/eval/image_ground_truth/",
-    "capstone/reference_index/",
     "scripts/score_extraction.py",
 }
 

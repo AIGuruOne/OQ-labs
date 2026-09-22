@@ -1,0 +1,46 @@
+Mock ERP up at http://127.0.0.1:8000 in 0.5 s (pid 97724). Docs: http://127.0.0.1:8000/docs
+Server log: <temp>\mock_erp_8000.log
+MCP server up at http://127.0.0.1:8100/mcp in 1.3 s, read-only (pid 42604).
+====================================================================================================
+CAPSTONE WIRING (FALLBACK = your own piece was not usable; the pre-baked one is in use)
+----------------------------------------------------------------------------------------------------
+use case   capstone.examples.brief5_similar_tickets: Brief 5: similar-ticket assist (neighbours +
+           proposed queue with evidence)
+endpoint   hosted: gpt-4o-mini @ https://api.openai.com/v1
+index      FALLBACK: reference-bm25-tickets build c2b71eb64b23, 580 items
+           MY_INDEX is not set; reference index loaded reference_index.json (saved earlier)
+adapter    FALLBACK: <repo>\checkpoints\adapter_prebaked (fingerprint
+           b1c0e3d4)
+           MY_ADAPTER_DIR is not set; using the pre-baked adapter
+tuned      registered: oq-ticket-tuned registered by the scaffold from the pre-baked adapter
+           b1c0e3d4 on 2026-09-22
+ERP + MCP  up: ERP http://127.0.0.1:8000 data 84e0cc199798; MCP http://127.0.0.1:8100/mcp (started,
+           read-only); tool used: get_equipment
+audit      checkpoints\local\capstone_brief5\audit
+cost cap   $0.0000 spent this month of $5.00
+====================================================================================================
+TICKET PASTED-b884fd90
+  | GateKey VPN keeps dropping since yesterday's update, connects then disconnects after 10 secon...
+NEIGHBOURS (reference-bm25-tickets): 5
+  1. INC-005499 score 27.29 Gatekey vpn wont connect
+  2. INC-004929 score 26.66 Gatekey vpn drops after 10 sec
+  3. INC-005104 score 26.66 GateKey VPN drops after 10 sec
+  4. INC-005468 score 22.28 Gatekey vpn wont connect
+  5. INC-004336 score 20.47 Issue since morning
+EQUIPMENT (MCP get_equipment): no plant tag in the ticket
+MODEL (hosted: gpt-4o-mini) 2.08 s, 440 tokens in, 65 out
+  category network
+  affected_system GateKey VPN
+  asset_tag null
+  urgency high
+  impact single_user
+  requested_action Restore the user's GateKey VPN connection
+  routing_queue network_ops
+VALID      True
+DECISION propose_queue: model and neighbours agree
+  proposed_queue network_ops
+  proposed_by model + neighbours
+  evidence ["INC-005499 network_ops", "INC-004929 network_ops", "INC-005104 network_ops", "INC-00...
+AUDIT trace 33a1f12e9e840c7cfe14d6699546ac87 in checkpoints\local\capstone_brief5\audit\llm_call....
+MCP server at http://127.0.0.1:8100/mcp stopped (pid 42604).
+Mock ERP at http://127.0.0.1:8000 stopped (pid 97724).
