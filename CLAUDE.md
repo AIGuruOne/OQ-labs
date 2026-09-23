@@ -125,22 +125,10 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   = INFO, never a failure.
 
 ### Repo state notes
-- Lab repo: https://github.com/AIGuruOne/OQ-labs.git (moved from
-  Utkarsh-09/AI_GURU_labs on 2026-09-23; meant to be PRIVATE) — this is
-  the URL the notebooks' environment-detection cell clones in Colab and
-  the Open in Colab badges point at (`REPO_URL` in every notebook and
-  solution, notebooks/_template.ipynb, docs/notebook_conventions.md and
-  capstone/README.md; keep them all in sync). `setup_check.py --network`
-  probes the org page, not the repo: a private repo answers 404 without
-  a login.
-- The clone is ANONYMOUS. Against a private repo it fails: the
-  environment cell now checks the exit code (with
-  `GIT_TERMINAL_PROMPT=0`, so it can never hang on a username prompt)
-  and raises `Could not clone ... PRIVATE ...` (playbook E21). How the
-  room gets access is NOT decided yet (raise with Ritesh). Checked via
-  the GitHub API on 2026-09-23: the org repo is actually PUBLIC and holds only 12
-  Day 3/4 files - none of this tree - so every notebook breaks until
-  this repo is pushed to its root.
+- Remote: https://github.com/AIGuruOne/OQ-labs.git — this is the
+  URL the notebooks' environment-detection cell clones in Colab
+  (`REPO_URL` in notebooks/_template.ipynb and
+  docs/notebook_conventions.md; keep all three in sync).
 - `notebooks/_template.ipynb` must always run top-to-bottom clean; it
   is the reference for Contract #2.
 
