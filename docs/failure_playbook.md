@@ -68,6 +68,11 @@ one capstone group.
   centre. Its pip installs, Ollama install, model pulls and git clone
   never touch OQ's network. If the Colab page works, the installs inside
   it work too, even when pip on the laptop is blocked (entry 3).
+- **Every new runtime asks for a person:** an "Are you still there?"
+  reCAPTCHA while the runtime is allocated, then the Drive consent
+  popup when the first cell mounts Drive. Both need a click at the
+  screen, every notebook (seen on every fresh runtime, 2026-09-23). A
+  cell that sits at "Connecting" may just be waiting for one of them.
 - **Tested:** NOT REPRODUCED. There is no OQ network here.
   - Measured 2026-09-22 on an open network: the host list and the
     status each host returns (`setup_check.py --network`). Also measured:
@@ -224,6 +229,9 @@ one capstone group.
   - Notebooks 02, 03 and 06 print `NVIDIA GPU: none found`.
   - A Colab dialog saying "You cannot currently connect to a GPU due to
     usage limits in Colab" means that account's GPU quota is used up.
+  - `NVIDIA GPU: Tesla T4` but `0% of the model is in GPU memory`: the
+    GPU is there and Ollama is not using it - a half-finished Ollama
+    install on that runtime (E23).
 - **Fix:**
   - No GPU selected: *Runtime > Change runtime type > T4 GPU > Save*,
     then *Run all*. Nothing is lost.
@@ -653,9 +661,10 @@ entries point to. The numbers are the ones this file used before
   left sidebar, secret named exactly `OPENAI_API_KEY`, *Notebook
   access* switched on - and otherwise asks for a hidden one-time
   paste. A paste lasts for that runtime only; a disconnect means
-  pasting again, a Secret does not. The Colab branch is untested on
-  Colab as of 2026-09-22 (local branch tested); first Colab run of
-  notebook 01 confirms it or lands here as its own entry.
+  pasting again, a Secret does not. The Secrets path ran on Colab on
+  2026-09-23 (notebook 01 on a CPU runtime, 02 and the capstone cells
+  on a T4): `OPENAI_API_KEY: found in Colab Secrets`, first time. The
+  hidden-paste path has still not run on Colab.
 - **Seen on:** 2026-09-19 (build machine).
 
 ### E2. Ollama: `model requires more system memory (15.9 GiB) than is available`
@@ -1075,3 +1084,34 @@ entries point to. The numbers are the ones this file used before
 - **Seen on:** 2026-09-23 (build machine, P16 freeze check: a fresh
   Python 3.12 venv in a folder 132 characters long failed exactly so;
   the same install from a 50-character folder succeeded in 101 s).
+
+### E23. Colab T4: `warm-up: loaded and answered in 12.4 s; 0% of the model is in GPU memory`
+- **Symptom:** notebook 02, 03 or 06 on a T4. The server cell prints
+  `NVIDIA GPU: Tesla T4` but NO `Downloading Ollama 0.12.10` line, then
+  a warm-up of 10 s or more and `0% of the model is in GPU memory`. No
+  warning, no error: the evals that follow crawl or time out. A clean
+  install says `100% of the model is in GPU memory`, warm-up about 3 s.
+- **Cause:** an interrupted Ollama install. `install_on_linux` streams
+  `curl | tar` into `/usr/local`, so stopping the server cell part-way
+  (the Stop button, or *Interrupt execution*) leaves
+  `/usr/local/bin/ollama` in place without its GPU libraries.
+  `ensure_server` (`notebooks/ollama_utils.py`) installs only when
+  `shutil.which("ollama")` finds nothing, so the next run on the SAME
+  runtime skips the install and serves on the CPU. The server log
+  (`eval_runs/ollama_server.log`, or `log_dir` in the capstone) says
+  `"inference compute" id=cpu library=cpu`.
+- **Diagnose:** `!du -sh /usr/local/lib/ollama` - a part-install is a
+  few hundred MB (547 MB, only `cuda_v12/`, when seen).
+- **Fix:** *Runtime > Disconnect and delete runtime*, then *Run all* on
+  the fresh runtime (a new CAPTCHA and Drive consent, room entry 1).
+  Or, on the same runtime: `!pkill -f ollama; rm -rf
+  /usr/local/bin/ollama /usr/local/lib/ollama`, then re-run the server
+  cell, which then installs in full. Never press Stop on the server
+  cell while it says `Downloading Ollama`.
+- **Seen on:** 2026-09-23 on Colab (free T4, notebook 06): REPRODUCED,
+  by accident - the server cell was interrupted during the download,
+  and the next run on that runtime printed exactly the symptom above
+  (warm-up 12.4 s, 0% in GPU memory). A fresh runtime then installed in
+  full and put 100% of the model in GPU memory (warm-up 3.3 s). The
+  same-runtime `rm -rf` fix was NOT run; the fresh runtime is the
+  tested fix. Not fixed in the code (freeze).

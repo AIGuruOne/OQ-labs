@@ -1007,12 +1007,53 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   grep and `check_tickets.py` clean. Timings: `docs/timing_log.md`,
   "P16 freeze check" section - local machine time, so they close no
   Colab row.
-- Section 12 standard 1 (cold free-tier Colab) is met by NO notebook
-  yet. Owed on Colab, in order of room risk: 05 on a T4 (new CUDA 13
-  image, see Python versions) + its disconnect test; 01 on CPU with the
-  key in Colab Secrets (that branch has never run); 02, 03, 06 on a T4
-  (+ disconnect tests for 03 and 06); 04 timed; the capstone README's
-  Colab cells.
+- **Colab break-check, 2026-09-23 (real free-tier Colab, solutions/
+  opened from GitHub, driven through Claude in Chrome; cells stepped
+  through, NOT a cold "Run all" with a stopwatch, so NOT section 11
+  timings and nothing in `docs/timing_log.md`).** All ran top to bottom
+  with no errors:
+  - 05 on a T4: `ADAPTER READY`, no restart prompt after the
+    bitsandbytes install, 4-bit load 1.01 GB, peak GPU 7.53 GB allocated
+    / 8.97 GB reserved, 72/72 steps in 6.5 min, loss 0.742 -> 0.021, val
+    0.1370 / 0.0552 / 0.0466, 5/5 schema-valid after load-back. BUT the
+    runtime had the OLD GPU image (torch 2.11.0+cu128, transformers
+    5.16.1, peft 0.20.0, accelerate 1.14.0, Python 3.13.15): Colab was
+    still handing it out on 23 Sept, so the CUDA 13 image is STILL
+    UNVERIFIED. Check `torch.__version__` before calling a run a CUDA 13
+    run.
+  - 01 on a CPU runtime: `01 FUNDAMENTALS OK`, READY (8/8), 5/5
+    schema-valid, whole record 1/5, agent 3 steps. The Colab Secrets
+    branch of `utils.ensure_api_key` worked first time (hidden-paste path
+    still unrun on Colab).
+  - 02 on a T4: `LOCAL INFERENCE READY`; Ollama 0.12.10 installed (112 s)
+    and served, 100% in GPU memory, 158.6 tokens/s; 1B reply `not JSON`,
+    vendor 4/6 - inside the header's ranges.
+  - 03 on a T4: `CONCURRENCY LAB DONE`, 80 requests 0 failed, p95 1.46 s
+    -> 11.73 s (8.0x), throughput plateau 1.41 / 1.30 req/s; worksheet
+    numbers 8 callers, 1.41 req/s, 5076 requests/hour.
+  - 06 on a T4 with no participant adapter on Drive: fell back to
+    `ADAPTER IN USE: THE PRE-BAKED ONE` (b1c0e3d4), every folder checked
+    printed; tuned column exactly 20/20 schema-valid, 16/20 routing,
+    16/20 requested_action, 7/20 urgency, 4/20 record, 0 invented; tuned
+    worse on INC-005370, INC-005480 as documented.
+  - Capstone README "In Colab" cells on a T4: all five clean. Index
+    fallback reference-bm25 c2b71eb64b23 (580 items), adapter fallback
+    b1c0e3d4, ERP data fingerprint 84e0cc199798, MCP server read-only,
+    `ticket INC-005310` VALID via gpt-4o-mini; the tuned cell installed
+    Ollama 0.12.10 and registered `oq-ticket-tuned` from the pre-baked
+    adapter. LIMITATION: those README cells never warm the model or send
+    it a ticket, so a tuned answer through the capstone path on Colab
+    was never seen.
+- Found on Colab 2026-09-23, NOT fixed (freeze): an interrupted Ollama
+  install leaves the binary without GPU libraries; `ensure_server` only
+  checks the binary exists, so the next run on that runtime serves on
+  CPU with only `0% of the model is in GPU memory` as the sign (02, 03,
+  06). Playbook E23. And every new Colab runtime brings a reCAPTCHA and
+  a Drive consent, both needing a person (playbook entry 1).
+- STILL OWED on Colab: 05 on the CUDA 13 image; the disconnect tests
+  for 03, 05 and 06; every section 11 stopwatch run (01-06, 04 never
+  timed on Colab); the capstone `tuned` endpoint answering a ticket;
+  01's hidden-paste key path.
 - Known and accepted at freeze (do not "fix" during freeze without
   asking): the environment cell ignores `git clone`'s exit code
   (playbook E21 is the room answer; changing the cell means 7 notebooks
