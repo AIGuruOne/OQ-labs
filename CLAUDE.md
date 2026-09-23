@@ -125,10 +125,22 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   = INFO, never a failure.
 
 ### Repo state notes
-- Remote: https://github.com/Utkarsh-09/AI_GURU_labs.git — this is the
-  URL the notebooks' environment-detection cell clones in Colab
-  (`REPO_URL` in notebooks/_template.ipynb and
-  docs/notebook_conventions.md; keep all three in sync).
+- Lab repo: https://github.com/AIGuruOne/OQ-labs.git (moved from
+  Utkarsh-09/AI_GURU_labs on 2026-09-23; meant to be PRIVATE) — this is
+  the URL the notebooks' environment-detection cell clones in Colab and
+  the Open in Colab badges point at (`REPO_URL` in every notebook and
+  solution, notebooks/_template.ipynb, docs/notebook_conventions.md and
+  capstone/README.md; keep them all in sync). `setup_check.py --network`
+  probes the org page, not the repo: a private repo answers 404 without
+  a login.
+- The clone is ANONYMOUS. Against a private repo it fails: the
+  environment cell now checks the exit code (with
+  `GIT_TERMINAL_PROMPT=0`, so it can never hang on a username prompt)
+  and raises `Could not clone ... PRIVATE ...` (playbook E21). How the
+  room gets access is NOT decided yet (raise with Ritesh). Checked via
+  the GitHub API on 2026-09-23: the org repo is actually PUBLIC and holds only 12
+  Day 3/4 files - none of this tree - so every notebook breaks until
+  this repo is pushed to its root.
 - `notebooks/_template.ipynb` must always run top-to-bottom clean; it
   is the reference for Contract #2.
 
@@ -1055,9 +1067,8 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   timed on Colab); the capstone `tuned` endpoint answering a ticket;
   01's hidden-paste key path.
 - Known and accepted at freeze (do not "fix" during freeze without
-  asking): the environment cell ignores `git clone`'s exit code
-  (playbook E21 is the room answer; changing the cell means 7 notebooks
-  + template + conventions doc + parity tests); `config/endpoints.py`
+  asking): [FIXED 2026-09-23 with the repo move: the environment cell
+  now stops on a failed clone, playbook E21]; `config/endpoints.py`
   lets `requests` `ReadTimeout` escape instead of `EndpointError`
   (`run_eval` catches it per ticket); notebook 03's two TODO cells are
   37-38 lines; one notebook 03 warm re-run hung on Windows (30 min, not

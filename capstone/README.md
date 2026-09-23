@@ -42,13 +42,16 @@ Drive, so the logs, the saved index and the eval runs survive a disconnect.
 import os, sys
 from pathlib import Path
 IN_COLAB = "google.colab" in sys.modules
-REPO_URL = "https://github.com/Utkarsh-09/AI_GURU_labs.git"
+REPO_URL = "https://github.com/AIGuruOne/OQ-labs.git"
 if IN_COLAB:
     from google.colab import drive
     drive.mount("/content/drive")
     REPO_ROOT = Path("/content/oq-advanced-ai")
     if not REPO_ROOT.exists():
-        os.system(f"git clone --depth 1 {REPO_URL} {REPO_ROOT}")
+        if os.system(f"GIT_TERMINAL_PROMPT=0 git clone --depth 1 {REPO_URL} {REPO_ROOT}") != 0:
+            raise RuntimeError(f"Could not clone {REPO_URL}. The lab repo is PRIVATE and this runtime has no "
+                               "access to it (or GitHub is blocked here). Stop and tell the facilitator: "
+                               "failure playbook E21.")
     OUT = "/content/drive/MyDrive/oq-advanced-ai-checkpoints/capstone"
 else:
     REPO_ROOT = next(p for p in [Path.cwd(), *Path.cwd().parents] if (p / "BUILD_SPEC.md").exists())

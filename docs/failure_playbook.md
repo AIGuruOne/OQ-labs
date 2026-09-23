@@ -1043,31 +1043,40 @@ entries point to. The numbers are the ones this file used before
   restart, round 2 -> exactly the text above; the same with
   `OQ_MCP_STATE_KEY` set -> `WO-195893` written).
 
-### E21. Colab: `ModuleNotFoundError: No module named 'utils'` (or `'config'`, `'ollama_utils'`) in the cell after the environment cell
-- **Symptom:** the first code cell printed `Environment : Colab` and a
-  `Repo root` as if all was well; the next cell that imports a repo
-  module fails with `No module named ...`.
-- **Cause:** the repo clone failed and the environment cell did not
-  notice: it runs `os.system("git clone ...")` and never checks the
-  result. Git's own error (`fatal: repository ... not found`, or a
-  network error) may not show in the cell at all. Usual reasons: GitHub
-  blocked or slow on the network (room entry 1), or the runtime
-  disconnected while cell 1 was still cloning.
-- **Diagnose:** `!ls /content/oq-advanced-ai` - no such folder, or a
-  folder with no `notebooks/` in it.
-- **Fix:** `!rm -rf /content/oq-advanced-ai`, then run the first cell
-  again. A clean git failure leaves no folder, so a re-run retries by
-  itself; a clone killed half-way leaves one, and the cell then skips
-  the clone - hence the `rm`. If it fails again, GitHub is blocked:
-  `!git clone --depth 1 https://github.com/Utkarsh-09/AI_GURU_labs.git
-  /content/oq-advanced-ai` shows the real error. Then room entry 1.
-- **Seen on:** 2026-09-23, SIMULATED on the build machine: the real
-  first cell of notebook 02, run with a stand-in `google.colab`, a repo
-  URL that does not exist and `/content` redirected to a scratch folder.
-  Cell 1 printed `Environment : Colab`; `import utils` then raised
-  exactly `ModuleNotFoundError: No module named 'utils'`; no folder was
-  left behind. Not reproduced on Colab itself, and whether git's error
-  line shows in a Colab cell was not checked.
+### E21. Colab: `RuntimeError: Could not clone https://github.com/AIGuruOne/OQ-labs.git. The lab repo is PRIVATE ...` in the environment cell (older copies: `ModuleNotFoundError: No module named 'utils'` in the cell after it)
+- **Symptom:** the first code cell stops with `Could not clone ... The
+  lab repo is PRIVATE and this runtime has no access to it (or GitHub is
+  blocked here)`. A notebook copy from before 2026-09-23 does not stop:
+  it prints `Environment : Colab` as if all was well, and the next cell
+  that imports a repo module fails with `No module named ...`.
+- **Cause:** `git clone` failed. The repo is private, so a clone with
+  no credentials is refused: git exits 128 at once with `fatal: could
+  not read Username for 'https://github.com': terminal prompts disabled`
+  (the cell sets `GIT_TERMINAL_PROMPT=0`, so git can never sit waiting
+  for a username). Other reasons: GitHub blocked or slow on the network
+  (room entry 1), or the runtime disconnected while cell 1 was cloning.
+  Git's own line may not show in the cell; the RuntimeError always does.
+- **Diagnose:** `!GIT_TERMINAL_PROMPT=0 git clone --depth 1
+  https://github.com/AIGuruOne/OQ-labs.git /tmp/probe` shows git's
+  real error: `could not read Username` = no access to the private
+  repo; `Could not resolve host` / a timeout = the network.
+  `!ls /content/oq-advanced-ai` with no `notebooks/` in it = a clone
+  killed half-way.
+- **Fix:** access: the runtime needs the room's way into the private
+  repo (not chosen at the freeze, 2026-09-23 - see CLAUDE.md, repo
+  notes); until then only the facilitator can fix it. Half-way clone:
+  `!rm -rf /content/oq-advanced-ai`, then run the first cell again (a
+  clean failure leaves no folder, so a plain re-run retries by itself).
+  Network: room entry 1.
+- **Seen on:** 2026-09-23, SIMULATED twice on the build machine with a
+  stand-in `google.colab` and a repo URL that does not exist (GitHub
+  answers exactly as for a private repo without credentials). Old cell
+  (notebook 02): `Environment : Colab`, then `ModuleNotFoundError: No
+  module named 'utils'`. New cell (`notebooks/_template.ipynb`, in a
+  `python:3.12-slim` container with git): git exit 128 in under a
+  second, then the RuntimeError above; with a clonable repo it printed
+  the usual three lines. No folder was left behind either time. Not
+  reproduced on Colab itself.
 
 ### E22. pip on Windows: `Could not install packages due to an OSError: [Errno 2] No such file or directory: '...\site-packages\jedi\third_party\django-stubs\...'`
 - **Symptom:** `pip install -r requirements.txt` into a venv stops with

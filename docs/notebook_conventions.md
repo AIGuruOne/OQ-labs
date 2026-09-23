@@ -41,7 +41,7 @@ from pathlib import Path
 IN_COLAB = "google.colab" in sys.modules
 
 # The repo URL participants clone in Colab. Set once, here.
-REPO_URL = "https://github.com/Utkarsh-09/AI_GURU_labs.git"
+REPO_URL = "https://github.com/AIGuruOne/OQ-labs.git"
 
 if IN_COLAB:
     # Drive first: checkpoints survive a runtime disconnect.
@@ -50,7 +50,10 @@ if IN_COLAB:
 
     REPO_ROOT = Path("/content/oq-advanced-ai")
     if not REPO_ROOT.exists():
-        os.system(f"git clone --depth 1 {REPO_URL} {REPO_ROOT}")
+        if os.system(f"GIT_TERMINAL_PROMPT=0 git clone --depth 1 {REPO_URL} {REPO_ROOT}") != 0:
+            raise RuntimeError(f"Could not clone {REPO_URL}. The lab repo is PRIVATE and this runtime has no "
+                               "access to it (or GitHub is blocked here). Stop and tell the facilitator: "
+                               "failure playbook E21.")
     CHECKPOINT_DIR = Path("/content/drive/MyDrive/oq-advanced-ai-checkpoints")
 else:
     # Local: find the repo root by walking up until BUILD_SPEC.md appears.

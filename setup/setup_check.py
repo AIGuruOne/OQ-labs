@@ -262,7 +262,7 @@ NETWORK_HOSTS = [
     ("https://accounts.google.com/ServiceLogin", 200, "Google sign-in - Colab and Drive"),
     ("https://drive.google.com/", 200, "Drive - checkpoints that survive a disconnect"),
     ("https://www.gstatic.com/generate_204", 204, "Google static files - the Colab page"),
-    ("https://github.com/Utkarsh-09/AI_GURU_labs", 200, "the lab repo - Open in Colab links, git clone"),
+    ("https://github.com/AIGuruOne", 200, "GitHub, the lab repo's org page - Open in Colab links, git clone (the repo itself is private, so it is not probed)"),
     ("https://pypi.org/simple/requests/", 200, "pip index - installs on a laptop"),
     ("https://files.pythonhosted.org/packages/7c/e4/56027c4a6b4ae70ca9de302488c5ca95ad4a39e190093d6c1a8ace08341b/requests-2.32.4-py3-none-any.whl",
      200, "pip downloads - installs on a laptop"),
