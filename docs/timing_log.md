@@ -78,8 +78,8 @@ prompts = the 20 held-out tickets with the house system prompt).
 | Command | Date | Where | Measured | Notes |
 |---|---|---|---|---|
 | `concurrency_test.py --endpoint local` (llama3.2:1b, Ollama 0.12.10 on port 11435, started by hand on 2026-09-20 with an unrecorded environment) | 2026-09-22 | local, Windows 11, integrated GPU | 3 m 25 s | one run, 0 failed. p95 4.45 -> 30.3 s, throughput 0.24 -> 0.49 req/s, flat from 2 callers on. The two runs inside notebook 03 (port 11437, `Parallel:1` in the log) show the same shape; the notebook's rows above are the reference |
-| `concurrency_test.py --base-url http://localhost:11436/v1 --model llama3.2:1b` against a scratch server started with **`OLLAMA_NUM_PARALLEL=4`** (log: `Parallel:4 ... KvSize:16384`) | 2026-09-22 | local, Windows 11, **CPU only** (the integrated GPU had 466 MiB free, so Ollama put 0% there) | 2 m 51 s | one run, 0 failed. p95 4.24 -> 17.6 s (4.1x); throughput 0.25 -> 0.66 (4 callers) -> 0.9 req/s (8) and flat at 16. Batching moves the knee to 8 and raises the ceiling 3.6x; it does not remove the knee. Summary in `facilitator/prebaked_outputs/concurrency/03_load_llama3.2_1b_parallel4_summary.json` |
-| `concurrency_test.py --endpoint hosted --levels 1,4,16 --requests 8` (gpt-4o-mini) | 2026-09-22 | local, home broadband | 27 s | one run, 0 failed. p95 2.84 (1 caller) / 2.09 (4) / 2.46 s (16); throughput 0.45 -> 2.09 -> 3.25 req/s and still rising: a fleet, not a server. Summary in `facilitator/prebaked_outputs/concurrency/03_load_hosted_gpt-4o-mini_summary.json` |
+| `concurrency_test.py --base-url http://localhost:11436/v1 --model llama3.2:1b` against a scratch server started with **`OLLAMA_NUM_PARALLEL=4`** (log: `Parallel:4 ... KvSize:16384`) | 2026-09-22 | local, Windows 11, **CPU only** (the integrated GPU had 466 MiB free, so Ollama put 0% there) | 2 m 51 s | one run, 0 failed. p95 4.24 -> 17.6 s (4.1x); throughput 0.25 -> 0.66 (4 callers) -> 0.9 req/s (8) and flat at 16. Batching moves the knee to 8 and raises the ceiling 3.6x; it does not remove the knee. The summary file was not kept (found missing at the P16 freeze check, 2026-09-23); these numbers are the record |
+| `concurrency_test.py --endpoint hosted --levels 1,4,16 --requests 8` (gpt-4o-mini) | 2026-09-22 | local, home broadband | 27 s | one run, 0 failed. p95 2.84 (1 caller) / 2.09 (4) / 2.46 s (16); throughput 0.45 -> 2.09 -> 3.25 req/s and still rising: a fleet, not a server. The summary file was not kept (found missing at the P16 freeze check, 2026-09-23); these numbers are the record |
 | `concurrency_test.py --base-url http://localhost:9/v1 --model x` (nothing listening) | 2026-09-22 | local | 4.4 s | exit 2, `NOTHING MEASURED. Preflight failed after 4.1 s: nothing answered at that address ...`, no files written. Windows takes about 4 s to refuse a localhost connection (Linux: at once) |
 | `concurrency_test.py --base-url http://10.255.255.1/v1 --model x --timeout 5` (non-routable address) | 2026-09-22 | local | 5.2 s | exit 2 at exactly the timeout: `no reply within 5.0 s ...`. Proves a black-hole endpoint cannot hang the room; the connect wait is capped at 10 s whatever `--timeout` says |
 | `concurrency_test.py --base-url http://localhost:11435/v1 --model nosuchmodel` | 2026-09-22 | local | 2.3 s | exit 2, `the server answered HTTP 404. Check the model name ...` |
@@ -128,3 +128,35 @@ docstring).
 | README Colab cells, stand-in `google.colab`, Jupyter kernel | 2026-09-23 | `python:3.12-slim` and `python:3.13-slim` containers | 16-22 s for the cells | - | env cell, `%pip install mcp==2.2.0`, key from the stand-in Secrets, status, one ticket, a 3-ticket eval, brief 5 with an MCP lookup, all on the "Drive" path. NOT run on Colab itself |
 | Deployment checklist, filled for the brief 5 build | 2026-09-23 | same laptop | about 25 min | 30 min | author time, including the four evals. `facilitator/examples/deployment_checklist_brief5_filled.md` |
 | **The room: a group of 2-3 building its brief** | - | people | **not yet measured** | 105 min | STILL OWED: the Day 5 dry run. On paper: README 10 min, untouched run 5, the four functions 40-60 (78 lines for brief 5), evals 5, the rest is slack for a Day 3/4 artifact that did not come out |
+
+## P16 freeze check (2026-09-23): cold and warm re-runs, local
+
+A verification pass, not the section 11 protocol: machine time on the
+build laptop, NOT Colab, so none of these rows closes a "not yet measured"
+Colab row above. Every solution ran headless (`python -m nbconvert
+--execute`) from a copy under `checkpoints/`, with its `checkpoints/local`
+files moved aside first (**cold**), then again straight after with the
+checkpoints left in place (**warm** = what a reconnect sees). Ollama 0.12.10
+on port 11435 (02, 06) or started by the notebook on 11437 (03);
+integrated AMD GPU. No retries unless stated.
+
+| Notebook | Cold | Warm (resume) | Result, and what the warm run reused |
+|---|---|---|---|
+| _template | 7.1 s | - | `TEMPLATE OK` |
+| 01_fundamentals (solution, FULL path) | 47.4 s | 36.0 s | `READY (8 / 8)`, 5 / 5 schema-valid, whole record 1 / 5, agent in 3 steps, both times. Warm: the five extractions reloaded `(from checkpoint)`; the short teaching calls ran again |
+| 02_local_inference (solution) | 66.1 s | 50.9 s | clean both times; the local reply was not readable JSON (0/6), as the header warns |
+| 03_concurrency (solution) | 244.4 s | **hung once (killed at 30 min)**, then 23.5 s and 22 s | cold: clean, 0 failed. Warm: the load test reloaded its saved summary. The hang did not reproduce in two retries and its cause was not found; Windows, notebook-started server on 11437. Four orphaned `ollama runner` processes (their `ollama serve` parents gone) were on the machine at the time |
+| 04_dataset_builder (solution) | 11.7 s | 10.5 s | `DATASET READY`, 373 / 72 / 20, both times |
+| 06_compare_base_tuned (solution, pre-baked adapter) | 248.3 s | 28.5 s | tuned column identical to the retained run (routing 16/20, urgency 7/20, invented 0); base column 5/20 urgency, 5/20 routing. Warm: all 40 replies reused |
+| 05_finetune (solution, `OQ_SMOKE_TEST=1`, `.venv-finetune`: transformers 5.16.1, peft 0.20.0, Python 3.11) | 414.9 s | - | 19 / 19 cells, `ADAPTER READY` |
+| 05_finetune (solution, `OQ_SMOKE_TEST=1`, **Colab's 2026-09-21 versions**: transformers 5.17.0, peft 0.21.0, accelerate 1.15.0, huggingface_hub 1.31.0, tokenizers 0.23.2, torch 2.11.0 CPU, Python 3.13) | 334.4 s | - | 19 / 19 cells, `ADAPTER READY`, no new warnings. CPU plumbing only: the T4 / CUDA 13 path of the new Colab image is still unrun |
+| Participant versions 01-06 | 7.5-110.5 s | - | each stops at its first hard TODO with `TODO n is not filled in yet` (01 at TODO 4: TODOs 1-3 are the diagnostic and never stop the room), nothing earlier |
+
+Cold `pip install --no-cache-dir -r requirements.txt` into a fresh venv:
+Python 3.11.15 102 s, Python 3.12.11 101 s, `pip check` clean, setup_check
+all PASS. The same install failed with `OSError ... Windows Long Path
+support` (on a jedi file, which ipykernel pulls in) from a venv folder 132
+characters long. The deepest file in the finished venv is 142
+characters below the venv folder (debugpy), so on Windows without long
+paths enabled the venv folder must be under about 116 characters.
+Playbook E22.

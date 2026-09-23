@@ -1,4 +1,4 @@
-# Pre-baked output of notebook 03 (Day 2 S8) and two contrast runs
+# Pre-baked output of notebook 03 (Day 2 S8), plus two contrast runs
 
 All measured on the build machine on 2026-09-22 with
 `scripts/concurrency_test.py`: Windows 11, no NVIDIA GPU, Ollama 0.12.10,
@@ -14,8 +14,15 @@ the same run cell by cell, which is the thing to put on the projector.
 | `03_load_llama3.2_1b_1-2-4-8-16_summary.json` | TODO 1 (the retained run) | the server the notebook started, `Parallel:1`: p95 **3.19 s at 1 caller -> 14.01 s at 16** (4.4x); throughput 0.33 -> 0.65 -> 1.05 req/s and **flat from 4 callers on**; 0 failed |
 | `03_load_llama3.2_1b_1-2-4-8-16_requests.jsonl` | the same run | one row per request (80): level, seconds, ok, status, reply tokens. Sort by level to see the queue: at 16 callers the replies land 0.95 s apart |
 | `03_capacity.json` | TODO 2 | target p95 <= 10 s -> **8 callers, 1.03 req/s, 3,708 requests/hour** - the three numbers the sizing worksheet's worked example uses |
-| `03_load_llama3.2_1b_parallel4_summary.json` | the script by hand, against a scratch server started with `OLLAMA_NUM_PARALLEL=4` (CPU only that time: the integrated GPU had no memory left) | p95 4.24 -> 17.6 s; throughput 0.25 -> 0.9 req/s, flat from 8 callers. Batching moves the knee and raises the ceiling; it does not remove either |
-| `03_load_hosted_gpt-4o-mini_summary.json` | the script by hand, `--endpoint hosted --levels 1,4,16 --requests 8` | p95 2.84 / 2.09 / 2.46 s at 1 / 4 / 16 callers; throughput 0.45 -> 3.25 req/s and still rising. A fleet behind a load balancer |
+
+Two contrast runs of the script by hand, 2026-09-22. **Numbers only: their
+summary files were not kept** (found missing at the P16 freeze check); the
+rows in `docs/timing_log.md` are the record.
+
+| Run | What it showed |
+|---|---|
+| `--base-url` a scratch server started with `OLLAMA_NUM_PARALLEL=4` (CPU only that time: the integrated GPU had no memory left) | p95 4.24 -> 17.6 s; throughput 0.25 -> 0.9 req/s, flat from 8 callers. Batching moves the knee and raises the ceiling; it does not remove either |
+| `--endpoint hosted --levels 1,4,16 --requests 8` (gpt-4o-mini) | p95 2.84 / 2.09 / 2.46 s at 1 / 4 / 16 callers; throughput 0.45 -> 3.25 req/s and still rising. A fleet behind a load balancer |
 
 Two earlier runs of the notebook the same day, when the integrated GPU
 held only 62% of the model, gave the same shape with every latency about

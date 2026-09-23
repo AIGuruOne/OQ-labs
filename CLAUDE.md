@@ -87,13 +87,27 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
 - `config/endpoints.py` and `setup/setup_check.py` parse `.env`
   themselves (stdlib) so both work before `pip install`.
 
-### Python versions (verified 2026-09-19)
+### Python versions (verified 2026-09-19, Colab GPU image re-checked 2026-09-23)
 - Colab is mid-rollout: new default image is Python 3.13.15 /
   Ubuntu 24.04; the pinnable previous runtime "2026.07" is Python
   3.12.13 / Ubuntu 22.04. Colab preinstalls torch 2.11.0+cu128,
   transformers 5.16.1, numpy 2.1.3, pandas 2.2.3, requests 2.32.4,
   pydantic 2.13.5, accelerate 1.14.0, datasets 4.8.5, httpx 0.28.1.
   Authority: github.com/googlecolab/backend-info (pip-freeze.gpu.txt).
+- **CHANGED 2026-09-21 22:12 UTC** (backend-info commit e9534f11,
+  "Update GPU runtime to cuda 13.3.1"): the GPU image now has torch
+  2.11.0+cu130, transformers 5.17.0, peft 0.21.0, accelerate 1.15.0,
+  huggingface_hub 1.31.0, tokenizers 0.23.2, uvicorn 0.53.0, starlette
+  1.6.0, Python 3.13.15. Everything the base `requirements.txt` pins is
+  unchanged. Notebook 05's only T4 run (2026-09-20) was on the OLD
+  image. Checked at P16 without a GPU: the bitsandbytes 0.50.2 wheel
+  ships `libbitsandbytes_cuda130.so`; `tests/test_finetune_utils.py` +
+  `tests/test_notebook_05.py` (40 tests) and the 05 smoke run pass on
+  exactly those versions on CPU (Python 3.13). The T4 / CUDA 13 path
+  itself is UNRUN - the first thing to run on Colab.
+  `requirements-finetune.txt` now trails Colab; harmless, because
+  notebook 05 installs only bitsandbytes on Colab. Do not "catch up"
+  the pins during freeze.
 - `requirements.txt` pins match Colab's preinstalled versions where
   Colab ships the package. Do not "upgrade" a pin to the newest PyPI
   version — matching Colab is the point.
@@ -795,9 +809,12 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
   Fix / Fallback after 60 s / Tested, in that order. They are ordered
   by likelihood x blast radius, with an index table on the first screen.
   Part 2: the demo fallback ladder and Ritesh's Sat 26 check table.
-  Part 3: exact-error reference E1-E18.
+  Part 3: exact-error reference E1-E22 (E19-E20 from P11, E21-E22
+  from the P16 freeze check).
   `tests/test_failure_playbook.py` holds that shape (index lines < 40,
-  anchors land, trust level on every entry, paths exist).
+  anchors land, trust level on every entry, paths exist; paths under
+  the git-ignored `checkpoints/local` are exempt, since a fresh clone
+  does not have them).
 - Numbering rule for citations: "playbook entry N" (N <= 15) = room
   entry N; "playbook EN" = Part 3. E-numbers are the entry numbers used
   before 2026-09-23, so an old "entry 17" still means E17 (the test
@@ -980,4 +997,34 @@ Do not change a contract silently — that is a raise-with-Ritesh change.
 - STILL OWED: the room. 105 min for a group is unmeasured (author built
   brief 5 in ~7 min, 78 lines); checklist (30) and peer sheet (65) never
   timed with people. Day 5 dry run.
+
+### Freeze verification (P16, 2026-09-23)
+- Verified locally, nothing rebuilt: every solution ran headless cold,
+  then warm (the reconnect case), clean; each participant notebook stops
+  at its first hard TODO; tests green on the build machine AND on a
+  fresh anonymous clone; cold `pip install -r requirements.txt` clean on
+  3.11 and 3.12; no secret in any blob of git history; the real-name
+  grep and `check_tickets.py` clean. Timings: `docs/timing_log.md`,
+  "P16 freeze check" section - local machine time, so they close no
+  Colab row.
+- Section 12 standard 1 (cold free-tier Colab) is met by NO notebook
+  yet. Owed on Colab, in order of room risk: 05 on a T4 (new CUDA 13
+  image, see Python versions) + its disconnect test; 01 on CPU with the
+  key in Colab Secrets (that branch has never run); 02, 03, 06 on a T4
+  (+ disconnect tests for 03 and 06); 04 timed; the capstone README's
+  Colab cells.
+- Known and accepted at freeze (do not "fix" during freeze without
+  asking): the environment cell ignores `git clone`'s exit code
+  (playbook E21 is the room answer; changing the cell means 7 notebooks
+  + template + conventions doc + parity tests); `config/endpoints.py`
+  lets `requests` `ReadTimeout` escape instead of `EndpointError`
+  (`run_eval` catches it per ticket); notebook 03's two TODO cells are
+  37-38 lines; one notebook 03 warm re-run hung on Windows (30 min, not
+  reproduced in two retries, cause unknown); only direct pins, not
+  their dependencies, are pinned; 04 and 05 have no folder in
+  `facilitator/prebaked_outputs/` (their solution notebooks and
+  `checkpoints/adapter_prebaked/` are the fallback).
+- On Windows, a notebook-started `ollama serve` dies with the kernel but
+  its `ollama runner` child can survive (four orphans were found on the
+  build machine). Kill stray runners before a reference timing run.
 

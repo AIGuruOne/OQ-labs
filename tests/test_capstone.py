@@ -329,6 +329,10 @@ def test_paths_named_in_the_capstone_docs_exist():
         for match in re.findall(r"`([A-Za-z0-9_./-]+/[A-Za-z0-9_./-]*)`", doc.read_text(encoding="utf-8")):
             if match.startswith(("http", "/content", "<")) or "<" in match:
                 continue
+            # checkpoints/local/ is created by the first run and git-ignored:
+            # a fresh clone does not have it yet.
+            if match.startswith("checkpoints/local"):
+                continue
             path = match.split(":")[0]
             if not (REPO_ROOT / path).exists() and not (PREBAKED / path).exists():
                 missing.append((doc.name, match))

@@ -1033,3 +1033,45 @@ entries point to. The numbers are the ones this file used before
 - **Seen on:** 2026-09-22 (build machine, provoked on purpose: round 1,
   restart, round 2 -> exactly the text above; the same with
   `OQ_MCP_STATE_KEY` set -> `WO-195893` written).
+
+### E21. Colab: `ModuleNotFoundError: No module named 'utils'` (or `'config'`, `'ollama_utils'`) in the cell after the environment cell
+- **Symptom:** the first code cell printed `Environment : Colab` and a
+  `Repo root` as if all was well; the next cell that imports a repo
+  module fails with `No module named ...`.
+- **Cause:** the repo clone failed and the environment cell did not
+  notice: it runs `os.system("git clone ...")` and never checks the
+  result. Git's own error (`fatal: repository ... not found`, or a
+  network error) may not show in the cell at all. Usual reasons: GitHub
+  blocked or slow on the network (room entry 1), or the runtime
+  disconnected while cell 1 was still cloning.
+- **Diagnose:** `!ls /content/oq-advanced-ai` - no such folder, or a
+  folder with no `notebooks/` in it.
+- **Fix:** `!rm -rf /content/oq-advanced-ai`, then run the first cell
+  again. A clean git failure leaves no folder, so a re-run retries by
+  itself; a clone killed half-way leaves one, and the cell then skips
+  the clone - hence the `rm`. If it fails again, GitHub is blocked:
+  `!git clone --depth 1 https://github.com/Utkarsh-09/AI_GURU_labs.git
+  /content/oq-advanced-ai` shows the real error. Then room entry 1.
+- **Seen on:** 2026-09-23, SIMULATED on the build machine: the real
+  first cell of notebook 02, run with a stand-in `google.colab`, a repo
+  URL that does not exist and `/content` redirected to a scratch folder.
+  Cell 1 printed `Environment : Colab`; `import utils` then raised
+  exactly `ModuleNotFoundError: No module named 'utils'`; no folder was
+  left behind. Not reproduced on Colab itself, and whether git's error
+  line shows in a Colab cell was not checked.
+
+### E22. pip on Windows: `Could not install packages due to an OSError: [Errno 2] No such file or directory: '...\site-packages\jedi\third_party\django-stubs\...'`
+- **Symptom:** `pip install -r requirements.txt` into a venv stops with
+  that error and a `HINT: ... Windows Long Path support` line.
+- **Cause:** Windows' 260-character path limit. ipykernel brings in
+  jedi and debugpy, whose deepest files sit 142 characters below the
+  venv folder, so a venv folder longer than about 116 characters cannot
+  hold them - typical when the repo lives deep inside a synced folder
+  (OneDrive "Documents", a long company folder name).
+- **Fix:** clone the repo somewhere short (`C:\oq` or
+  `C:\Users\<name>\oq-advanced-ai`), make the venv there, install again.
+  Enabling long paths in Windows also works but needs admin rights,
+  which a managed OQ laptop may not give.
+- **Seen on:** 2026-09-23 (build machine, P16 freeze check: a fresh
+  Python 3.12 venv in a folder 132 characters long failed exactly so;
+  the same install from a 50-character folder succeeded in 101 s).

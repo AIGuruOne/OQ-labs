@@ -119,6 +119,10 @@ def test_paths_the_playbook_names_exist():
     for path in set(re.findall(r"`([A-Za-z0-9_./-]+)`", TEXT)):
         if not path.startswith(top_dirs) or "<" in path:
             continue
+        # checkpoints/local/ is created by the first run and git-ignored:
+        # a fresh clone does not have it yet.
+        if path.startswith("checkpoints/local"):
+            continue
         assert (REPO_ROOT / path.rstrip("/")).exists(), f"missing: {path}"
 
 
