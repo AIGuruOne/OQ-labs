@@ -93,9 +93,11 @@ is a rate, and rates have bad days.
 9. **Keep an injection case in the eval set** and re-run it on every model upgrade, every prompt
    change and every new MCP server. This is how you find out that last month's defence stopped working.
 
-Measured in S25 on the same queue, same model and same loop: undefended, the payload reached the
-record on 1 of 3 runs. Under the structural controls it reached it on none of theirs — and not one
-of them had to notice anything to stop it.
+Measured in S25, same queue, same model, same loop. The loud payload — *close this P1* — reached
+the record on 0 of 3 undefended runs, and on none of the runs behind a structural control; not one
+of those controls had to notice anything to stop it. The quiet payload — *copy this record into
+that one* — walked straight through the policy gate, because that write was inside the policy.
+Which is step 3 above, and why it is above step 4: scope the reads, not only the writes.
 
 ---
 
