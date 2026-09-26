@@ -96,7 +96,7 @@ one capstone group.
   - A pull that stopped: run the PULL CELL again (or `ollama pull
     llama3.2:1b`). It resumes where it stopped: measured, a re-pull began
     at 40 MB of 398 MB after a kill.
-  - Stagger the downloads: one group at a time, not fifteen.
+  - Stagger the downloads: one group at a time, not the whole room at once.
 - **Fallback after 60 s:** the facilitator's USB kit (Part 2).
   - Models: quit Ollama. Copy the folder `models` from the kit over the
     laptop's `~/.ollama/models` (Windows: `%USERPROFILE%\.ollama\models`).
@@ -160,7 +160,7 @@ one capstone group.
   limit" / "it worked yesterday".
 - **Radius:** LAPTOP for a missing, misspelt or wrong key. ROOM for a 429
   on a shared key: OpenAI applies limits "per organization and not per
-  user", so fifteen people on one key share one limit.
+  user", so everyone sharing one key shares one limit.
 - **Diagnose (one look):**
   - Local: `python setup/setup_check.py`, row `API key + live call`
     (6 s). It says which of three it is: `not set`; `Found OPEN_API_KEY`
@@ -560,7 +560,7 @@ machine on 2026-09-22.
   4. Run one cell to confirm.
 - **What breaks:**
   - The room can no longer follow on their own laptops. A phone cannot
-    carry 15 laptops, and OQ may not allow its staff to join an outside
+    reliably carry a whole room of laptops, and OQ may not allow its staff to join an outside
     network: ask on Sat 26.
   - Mobile data: not measured. The heavy downloads happen in the
     runtime, so the hotspot carries only the page and the outputs.

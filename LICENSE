@@ -1,0 +1,48 @@
+Copyright (c) 2026 AI Guru. All rights reserved.
+
+Training material prepared for the OQ "Advanced AI for IT" program,
+27 September - 1 October 2026.
+
+
+WHY THIS REPOSITORY IS PUBLIC
+
+It is public for one practical reason: so that program participants can
+clone it and open its notebooks in Google Colab without needing a GitHub
+account of their own. Public visibility is a convenience for the room. It
+is not a grant of any licence, and nothing here is open source.
+
+
+PERMITTED
+
+  - Program participants and OQ staff may clone, run, modify and keep
+    this material for their own learning and internal use, during the
+    program and afterwards.
+
+
+NOT PERMITTED without prior written permission from AI Guru
+
+  - Redistributing this material, in whole or in part, publicly or
+    commercially.
+  - Using it to deliver training, paid or unpaid, to any other audience.
+  - Incorporating it into another course, product, service or model
+    training set.
+
+
+SYNTHETIC DATA
+
+Every document, ticket, record, image, name, site code, equipment tag and
+system name in this repository is synthetic and was generated for
+teaching. No OQ material of any kind was used: no documents, data, site
+names, employee names or system names. See corpus/README.md for how the
+corpus was built and how that is verified. Any resemblance to real OQ
+material is coincidental.
+
+
+THIRD-PARTY SOFTWARE
+
+Dependencies installed by requirements.txt and by the notebooks remain
+under their own licences, held by their own authors. Nothing in this
+notice applies to them.
+
+
+Contact: ritesh@goaiguru.com

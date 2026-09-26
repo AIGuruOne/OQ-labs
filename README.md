@@ -152,3 +152,12 @@ python -m services.mock_erp.tour                               # hit every mock 
 
 Read `BUILD_SPEC.md` before changing anything, and `CLAUDE.md` if you
 are an AI agent working on this repo.
+
+## Copyright
+
+(c) 2026 AI Guru. All rights reserved. This repository is public so
+participants can clone it into Colab without a GitHub account - that is a
+convenience, not an open-source licence. Participants and OQ staff may run
+and modify it freely for their own learning; redistributing it or teaching
+from it elsewhere needs written permission. All data is synthetic. See
+`LICENSE`.
