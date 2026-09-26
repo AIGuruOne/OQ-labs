@@ -70,6 +70,19 @@ corpus/
   images/        rendered image set + the spec files that are its ground truth
 ```
 
+**What is actually committed, and what is generated.** Only
+`tickets/tickets_raw.jsonl` ships in the repo — it is generated once by
+`scripts/generate_tickets.py --seed 42` and committed, because every Day 2
+eval depends on those exact bytes.
+
+`manuals/`, `hse/`, `maintenance/` and `images/` are committed **empty**
+(a `.gitkeep` each). The Day 3 labs build their contents at runtime:
+`notebooks/07_rag_pipeline.ipynb` writes the plant documents, and
+`notebooks/08_vision_diagram.ipynb`, `09_vision_scanned.ipynb` and
+`10_multimodal_retrieval.ipynb` render the image set and its ground-truth
+specs. So a fresh clone shows four empty folders — that is correct, not a
+failed checkout. Run the Day 3 notebooks and they fill.
+
 Document frontmatter format and naming conventions are defined in
 `docs/contracts.md` (Contract 1). That file is the authority; this one
 summarises.

@@ -35,3 +35,20 @@ s26_server.py
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Day 3 / Day 4 lab output. These notebooks build their own working set —
+# rendered images, a chunk index, two MCP servers, saved runs — from the
+# payload cells inside them, so nothing here is source. The reference
+# copies we DO keep live in facilitator/ and facilitator/prebaked_outputs/.
+artifacts/
+corpus/images/*.png
+corpus/images/*.json
+notebooks/corpus/
+notebooks/artifacts/
+s23_agent_graph/
+s24_agent_control/
+mcp_live/
+notebooks/s23_agent_graph/
+notebooks/s24_agent_control/
+notebooks/mcp_live/
+notebooks/harness_and_loop_handout.md

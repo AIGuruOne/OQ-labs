@@ -60,13 +60,74 @@ first) read the key from **Colab Secrets**: key icon in the left
 sidebar, add a secret named exactly `OPENAI_API_KEY`, switch on
 *Notebook access*. Do it once; it persists across runtimes.
 
+## The week, session by session
+
+Every lab notebook lives in `notebooks/`, numbered in the order the week
+runs them. Open one with its **Open in Colab** badge, or run it locally.
+
+| Day | Session | Notebook or file |
+|---|---|---|
+| **1** Architect | S1. Fundamentals | `notebooks/01_fundamentals.ipynb` |
+| | S3. Build, buy or host | `resources/day1/OQ_D1_S3_Decision_Matrix.xlsx` |
+| | S4. Architecture spec + cost model | `resources/day1/OQ_D1_S4_Architecture_Spec_Template.docx`, `..._Cost_Model.xlsx` |
+| | S5. Spec peer review | `resources/day1/OQ_D1_S5_Spec_Review_Checklist.docx` |
+| | Close. Capstone groups form | `resources/day1/OQ_D1_Use_Case_Briefs.pdf` |
+| **2** Own the model | S7. Run a model yourself | `notebooks/02_local_inference.ipynb` |
+| | S8. What breaks at scale | `notebooks/03_concurrency.ipynb` |
+| | S10. Build the dataset | `notebooks/04_dataset_builder.ipynb` |
+| | S11. Fine-tune it | `notebooks/05_finetune.ipynb` (Apple Silicon: `05b_finetune_mlx.ipynb`) |
+| | S12. Did it work | `notebooks/06_compare_base_tuned.ipynb` |
+| **3** Ground it | S15. Full text RAG pipeline | `notebooks/07_rag_pipeline.ipynb` |
+| | S16. Vision, lab 1 — diagrams | `notebooks/08_vision_diagram.ipynb` |
+| | S16. Vision, lab 2 — scanned work orders | `notebooks/09_vision_scanned.ipynb` |
+| | S16. Vision, lab 3 — multimodal retrieval | `notebooks/10_multimodal_retrieval.ipynb` |
+| **4** Agents | S19. Tune versus retrieve | `notebooks/11_three_way.ipynb` |
+| | S22. MCP live | `notebooks/11b_mcp_live.ipynb` |
+| | S23. The agent graph | `notebooks/12_agent_graph.ipynb` |
+| | S24. Control | `notebooks/13_agent_control.ipynb` |
+| | S25. Agent safety and patterns | `notebooks/14_agent_safety.ipynb`, `facilitator/harness_and_loop_handout.md` |
+| | Close. Integration mapping | `notebooks/15_integration_mapping.ipynb` |
+| **5** Integrate and ship | S26. Build an MCP server | `facilitator/mcp_build_sequence.md`, `services/` |
+| | S27–S28. Capstone assembly | `capstone/` — your group edits `capstone/my_usecase.py` |
+| | S29. Governance pack | `facilitator/governance_pack/` |
+| | S30. Showcase and peer review | `facilitator/peer_scoring_sheet.md` |
+
+### Two kinds of notebook
+
+**Days 1, 2 and 5** notebooks have **TODO gaps you fill in**. Their
+committed copies in `notebooks/` have outputs cleared, and the completed
+reference with outputs is in `solutions/`.
+
+**Days 3 and 4** notebooks (07–15) work differently, on purpose: they have
+no TODO gaps — you read and run them — and they ship **with their outputs
+kept**, so the lab still reads correctly if a model call fails on venue
+Wi-Fi. There is no `solutions/` copy of these; the committed notebook *is*
+the reference. Notebooks 12, 13 and 14 go further and carry their whole
+working set (corpus, two MCP servers, a chunk index, seed tickets and one
+saved run) inside a payload cell, so they run on a bare Colab runtime with
+nothing cloned.
+
+Days 3 and 4 also **install their own pinned packages** in their first cell
+(`openai`, `rank-bm25`, `sentence-transformers`, `ragas` and friends) rather
+than relying on `requirements.txt`. That keeps them self-contained on Colab.
+Locally, run them in a **separate virtual environment** — a couple of their
+pins differ from `requirements.txt` and would disturb the Day 1/2/5 setup.
+
+## Slides and hand-outs
+
+Slide decks for all five days live in the program **Google Drive** folder, in
+its *slides* sub-folder — not in this repo. The Office versions of the Day 1
+working documents *are* in this repo, under `resources/`. Ask the facilitator
+for the Drive link.
+
 ## Layout
 
 | Path | What it is |
 |---|---|
-| `notebooks/` | Participant notebooks, with TODO gaps to fill |
-| `solutions/` | Completed notebooks with outputs — the reference |
-| `corpus/` | Synthetic documents, tickets and images the labs consume |
+| `notebooks/` | Every lab notebook, `01`–`15`, in the order the week runs them |
+| `solutions/` | Completed Day 1/2/5 notebooks with outputs — the reference for `01`–`06` |
+| `resources/` | Office versions of the Day 1 working documents (Excel, Word, PDF) |
+| `corpus/` | Synthetic tickets, and the folders the Day 3 labs generate their documents and images into |
 | `data/` | Fine-tuning datasets and eval sets |
 | `config/endpoints.py` | One switch for local Ollama / hosted API / tuned adapter |
 | `scripts/` | Eval harness, data generators, quality checks |
@@ -74,7 +135,7 @@ sidebar, add a secret named exactly `OPENAI_API_KEY`, switch on
 | `capstone/` | Day 5 capstone scaffold: one file per group (`my_usecase.py`), the Contract 5 reference index, a worked brief 5 build |
 | `setup/` | Environment check and setup guides |
 | `docs/` | Interface contracts, timing log, failure playbook |
-| `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 5 governance pack, production handout, deployment checklist, peer scoring sheet, pre-baked outputs |
+| `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 4 decision table and harness hand-out, the Day 5 governance pack, production handout, deployment checklist, peer scoring sheet, pre-baked outputs |
 
 ## Commands
 
