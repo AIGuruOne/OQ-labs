@@ -43,6 +43,7 @@ Thumbs.db
 artifacts/
 corpus/images/*.png
 corpus/images/*.json
+data/eval/image_ground_truth/*.json
 notebooks/corpus/
 notebooks/artifacts/
 s23_agent_graph/

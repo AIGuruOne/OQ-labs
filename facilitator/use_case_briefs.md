@@ -134,8 +134,9 @@ document corpus, Markdown with frontmatter that carries `revision`,
 `revision_date` and `supersedes`), the planted traps (same tag in two
 documents with different revision dates, a superseding procedure with
 no cross-reference, a term with two meanings, one scanned page that
-breaks ingestion), `data/eval/rag_adversarial.jsonl` and
-`data/eval/golden_answers.jsonl`.
+breaks ingestion), the adversarial set and the golden answers, which
+`notebooks/07_rag_pipeline.ipynb` generates into its own artifacts folder
+when you run it - neither is committed, so run that notebook first.
 
 **What "deployment-ready" means here.** An index built from the corpus
 by a script anyone can rerun when a procedure changes, with a
@@ -199,7 +200,8 @@ silently applied.
 diagrams, nameplates aged with noise and glare, scanned pages,
 inspection photos, one known-bad case) with the spec files that are
 their ground truth in `data/eval/image_ground_truth/`;
-`scripts/score_extraction.py`; the mock ERP's equipment master
+the scoring code, which lives inside notebooks 08, 09
+and 10 rather than in a standalone script; the mock ERP's equipment master
 (`services/mock_erp/`) and the reference MCP server's read tools.
 
 **What "deployment-ready" means here.** A pipeline from image to

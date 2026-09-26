@@ -15,8 +15,8 @@ fine-tuning stack). Check with `python --version`.
 
 ```bash
 # 1. Clone
-git clone <repo-url> oq-advanced-ai
-cd oq-advanced-ai
+git clone https://github.com/AIGuruOne/OQ-labs.git
+cd OQ-labs
 
 # 2. Virtual environment
 python -m venv .venv

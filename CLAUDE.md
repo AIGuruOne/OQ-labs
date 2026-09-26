@@ -46,7 +46,12 @@ every time.
 - Environment check: `python setup/setup_check.py` (`--network`: can this network reach every host the week needs - run it on the OQ network)
 - Eval: `python scripts/run_eval.py --dataset <path> --endpoint <name>` (`--label`, `--out`, `--json-mode`, `--resume`, `--replies <file>`, `--limit`, `--all`)
 - Compare runs: `python scripts/run_eval.py --compare <a_summary.json> <b_summary.json> [...]`
-- Image scoring: `python scripts/score_extraction.py --pred <path> --truth <path>`
+- Image scoring: NOT a script. BUILD_SPEC specced `scripts/score_extraction.py`,
+  but the Day 3 vision labs score inline instead - the scoring functions and the
+  ground truth live in `notebooks/08_vision_diagram.ipynb`,
+  `09_vision_scanned.ipynb` and `10_multimodal_retrieval.ipynb`, which write their
+  ground truth to `data/eval/image_ground_truth/` at runtime. Do not tell anyone to
+  run score_extraction.py; it does not exist.
 - Data quality: `python scripts/quality_checks.py --dataset data/finetune` (a folder, or `--dataset <train file> --val <val file>`; `--all` lists every finding)
 - Mock ERP: `uvicorn services.mock_erp.main:app --reload` (on Windows drop `--reload`: the reload hangs, playbook 17). Walk every endpoint: `python -m services.mock_erp.tour` (`--base-url`, `--api-key`). Regenerate seed: `python -m services.mock_erp.seed --seed 42`; OpenAPI file: `python -m services.mock_erp.write_openapi`
 - MCP server (S26): `python -m services.mcp_server_reference.server` (read-only; `--enable-writes`, `--port 8100`, `--audit-log <file>`, `--transport stdio`). Speak to it by hand, every header shown: `python -m services.mcp_server_reference.call discover | list | <tool> key=value` (`--args-file`, `--approve/--reject <approver> --reason`, `--brief`, `--no-forms`). Prove it: `python services/mcp_server_reference/test_inspector.py` (`--inspector` needs Node >= 22.19, `--module s26_server`). Refresh its pre-baked outputs: `python scripts/walk_s26_steps.py --out facilitator/prebaked_outputs/mcp_server` (ports 8000 + 8100 free)
