@@ -1,16 +1,29 @@
 # Capstone use case briefs (Day 1, close: groups form)
 
-Five briefs. Each group of 2–3 picks one on Day 1 and builds toward
-it all week; on Thursday afternoon (S30) they show it. No more than
-two groups on the same brief — if a third wants it, they take their
-second choice.
+Five briefs. Each person, or each pair, picks one on Day 1 and builds
+toward it all week; on Thursday afternoon (S30) they show it.
+
+**How this room splits.** The cohort is three or four people, so the week
+runs in one of three shapes. Decide which one before S4, because the
+architecture spec written in S4 is written against a brief.
+
+| Shape | When it fits | Thursday (S30) |
+|---|---|---|
+| **One brief each**, 3–4 builds | the default at this size: everyone writes Python, and the facilitator is free at three-to-one | real peer review — each build scored by everyone who did not build it. Each person also takes their own working artifact back to OQ |
+| **Two pairs**, 2 builds | if two people would rather pair than work alone | peer review still works, over two demos |
+| **One group**, 1 build | if the room wants one deeper build, or somebody is not writing code this week | nobody is an eligible peer, so everyone scores the one build independently and the disagreements become the session. See `facilitator/peer_scoring_sheet.md` |
+
+At this size no brief can be over-subscribed, so there is no limit on who
+picks what. Two people taking the **same** brief and comparing builds on
+Thursday is a good outcome rather than a clash: one problem, two sets of
+choices, and the differences are the most useful conversation of the day.
 
 **When they are handed out.** At the start of S4 (12:45), because the
-architecture spec written in S4 has to be about *something*: each
-table picks a brief provisionally, writes its spec against it, and has
-it reviewed in S5. The 20-minute close (14:55) confirms the groups —
-a table may switch brief then, at the price of redoing its spec that
-evening. In practice nobody switches.
+architecture spec written in S4 has to be about *something*: each person
+picks a brief provisionally, writes a spec against it, and has it
+reviewed in S5. The 20-minute close (14:55) confirms the choices — you
+may switch brief then, at the price of redoing the spec that evening. In
+practice nobody switches.
 
 **Everything here is invented.** The company, the desk, the sites
 (`MRB`, `SHZ`, `KTF`, ...), the systems (`Tavrona ERP`, `StaffGate`,
@@ -18,12 +31,23 @@ evening. In practice nobody switches.
 OQ system, site or incident appears in any brief. Groups should
 imagine their own environment while building against this one.
 
-**One scaffold, five briefs.** There are not five starter kits. Every
-group starts from the same capstone scaffold on Day 5 (S27) and the
+**One scaffold, five briefs.** There are not five starter kits. Everyone
+starts from the same capstone scaffold on Day 5 (S27) and the
 same repo: the endpoint switch (`config/endpoints.py`), the eval
 harness (`scripts/run_eval.py`), the mock ERP and the reference MCP
 server (`services/`), the pre-baked adapter and the ticket corpus.
-The briefs differ in which of those pieces the group leans on.
+The briefs differ in which of those pieces you lean on.
+
+**Building on your own?** Then do not all edit `capstone/my_usecase.py`.
+Copy it once, to a name of your own, and point the scaffold at your copy:
+
+    cp capstone/my_usecase.py capstone/my_usecase_sara.py
+    python -m capstone.run status --usecase capstone.my_usecase_sara
+    python -m capstone.run ticket INC-005310 --usecase capstone.my_usecase_sara
+
+Everything else — the endpoint switch, the index, the adapter, the audit
+log — is shared and needs no copy. A pair or a single group can leave the
+file where it is and drop `--usecase` entirely.
 
 **The bar for "deployment-ready"** is the same for all five, and it is
 not "it works in the notebook":
@@ -279,8 +303,8 @@ planner reconstruct why a draft says what it says; and a governance
 entry naming who can approve and what "approve" commits them to.
 
 **Scope guard.** One agent, one job. No multi-agent choreography, no
-memory between tickets, no autonomous writes ever. If the group is
-tempted to let the agent "just do the obvious ones", the answer is
+memory between tickets, no autonomous writes ever. If you are tempted
+to let the agent "just do the obvious ones", the answer is
 the S25 talk.
 
 **Which sessions give you what you need.**
@@ -418,10 +442,14 @@ one write endpoint, already specified. No brief needs a GPU after Day
 | Minute | Do |
 |---|---|
 | 0–5 | Read the five one-line problems aloud. Say which one is the locked fine-tune task (1) and that the three-way comparison on Day 4 uses briefs 1 and 5's data |
-| 5–12 | Groups form by interest, 2–3 people, mixed roles where possible (one person who owns an integration, one who owns data) |
-| 12–17 | Each group names its brief and its post-week owner-in-principle. Enforce the two-groups-per-brief limit |
-| 17–20 | Each group writes, on the back of the page, one line for each of the six deployment-ready points above: who, what number, what happens when it is wrong. Tomorrow's S12 fills in the number |
+| 5–10 | Settle the shape first — one brief each, two pairs, or one group — using the table at the top of this document. Say out loud what it costs: one brief each means real peer review on Thursday and an artifact each; one group means a deeper build and no eligible peer scorer |
+| 10–15 | Each person (or pair) names their brief and its post-week owner-in-principle. There is no over-subscription limit at this size, so do not invent one: if two people want the same brief, let them, and tell them Thursday will compare their two builds |
+| 15–20 | Each person writes, on the back of the page, one line for each of the six deployment-ready points above: who, what number, what happens when it is wrong. Tomorrow's S12 fills in the number |
 
-If a group wants a sixth use case: fine, if they can fill in the
+Write the chosen shape on the flip chart and leave it there all week: it
+decides which clock row S30 runs on (`facilitator/peer_scoring_sheet.md`)
+and whether anyone needs their own `capstone/my_usecase_<name>.py`.
+
+If somebody wants a sixth use case: fine, if they can fill in the
 "what data exists" line from this repo before Day 2 starts. If they
 cannot, they pick from the five.
