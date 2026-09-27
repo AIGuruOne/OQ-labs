@@ -323,6 +323,26 @@ def test_peer_sheet_slots_add_up_to_65():
     assert 5 * 11 <= 65 and 6 * 9 + 11 == 65
 
 
+def test_peer_sheet_small_cohort_rows_also_add_up_to_65():
+    """The cohort is 3-4 people, so S30 may show one build, not five.
+
+    Every small-cohort row must fill the 65 minutes exactly, and the parts
+    each row lists must add up to the minutes it claims.
+    """
+    text = (FAC / "peer_scoring_sheet.md").read_text(encoding="utf-8")
+    rows = re.findall(r"^\| \*\*(\d)\*\*[^|]*\| (\d+) min: ([^|]+)\| (\d+) min: ([^|]+)\|$",
+                      text, re.M)
+    assert len(rows) == 4, f"expected rows for 1-4 builds, got {len(rows)}"
+    for builds, per, per_parts, then, then_parts in rows:
+        builds, per, then = int(builds), int(per), int(then)
+        assert builds * per + then == 65, (builds, per, then)
+        assert sum(int(n) for n in re.findall(r"\d+", per_parts)) == per, per_parts
+        assert sum(int(n) for n in re.findall(r"\d+", then_parts)) == then, then_parts
+    # the one-build shape needs a scoring rule that works with no peer
+    assert "the facilitator scores it too" in text
+    assert "a median is noise" in text
+
+
 def test_paths_named_in_the_capstone_docs_exist():
     missing = []
     for doc in CAPSTONE_DOCS:
