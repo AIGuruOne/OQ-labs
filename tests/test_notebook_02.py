@@ -59,25 +59,37 @@ def test_participant_outputs_are_cleared(participant_cells):
             assert cell["execution_count"] is None, f"cell {cell['id']} has an execution count"
 
 
-def test_the_two_versions_differ_only_in_the_todo_cells(participant_cells, solution_cells):
+def test_the_two_versions_match_outside_the_todo_cells(participant_cells, solution_cells):
+    """The TODO values were pre-filled in place on 2026-09-28, for the three-person
+    delivery: a blocking assert mid-session cost more room time than the gap bought.
+
+    The TODO cells may still differ between the two copies, because the participant
+    copy keeps its hint comment (the facilitator talks through it) where the solution
+    replaced the hint with its answer. Everything outside a TODO cell must match.
+    The gapped originals are kept under the git tag `labs-with-todo-gaps`.
+    """
     assert [cell["id"] for cell in participant_cells] == [cell["id"] for cell in solution_cells]
     for mine, theirs in zip(participant_cells, solution_cells):
         if mine["id"] in TODO_CELL_IDS:
-            assert source_of(mine) != source_of(theirs)
-        else:
-            assert source_of(mine) == source_of(theirs), f"cell {mine['id']} differs between the two versions"
+            continue
+        assert source_of(mine) == source_of(theirs), f"cell {mine['id']} differs between the two versions"
 
+def test_todo_cells_keep_their_marker_hint_and_loud_failure(participant_cells):
+    """Pre-filled, but every TODO cell keeps its marker, its hint and its assert.
 
-def test_todo_cells_have_a_gap_a_hint_and_a_loud_failure(participant_cells):
+    The hint is what the facilitator discusses instead of having people type it, and
+    the assert still fires if a value is edited back into an unusable state.
+    """
     todo_cells = [cell for cell in participant_cells if cell["id"] in TODO_CELL_IDS]
     assert len(todo_cells) == 2
     for number, cell in enumerate(todo_cells, start=1):
         source = source_of(cell)
         assert f"── TODO {number} ─" in source
-        assert "..." in source
         assert "Hint:" in source
         assert f"TODO {number} is not filled in yet" in source
-
+        for line in source.splitlines():
+            code = line.split("#")[0]
+            assert "= ..." not in code and ": ...," not in code, f"gap left in {cell['id']}: {line}"
 
 def test_the_solution_has_no_gap_left(solution_cells):
     for cell in solution_cells:

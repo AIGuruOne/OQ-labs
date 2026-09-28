@@ -53,16 +53,22 @@ def test_the_two_versions_differ_only_in_the_todo_cells(participant_cells, solut
             assert source_of(mine) == source_of(theirs), f"cell {mine['id']} differs between the two versions"
 
 
-def test_todo_cells_have_a_gap_a_hint_and_a_loud_failure(participant_cells):
+def test_todo_cells_keep_their_marker_hint_and_loud_failure(participant_cells):
+    """Pre-filled, but every TODO cell keeps its marker, its hint and its assert.
+
+    The hint is what the facilitator discusses instead of having people type it, and
+    the assert still fires if a value is edited back into an unusable state.
+    """
     todo_cells = [cell for cell in participant_cells if cell["id"] in TODO_CELL_IDS]
     assert len(todo_cells) == 2
     for number, cell in enumerate(todo_cells, start=1):
         source = source_of(cell)
         assert f"── TODO {number} ─" in source
-        assert "= ...  " in source
         assert "Hint:" in source
         assert f'"TODO {number} is not filled in yet"' in source
-
+        for line in source.splitlines():
+            code = line.split("#")[0]
+            assert "= ..." not in code and ": ...," not in code, f"gap left in {cell['id']}: {line}"
 
 def test_the_decisions_are_the_same_ones_as_notebook_05(participant_cells):
     """A group on a Mac and a group on Colab must be able to compare notes:
