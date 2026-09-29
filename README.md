@@ -78,6 +78,7 @@ runs them. Open one with its **Open in Colab** badge, or run it locally.
 | | S11. Fine-tune it | `notebooks/05_finetune.ipynb` (Apple Silicon: `05b_finetune_mlx.ipynb`) |
 | | S12. Did it work | `notebooks/06_compare_base_tuned.ipynb` |
 | **3** Ground it | S15. Full text RAG pipeline | `notebooks/07_rag_pipeline.ipynb` |
+| | **S16. Vision — START HERE** | `notebooks/08a_vision_basics.ipynb` (15 min, one API key, no GPU, no Ollama) |
 | | S16. Vision, lab 1 — diagrams | `notebooks/08_vision_diagram.ipynb` |
 | | S16. Supplement — is the image worth sending? | `notebooks/08b_image_triage.ipynb` (15 min, no model, no key) |
 | | S16. Vision, lab 2 — scanned work orders | `notebooks/09_vision_scanned.ipynb` |

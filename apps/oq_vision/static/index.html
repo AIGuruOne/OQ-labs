@@ -1,0 +1,144 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OQ Vision</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#15181d;--dim:#5b6472;--line:#dfe3e9;
+        --accent:#1f5fa8;--good:#116a3d;--warn:#8a4b00;--bad:#b3261e;--chip:#eef2f7}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 20px}
+  .wrap{max-width:1200px;margin:0 auto}
+  h1{margin:0;font-size:21px}h1 span{color:var(--dim);font-weight:400;font-size:14px;margin-left:8px}
+  .meta{margin-top:6px;font-size:12.5px;color:var(--dim)}
+  main{max-width:1200px;margin:0 auto;padding:20px}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .lv{padding:11px 16px;border:1px solid var(--line);background:var(--card);border-radius:9px;
+      cursor:pointer;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .lv.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .lv small{display:block;font-weight:400;font-size:12px;opacity:.75;margin-top:2px}
+  .go{padding:12px 20px;border:0;border-radius:9px;background:var(--accent);color:#fff;
+      font-size:15px;font-weight:700;cursor:pointer}
+  .go.alt{background:#4a5568}
+  .go:disabled{opacity:.5;cursor:default}
+  .grid{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:18px;margin-top:16px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  section.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .phead{padding:10px 14px;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;
+         text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .pbody{padding:14px}
+  img.form{width:100%;border:1px solid var(--line);border-radius:7px;background:#fff;image-rendering:auto}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--dim);
+     padding:6px 8px;border-bottom:1px solid var(--line)}
+  td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  td.val{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14.5px}
+  tr.bad td.val.got{color:var(--bad);font-weight:700}
+  tr.ok  td.val.got{color:var(--good)}
+  tr.flag td.val.got{color:var(--warn);font-weight:600}
+  .banner{border-radius:9px;padding:12px 14px;font-size:15px;margin-bottom:14px}
+  .banner b{display:block;font-size:16px;margin-bottom:3px}
+  .banner.bad{background:#fdf1f1;border:1px solid #e8c4c1;color:var(--bad)}
+  .banner.ok{background:#eef7f1;border:1px solid #c9e2d2;color:var(--good)}
+  .banner.flag{background:#fdf6ec;border:1px solid #ecd9bb;color:var(--warn)}
+  pre{white-space:pre-wrap;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+      background:#fbfcfd;border:1px solid var(--line);border-radius:7px;padding:10px;margin:10px 0 0;color:var(--dim)}
+  .foot{color:var(--dim);font-size:12.5px;margin-top:10px}
+  .empty{color:var(--dim)}
+  details summary{cursor:pointer;font-size:13px;color:var(--accent);margin-top:10px}
+</style>
+
+<header><div class="wrap">
+  <h1>OQ Vision <span>what a model does when it cannot quite read the page</span></h1>
+  <div class="meta" id="meta">loading…</div>
+</div></header>
+
+<main>
+  <div class="controls" id="levels"></div>
+  <div class="controls">
+    <button class="go" data-p="naive">Just read it</button>
+    <button class="go alt" data-p="soft">Read it — &ldquo;say NOT_LEGIBLE if unsure&rdquo;</button>
+    <button class="go alt" data-p="strict">Read it — assume you cannot</button>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="phead">The photograph</div>
+      <div class="pbody"><img class="form" id="img" alt="work order"></div>
+    </section>
+    <section class="panel">
+      <div class="phead">What the model read</div>
+      <div class="pbody" id="out"><p class="empty">Pick a photograph and press <b>Read it</b>.</p></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let LEVEL = 0, HEALTH = null;
+
+async function boot(){
+  HEALTH = await (await fetch('/health')).json();
+  $('meta').innerHTML = `model <b>${HEALTH.model.model || 'not configured'}</b> · `
+    + `hosted API only — no GPU, no Ollama, nothing to install · temperature 0`;
+  $('levels').innerHTML = HEALTH.levels.map(l =>
+    `<button class="lv${l.id===0?' on':''}" data-id="${l.id}">${esc(l.label)}<small>${esc(l.note)}</small></button>`).join('');
+  $('levels').addEventListener('click', e => {
+    const b = e.target.closest('.lv'); if(!b) return;
+    LEVEL = +b.dataset.id;
+    document.querySelectorAll('.lv').forEach(x => x.classList.toggle('on', x===b));
+    setImage(); $('out').innerHTML = '<p class="empty">Press <b>Read it</b>.</p>';
+  });
+  setImage();
+}
+function setImage(){ $('img').src = `/static/level_${LEVEL}.jpg?t=${Date.now()}`; }
+
+function render(r){
+  if(r.error){ $('out').innerHTML = `<div class="banner bad"><b>Request failed</b>${esc(r.error)}</div>`; return; }
+  let banner;
+  if(r.flagged > 0)
+    banner = `<div class="banner flag"><b>${r.flagged} of 6 fields refused as NOT_LEGIBLE</b>`
+      + `Told explicitly to assume it could not read, the model backed off — including on fields`
+      + ` it would otherwise have got right. Refusing costs you correct answers too.</div>`;
+  else if(r.wrong > 0 && r.prompt === 'soft')
+    banner = `<div class="banner bad"><b>${r.wrong} of 6 still WRONG — and we asked it to say so</b>`
+      + `This is the fix most people write first. It reads as careful, and on this image it`
+      + ` changed nothing at all. Asking politely is not a control.</div>`;
+  else if(r.wrong === 0)
+    banner = `<div class="banner ok"><b>All 6 fields correct</b>Read cleanly, nothing invented.</div>`;
+  else
+    banner = `<div class="banner bad"><b>${r.wrong} of 6 fields are WRONG — and nothing was flagged</b>`
+      + `Valid JSON. Right shape. Right length. No error, no warning, no confidence score.`
+      + ` A system downstream would accept every one of these.</div>`;
+
+  const rows = r.rows.map(x => {
+    const cls = x.flagged ? 'flag' : (x.ok ? 'ok' : 'bad');
+    return `<tr class="${cls}"><td>${esc(x.label)}</td>`
+      + `<td class="val">${esc(x.want)}</td>`
+      + `<td class="val got">${esc(x.got || '—')}${x.ok?' ✓':(x.flagged?'':' ✗')}</td></tr>`;
+  }).join('');
+
+  $('out').innerHTML = banner
+    + `<table><tr><th>Field</th><th>On the form</th><th>Model read</th></tr>${rows}</table>`
+    + `<details><summary>The prompt, and the raw reply</summary>`
+    + `<pre>${esc(HEALTH.prompts[r.prompt])}</pre>`
+    + `<pre>${esc(r.raw)}</pre></details>`
+    + `<div class="foot">${esc(r.level.label)} · ${r.ms} ms · ${r.correct} correct, ${r.wrong} wrong, ${r.flagged} refused</div>`;
+}
+
+async function ask(prompt){
+  document.querySelectorAll('.go').forEach(b => b.disabled = true);
+  $('out').innerHTML = '<p class="empty">Asking the model…</p>';
+  try{
+    const r = await (await fetch('/read', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({level: LEVEL, prompt})})).json();
+    render(r);
+  }catch(e){ $('out').innerHTML = `<div class="banner bad"><b>Failed</b>${esc(e)}</div>`; }
+  document.querySelectorAll('.go').forEach(b => b.disabled = false);
+}
+document.querySelectorAll('.go').forEach(b =>
+  b.addEventListener('click', () => ask(b.dataset.p)));
+boot();
+</script>
