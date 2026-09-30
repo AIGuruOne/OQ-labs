@@ -53,3 +53,6 @@ notebooks/s23_agent_graph/
 notebooks/s24_agent_control/
 notebooks/mcp_live/
 notebooks/harness_and_loop_handout.md
+
+# Lab 11a writes an audit log while it runs
+outputs/11a/

@@ -85,7 +85,8 @@ runs them. Open one with its **Open in Colab** badge, or run it locally.
 | | S16. Vision, lab 2 — scanned work orders | `notebooks/09_vision_scanned.ipynb` |
 | | S16. Vision, lab 3 — multimodal retrieval | `notebooks/10_multimodal_retrieval.ipynb` |
 | **4** Agents | S19. Tune versus retrieve | `notebooks/11_three_way.ipynb` |
-| | S22. MCP live | `notebooks/11b_mcp_live.ipynb` |
+| | **S22. MCP — START HERE** | `notebooks/11a_mcp_basics.ipynb` (20 min, no model, no key, no GPU) |
+| | S22. MCP live, the fuller version | `notebooks/11b_mcp_live.ipynb` |
 | | S23. The agent graph | `notebooks/12_agent_graph.ipynb` |
 | | S24. Control | `notebooks/13_agent_control.ipynb` |
 | | S25. Agent safety and patterns | `notebooks/14_agent_safety.ipynb`, `facilitator/harness_and_loop_handout.md` |

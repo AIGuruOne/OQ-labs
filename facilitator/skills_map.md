@@ -18,6 +18,15 @@ reference.
 | `08a_vision_basics` | Recognise that a vision model which cannot read a field returns a confident, well-formed, wrong value rather than an error — and know that telling it to flag uncertainty does not fix it. | They can answer *"why is `PTW-48715` worse than a blank field?"* | `09a_vision_review_rule`, S29 governance pack template 3 |
 | `09a_vision_review_rule` | Decide, field by field, what a model may write into a system of record unchecked — and what must go to a person — by measuring it against documents you already know the answers to. | They can finish, with their own numbers: *"A model may write ___ unchecked. A person must see ___. That costs ___ reviews, and ___ wrong values still get through."* | S27 deployment checklist row 3, S29 governance pack template 4 |
 
+## Day 4 · S22 · MCP
+
+| Lab | Skill | You will know it landed when | Feeds |
+|---|---|---|---|
+| `11a_mcp_basics` | Tell what a model is allowed to do by looking at how its tool server was started — not at the model, the prompt or the client — and show that the same server file offers different tools depending on that one setting. | They can answer *"where is the write actually stopped?"* and *"what could a cleverer prompt do about it?"* | S24 blast-radius sheet, S26, S29 governance pack template 4 |
+
+`11b_mcp_live` is the fuller version — two servers written from scratch, the
+inspector, a gated client — and stays as reference. 11a is the rung.
+
 ### What the ladder deliberately leaves out
 
 `08`, `09`, `10` and `08b` are **not** on it. They were built as a full
