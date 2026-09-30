@@ -23,10 +23,13 @@ def code_of(stem):
 @pytest.mark.parametrize("stem", AGENT_LABS)
 def test_installs_are_not_colab_only(stem):
     code = code_of(stem)
-    install = re.search(r"^.*pip\", \"install\".*$", code, re.M)
-    assert install, f"{stem} has no pip install line"
-    # everything the notebook imports must be reachable on a laptop too
-    assert 'if IN_COLAB:\n    subprocess.run([sys.executable, "-m", "pip", "install"' not in code, (
+    assert 'pip", "install"' in code, f"{stem} has no pip install line"
+    # There must be a path that installs when NOT on Colab. Either an unconditional
+    # install, or an explicit branch for packages that are missing locally.
+    has_local_path = ("elif MISSING:" in code
+                      or "missing_packages()" in code
+                      or "if IN_COLAB:" not in code.split('pip", "install"')[0][-400:])
+    assert has_local_path, (
         f"{stem} installs only on Colab; a laptop hits ImportError several cells later")
 
 
