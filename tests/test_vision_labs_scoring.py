@@ -69,3 +69,56 @@ def test_08_section_8_markdown_does_not_promise_an_improvement():
     assert "Nothing moved" in note
     # and it must say what DOES help, or the section is just bad news
     assert "A better image" in note and "A bigger model" in note
+
+
+# --- the self-hosted arm is opt-in -----------------------------------------
+# Measured 2026-09-30: the self-hosted arm was ~94% of the run time in both 08 and 09
+# (791s and 795s against the vendor model's 48s and 42s) and produced every call
+# failure. With it off, both notebooks run in about 19 seconds.
+
+@pytest.mark.parametrize("stem", ["08_vision_diagram", "09_vision_scanned"])
+def test_the_self_hosted_arm_is_off_by_default(stem):
+    code = code_of(stem)
+    assert 'INCLUDE_SELF_HOSTED = os.environ.get("LAB_SELF_HOSTED", "0") == "1"' in code, \
+        "the expensive arm must default to off, and be switchable without editing code"
+    # and it must actually gate the Ollama call
+    block = code[code.index("INCLUDE_SELF_HOSTED"):]
+    assert "if INCLUDE_SELF_HOSTED:" in block
+    ollama_at = block.index("ensure_ollama()")
+    guard_at = block.index("if INCLUDE_SELF_HOSTED:")
+    assert guard_at < ollama_at, "ensure_ollama() must sit inside the guard"
+
+
+@pytest.mark.parametrize("stem", ["08_vision_diagram", "09_vision_scanned"])
+def test_the_notebook_says_what_turning_it_on_costs(stem):
+    code = code_of(stem)
+    assert "self-hosted arm OFF" in code
+    assert "INCLUDE_SELF_HOSTED = True" in code, "tell the reader how to get the second column"
+
+
+def test_08_section_8_explains_itself_when_every_model_is_skipped():
+    """With the default flag, nothing runs. That must read as a finding, not a gap."""
+    code = code_of("08_vision_diagram")
+    section = code[code.index("PROMPT_V2"):]
+    assert "ran_any" in section
+    assert "Nothing to run" in section and "That is the finding" in section
+
+
+@pytest.mark.parametrize("stem,phrase", [
+    ("08_vision_diagram", "What this buys you over lab 08a"),
+    ("09_vision_scanned", "the model you can afford to self-host"),
+    ("10_multimodal_retrieval", "What this buys you over labs 08a, 08 and 09"),
+])
+def test_each_lab_says_what_it_adds_over_the_simple_one(stem, phrase):
+    nb = json.loads((REPO_ROOT / "notebooks" / f"{stem}.ipynb").read_text(encoding="utf-8"))
+    md = "\n".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown")
+    assert phrase in md, f"{stem} does not justify its extra cost over 08a"
+
+
+def test_09_no_longer_claims_vision_models_invent_values_as_a_law():
+    """Measured: current vendor models do not invent on a blank field. 09's own numbers agree."""
+    nb = json.loads((REPO_ROOT / "notebooks" / "09_vision_scanned.ipynb").read_text(encoding="utf-8"))
+    md = "\n".join("".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "markdown")
+    assert "This lab is about one failure in particular: **a model that fills in a blank field" not in md
+    assert "not a law about vision models" in md
+    assert "hosting decision" in md
