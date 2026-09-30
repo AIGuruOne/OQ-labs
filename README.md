@@ -78,7 +78,8 @@ runs them. Open one with its **Open in Colab** badge, or run it locally.
 | | S11. Fine-tune it | `notebooks/05_finetune.ipynb` (Apple Silicon: `05b_finetune_mlx.ipynb`) |
 | | S12. Did it work | `notebooks/06_compare_base_tuned.ipynb` |
 | **3** Ground it | S15. Full text RAG pipeline | `notebooks/07_rag_pipeline.ipynb` |
-| | **S16. Vision — START HERE** | `notebooks/08a_vision_basics.ipynb` (15 min, one API key, no GPU, no Ollama) |
+| | **S16. Vision, step 1 — START HERE** | `notebooks/08a_vision_basics.ipynb` (15 min, one API key, no GPU, no Ollama) |
+| | **S16. Vision, step 2** | `notebooks/09a_vision_review_rule.ipynb` (20 min, ends with the sentence you take to S27) |
 | | S16. Vision, lab 1 — diagrams | `notebooks/08_vision_diagram.ipynb` |
 | | S16. Supplement — is the image worth sending? | `notebooks/08b_image_triage.ipynb` (15 min, no model, no key) |
 | | S16. Vision, lab 2 — scanned work orders | `notebooks/09_vision_scanned.ipynb` |
@@ -137,6 +138,7 @@ for the Drive link.
 | `capstone/` | Day 5 capstone scaffold: one file per group (`my_usecase.py`), the Contract 5 reference index, a worked brief 5 build |
 | `setup/` | Environment check and setup guides |
 | `docs/` | Interface contracts, timing log, failure playbook |
+| `facilitator/skills_map.md` | What each lab teaches, how you check it landed, and what consumes it downstream |
 | `facilitator/` | Day 1 templates (decision matrix, spec, cost model, review checklist), the five capstone briefs, the Day 4 decision table and harness hand-out, the Day 5 governance pack, production handout, deployment checklist, peer scoring sheet, pre-baked outputs |
 
 ## Commands

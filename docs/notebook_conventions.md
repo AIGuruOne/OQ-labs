@@ -19,12 +19,42 @@ like. Fill in every field; delete none.
 **Session:** Day <N>, S<NN> — <session name>
 **Expected runtime:** <NN> minutes on <Colab free-tier CPU | Colab free-tier T4>
 **Needs:** <API key? Ollama? GPU? which corpus/data files?>
+
+## What you will be able to do after this
+
+**<the skill, one sentence, as something the person can now DO>**
+
+**You will know it landed** when <the observable test — a sentence they can
+finish, a question they can answer, a decision they can defend>.
+
+**Where you use it:** <the later session and artifact that consumes it>
+
 **A correct result looks like:** <one or two sentences describing the
 final output a participant can check against — a table with specific
 columns, a file at a specific path, a score above a threshold>
 
 > All data in this lab is synthetic. No real OQ material anywhere.
 ```
+
+### Why the skill block is a required field
+
+"A correct result looks like" says whether the notebook *ran*. It does not say
+what the person can now *do*, and a lab that runs green while teaching nothing
+is the easiest failure mode to miss. The three lines are deliberately different
+questions:
+
+| Line | Answers |
+|---|---|
+| What you will be able to do | the skill, in the participant's hands, not the notebook's |
+| You will know it landed | how a facilitator checks it, without a quiz |
+| Where you use it | why it is on the ladder at all — if nothing downstream consumes it, cut the lab |
+
+Every skill block has a matching row in `facilitator/skills_map.md`, and
+`tests/test_skills_map.py` fails if the two drift apart.
+
+**Retrofit status (2026-09-30):** labs `08a` and `09a` carry the block. The
+older notebooks do not yet; the test only enforces it for notebooks listed in
+the skills map, so adding a row is what opts a notebook in.
 
 ## Cell 2 — environment detection (code, FIRST code cell, verbatim)
 
