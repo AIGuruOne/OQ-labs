@@ -1,0 +1,159 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OQ Agent</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#15181d;--dim:#5b6472;--line:#dfe3e9;
+        --model:#8a4b00;--modelbg:#fdf6ec;--code:#1f5fa8;--codebg:#eef2fb;
+        --bad:#b3261e;--badbg:#fdf1f1;--good:#116a3d;--goodbg:#eef7f1}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:16px 22px}
+  .wrap{max-width:1240px;margin:0 auto}
+  h1{margin:0;font-size:23px}h1 span{color:var(--dim);font-weight:400;font-size:15px;margin-left:10px}
+  .req{margin-top:8px;font-size:16px;color:var(--ink);background:#f3f6fb;border-left:4px solid var(--code);
+       padding:10px 14px;border-radius:0 8px 8px 0}
+  .meta{margin-top:8px;font-size:13px;color:var(--dim)}
+  main{max-width:1240px;margin:0 auto;padding:20px}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  button{padding:13px 20px;font-size:16px;font-weight:700;border:0;border-radius:9px;cursor:pointer;
+         background:var(--code);color:#fff}
+  button.alt{background:#4a5568}
+  button.ok{background:var(--good)}button.no{background:var(--bad)}
+  button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:600}
+  button:disabled{opacity:.5;cursor:default}
+  label.brk{font-size:14.5px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .counter{margin-left:auto;font-size:16px;font-weight:700}
+  .counter b{font-size:22px}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  section.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .phead{padding:11px 15px;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;
+         text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .pbody{padding:15px}
+  .tool{border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:10px}
+  .tool b{font-family:ui-monospace,Menlo,monospace;font-size:15px}
+  .tool p{margin:4px 0 0;font-size:14px;color:var(--dim)}
+  .badge{float:right;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;
+         background:#eef2f7;color:var(--dim)}
+  .badge.w{background:var(--badbg);color:var(--bad)}
+  .step{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);
+        border-radius:9px;margin-bottom:9px}
+  .who{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;margin-top:2px}
+  .who.model{background:var(--modelbg);color:var(--model)}
+  .who.code{background:var(--codebg);color:var(--code)}
+  .step.w{border-color:#e8c4c1;background:var(--badbg)}
+  .what{font-family:ui-monospace,Menlo,monospace;font-size:15.5px;font-weight:700}
+  .det{font-size:14px;color:var(--dim);margin-top:2px;word-break:break-word}
+  .res{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--dim);margin-top:4px;word-break:break-word}
+  .banner{border-radius:9px;padding:13px 15px;margin-bottom:14px;font-size:16px}
+  .banner b{display:block;font-size:17.5px;margin-bottom:3px}
+  .banner.bad{background:var(--badbg);border:1px solid #e8c4c1;color:var(--bad)}
+  .banner.good{background:var(--goodbg);border:1px solid #c9e2d2;color:var(--good)}
+  .banner.hold{background:var(--modelbg);border:1px solid #ecd9bb;color:var(--model)}
+  .tally{font-size:15px;color:var(--dim);margin-bottom:12px}
+  .tally b{color:var(--ink)}
+  pre{white-space:pre-wrap;font:13.5px/1.5 ui-monospace,Menlo,monospace;background:#fbfcfd;
+      border:1px solid var(--line);border-radius:8px;padding:11px;margin:0}
+  .empty{color:var(--dim)}
+</style>
+
+<header><div class="wrap">
+  <h1>OQ Agent <span>one job, run two ways</span></h1>
+  <div class="req" id="req">…</div>
+  <div class="meta" id="meta"></div>
+</div></header>
+
+<main>
+  <div class="bar">
+    <button data-engine="plain">Run it plain</button>
+    <button data-engine="gated" class="alt">Run it with a gate</button>
+    <label class="brk"><input type="checkbox" id="broken"> break the forecast</label>
+    <button class="ghost" id="reset">Reset</button>
+    <div class="counter">invites actually sent: <b id="total">0</b></div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="phead">The three tools</div>
+      <div class="pbody" id="tools"></div>
+    </section>
+    <section class="panel">
+      <div class="phead">What happened, and who decided it</div>
+      <div class="pbody" id="out"><p class="empty">Press <b>Run it plain</b>.</p></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+async function boot(){
+  const h=await (await fetch('/health')).json();
+  $('req').textContent=h.request;
+  $('meta').innerHTML=`model <b>${esc(h.model)}</b> · hosted API only — no GPU, no local model · temperature 0`;
+  $('total').textContent=h.invites_total;
+  $('tools').innerHTML=h.tools.map(t=>
+    `<div class="tool"><span class="badge ${t.writes?'w':''}">${t.writes?'CHANGES THE WORLD':'read'}</span>`
+    +`<b>${esc(t.name)}</b><p>${esc(t.description)}</p></div>`).join('');
+}
+
+function render(r){
+  if(r.error){ $('out').innerHTML=`<div class="banner bad"><b>Failed</b>${esc(r.error)}</div>`; return; }
+  $('total').textContent=r.invites_total;
+
+  let banner='';
+  if(r.waiting)
+    banner=`<div class="banner hold"><b>Stopped. Nothing has been sent.</b>`
+      +`This is the exact call that would run:<br><code>${esc(r.waiting.tool)}(${esc(JSON.stringify(r.waiting.args))})</code>`
+      +`<div style="margin-top:10px"><button class="ok" id="yes">Approve</button> `
+      +`<button class="no" id="no">Reject</button></div></div>`;
+  else if(r.engine==='plain' && r.invites_this_run>0)
+    banner=`<div class="banner bad"><b>The invite was sent. Nobody was asked.</b>`
+      +`The model chose the order and chose to send. Run it again — same result. `
+      +`Nothing in the loop separates <i>reading the weather</i> from <i>writing to the world</i>.</div>`;
+  else if(r.invites_this_run>0)
+    banner=`<div class="banner good"><b>Sent, after a person said yes.</b>${esc(r.answer)}</div>`;
+  else
+    banner=`<div class="banner good"><b>Nothing was sent.</b>${esc(r.answer||'The run ended without a write.')}</div>`;
+
+  const tally=`<div class="tally">Steps decided by <b>the model: ${r.model_steps}</b> · `
+    +`by <b>code: ${r.code_steps}</b> &nbsp;—&nbsp; call order: <b>${esc(r.order.join(' → ')||'none')}</b></div>`;
+
+  const steps=r.steps.map(s=>
+    `<div class="step ${s.writes?'w':''}"><span class="who ${s.who}">${s.who}</span><div>`
+    +`<div class="what">${esc(s.what)}</div>`
+    +(s.detail?`<div class="det">${esc(s.detail)}</div>`:'')
+    +(s.result?`<div class="res">${esc(JSON.stringify(s.result))}</div>`:'')
+    +`</div></div>`).join('');
+
+  $('out').innerHTML=banner+tally+steps
+    +(r.answer&&!r.waiting?`<pre>${esc(r.answer)}</pre>`:'');
+
+  if(r.waiting){
+    $('yes').onclick=()=>decide(true);
+    $('no').onclick=()=>decide(false);
+  }
+}
+
+async function go(engine){
+  document.querySelectorAll('button').forEach(b=>b.disabled=true);
+  $('out').innerHTML='<p class="empty">Running…</p>';
+  try{
+    const r=await (await fetch('/run',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({engine, broken:$('broken').checked})})).json();
+    render(r);
+  }catch(e){ $('out').innerHTML=`<div class="banner bad"><b>Failed</b>${esc(e)}</div>`; }
+  document.querySelectorAll('button').forEach(b=>b.disabled=false);
+}
+async function decide(yes){
+  const r=await (await fetch('/decide',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({approve:yes})})).json();
+  render(r);
+}
+document.querySelectorAll('button[data-engine]').forEach(b=>b.onclick=()=>go(b.dataset.engine));
+$('reset').onclick=async()=>{ await fetch('/reset',{method:'POST'}); $('total').textContent='0';
+  $('out').innerHTML='<p class="empty">Press <b>Run it plain</b>.</p>'; };
+boot();
+</script>
