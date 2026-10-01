@@ -1,87 +1,176 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OQ Agent</title>
+<title>OQ Agent — who actually did it</title>
 <style>
   :root{--bg:#f6f7f9;--card:#fff;--ink:#15181d;--dim:#5b6472;--line:#dfe3e9;
-        --model:#8a4b00;--modelbg:#fdf6ec;--code:#1f5fa8;--codebg:#eef2fb;
+        --per:#5b21b6;--perbg:#f5f1fe;--perln:#ddd1fa;
+        --prg:#1f5fa8;--prgbg:#eef2fb;--prgln:#cfdcf2;
+        --mdl:#8a4b00;--mdlbg:#fdf6ec;--mdlln:#ecd9bb;
         --bad:#b3261e;--badbg:#fdf1f1;--good:#116a3d;--goodbg:#eef7f1}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   header{background:var(--card);border-bottom:1px solid var(--line);padding:16px 22px}
-  .wrap{max-width:1240px;margin:0 auto}
-  h1{margin:0;font-size:23px}h1 span{color:var(--dim);font-weight:400;font-size:15px;margin-left:10px}
-  .req{margin-top:8px;font-size:16px;color:var(--ink);background:#f3f6fb;border-left:4px solid var(--code);
-       padding:10px 14px;border-radius:0 8px 8px 0}
-  .meta{margin-top:8px;font-size:13px;color:var(--dim)}
-  main{max-width:1240px;margin:0 auto;padding:20px}
-  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .wrap,main{max-width:1280px;margin:0 auto}
+  main{padding:20px}
+  h1{margin:0;font-size:23px}
+  h1 span{color:var(--dim);font-weight:400;font-size:15px;margin-left:10px}
+  .meta{margin-top:7px;font-size:13px;color:var(--dim)}
+
+  /* the one rule the whole page exists to teach */
+  .rule{margin-top:12px;background:#15181d;color:#fff;border-radius:10px;padding:13px 16px;font-size:16px}
+  .rule b{color:#ffd79a}
+
+  /* who is who */
+  .legend{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 18px}
+  @media (max-width:900px){.legend{grid-template-columns:1fr}}
+  .who-card{background:var(--card);border:1px solid var(--line);border-left-width:6px;
+            border-radius:10px;padding:11px 14px}
+  .who-card.person{border-left-color:var(--per)}
+  .who-card.program{border-left-color:var(--prg)}
+  .who-card.model{border-left-color:var(--mdl)}
+  .who-card h3{margin:0;font-size:13px;letter-spacing:.6px;text-transform:uppercase}
+  .who-card.person h3{color:var(--per)}
+  .who-card.program h3{color:var(--prg)}
+  .who-card.model h3{color:var(--mdl)}
+  .who-card p{margin:3px 0 0;font-size:14.5px;color:var(--dim)}
+
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   button{padding:13px 20px;font-size:16px;font-weight:700;border:0;border-radius:9px;cursor:pointer;
-         background:var(--code);color:#fff}
+         background:var(--prg);color:#fff}
   button.alt{background:#4a5568}
   button.ok{background:var(--good)}button.no{background:var(--bad)}
   button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:600}
   button:disabled{opacity:.5;cursor:default}
-  label.brk{font-size:14.5px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer}
-  .counter{margin-left:auto;font-size:16px;font-weight:700}
-  .counter b{font-size:22px}
-  .grid{display:grid;grid-template-columns:330px 1fr;gap:18px}
-  @media (max-width:900px){.grid{grid-template-columns:1fr}}
-  section.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .phead{padding:11px 15px;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;
-         text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
-  .pbody{padding:15px}
-  .tool{border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:10px}
-  .tool b{font-family:ui-monospace,Menlo,monospace;font-size:15px}
-  .tool p{margin:4px 0 0;font-size:14px;color:var(--dim)}
-  .badge{float:right;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;
-         background:#eef2f7;color:var(--dim)}
-  .badge.w{background:var(--badbg);color:var(--bad)}
-  .step{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);
-        border-radius:9px;margin-bottom:9px}
-  .who{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;margin-top:2px}
-  .who.model{background:var(--modelbg);color:var(--model)}
-  .who.code{background:var(--codebg);color:var(--code)}
-  .step.w{border-color:#e8c4c1;background:var(--badbg)}
-  .what{font-family:ui-monospace,Menlo,monospace;font-size:15.5px;font-weight:700}
-  .det{font-size:14px;color:var(--dim);margin-top:2px;word-break:break-word}
-  .res{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--dim);margin-top:4px;word-break:break-word}
-  .banner{border-radius:9px;padding:13px 15px;margin-bottom:14px;font-size:16px}
+  label.tick{font-size:14.5px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer;
+             background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 12px}
+  .counter{margin-left:auto;font-size:16px;font-weight:700;text-align:right}
+  .counter b{font-size:23px}
+
+  .banner{border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:16px}
   .banner b{display:block;font-size:17.5px;margin-bottom:3px}
   .banner.bad{background:var(--badbg);border:1px solid #e8c4c1;color:var(--bad)}
   .banner.good{background:var(--goodbg);border:1px solid #c9e2d2;color:var(--good)}
-  .banner.hold{background:var(--modelbg);border:1px solid #ecd9bb;color:var(--model)}
-  .tally{font-size:15px;color:var(--dim);margin-bottom:12px}
-  .tally b{color:var(--ink)}
-  pre{white-space:pre-wrap;font:13.5px/1.5 ui-monospace,Menlo,monospace;background:#fbfcfd;
-      border:1px solid var(--line);border-radius:8px;padding:11px;margin:0}
-  .empty{color:var(--dim)}
+  .banner.hold{background:var(--mdlbg);border:1px solid var(--mdlln);color:var(--mdl)}
+  .banner code{display:inline-block;margin-top:4px;background:#fff;border:1px solid var(--line);
+               border-radius:6px;padding:4px 8px;font-size:14px}
+
+  /* ---- the swim lane ---- */
+  .lanes{background:var(--card);border:1px solid var(--line);border-radius:12px}
+  .lane-heads{display:grid;grid-template-columns:1fr 1fr;border-bottom:2px solid var(--ink);
+              position:sticky;top:0;z-index:5;background:var(--card)}
+  .xline{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);background:var(--ink);
+         color:#fff;font-size:11px;font-weight:800;letter-spacing:.7px;border-radius:999px;
+         padding:3px 12px;white-space:nowrap;z-index:6}
+  /* the two lane heads only - .xline is also a child here and sets its own padding */
+  .lane-heads > .lh-left,.lane-heads > .lh-right{padding:12px 16px 26px}
+  .lane-heads .lh-left{border-right:2px solid var(--ink)}
+  .lane-heads h2{margin:0;font-size:14.5px;letter-spacing:.6px;text-transform:uppercase}
+  .lane-heads .lh-left h2{color:var(--prg)}
+  .lane-heads .lh-right h2{color:var(--mdl)}
+  .lane-heads p{margin:3px 0 0;font-size:14px;color:var(--dim)}
+
+  .track{position:relative;display:grid;grid-template-columns:1fr 1fr;
+         column-gap:56px;row-gap:12px;padding:18px 16px}
+  .track::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;
+                 background:var(--ink);transform:translateX(-1px)}
+
+  .step{position:relative;border:1px solid var(--line);border-left-width:6px;border-radius:10px;
+        padding:11px 13px;background:var(--card)}
+  .step.person{border-left-color:var(--per);background:var(--perbg);border-color:var(--perln)}
+  .step.program{border-left-color:var(--prg);background:var(--prgbg);border-color:var(--prgln)}
+  .step.model{border-left-color:var(--mdl);background:var(--mdlbg);border-color:var(--mdlln)}
+  .step.writes{border-color:#e8c4c1;background:var(--badbg);border-left-color:var(--bad)}
+  .step .n{position:absolute;top:-9px;left:10px;background:var(--ink);color:#fff;font-size:11.5px;
+           font-weight:800;border-radius:999px;padding:1px 8px}
+  .step .tag{font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+  .step.person .tag{color:var(--per)}
+  .step.program .tag{color:var(--prg)}
+  .step.model .tag{color:var(--mdl)}
+  .step .what{font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700;
+              margin-top:3px;word-break:break-word}
+  .step .det{font-size:14px;color:var(--dim);margin-top:3px}
+  .step .res{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#2b3340;margin-top:6px;
+             background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px;
+             word-break:break-word}
+  .step pre{margin:6px 0 0;white-space:pre-wrap;background:#fff;border:1px solid var(--mdlln);
+            border-radius:6px;padding:8px 9px;font:13px/1.45 ui-monospace,Menlo,monospace}
+  .step .ran{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:800;letter-spacing:.5px;
+             background:var(--ink);color:#fff;border-radius:999px;padding:2px 9px}
+  .step .caption{font-size:12.5px;color:var(--mdl);font-weight:700;margin-top:5px}
+
+  /* the arrow that sits on the divider: text is the only thing that crosses */
+  .cross{position:absolute;top:14px;width:30px;height:30px;border-radius:999px;
+         background:var(--ink);color:#fff;font-size:14px;font-weight:800;
+         display:flex;align-items:center;justify-content:center;z-index:2;
+         box-shadow:0 0 0 5px var(--card)}
+  .cross.out{right:-43px}
+  .cross.in{left:-43px}
+  @media (max-width:900px){
+    .track{grid-template-columns:1fr;column-gap:0}
+    .track::before{display:none}
+    .xline{display:none}
+    .lane-heads{grid-template-columns:1fr}
+    .lane-heads .lh-left{border-right:0;border-bottom:1px solid var(--line)}
+    .cross{position:static;width:auto;height:auto;border-radius:6px;display:inline-block;
+           margin-top:6px;padding:2px 8px;font-size:12px;box-shadow:none}
+    .step{grid-column:1 !important}
+  }
+
+  .tally{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+         padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media (max-width:900px){.tally{grid-template-columns:repeat(2,1fr)}}
+  .tally div{text-align:center}
+  .tally .k{font-size:13px;color:var(--dim);line-height:1.3}
+  .tally .v{font-size:30px;font-weight:800;line-height:1.1}
+  .tally .v.zero{color:var(--bad)}
+  pre.answer{white-space:pre-wrap;font:14.5px/1.55 ui-monospace,Menlo,monospace;background:var(--card);
+             border:1px solid var(--line);border-radius:10px;padding:13px;margin:16px 0 0}
+  .empty{color:var(--dim);padding:8px}
+  .ask{margin-top:14px;font-size:15px;color:var(--dim);background:var(--card);border:1px solid var(--line);
+       border-radius:10px;padding:13px 16px}
+  .ask b{color:var(--ink)}
+  .ask ol{margin:6px 0 0;padding-left:22px}
 </style>
 
 <header><div class="wrap">
-  <h1>OQ Agent <span>one job, run two ways</span></h1>
-  <div class="req" id="req">…</div>
+  <h1>OQ Agent <span>who actually did it</span></h1>
+  <div class="rule">The model never runs a tool. It <b>reads text and writes text</b>.
+    When it &ldquo;calls a tool&rdquo; it writes text <b>naming</b> one. Your program reads that
+    text, decides whether to obey, and runs the function itself.</div>
   <div class="meta" id="meta"></div>
 </div></header>
 
 <main>
+  <div class="legend">
+    <div class="who-card person"><h3>Person</h3>
+      <p>Starts it. Says yes or no. Nothing in this app ever starts itself.</p></div>
+    <div class="who-card program"><h3>Your program</h3>
+      <p>Runs every function. <b>The only actor that touches the world.</b></p></div>
+    <div class="who-card model"><h3>The model</h3>
+      <p>Reads text. Writes text. Runs nothing, ever.</p></div>
+  </div>
+
   <div class="bar">
     <button data-engine="plain">Run it plain</button>
     <button data-engine="gated" class="alt">Run it with a gate</button>
-    <label class="brk"><input type="checkbox" id="broken"> break the forecast</label>
+    <label class="tick"><input type="checkbox" id="obey" checked> run what the model asks for</label>
+    <label class="tick"><input type="checkbox" id="broken"> break the forecast</label>
     <button class="ghost" id="reset">Reset</button>
-    <div class="counter">invites actually sent: <b id="total">0</b></div>
+    <div class="counter">invites actually sent<br><b id="total">0</b></div>
   </div>
 
-  <div class="grid">
-    <section class="panel">
-      <div class="phead">The three tools</div>
-      <div class="pbody" id="tools"></div>
-    </section>
-    <section class="panel">
-      <div class="phead">What happened, and who decided it</div>
-      <div class="pbody" id="out"><p class="empty">Press <b>Run it plain</b>.</p></div>
-    </section>
+  <div id="out"><p class="empty">Press <b>Run it plain</b>. Watch which column the invite is sent in.</p></div>
+
+  <div class="ask">
+    <b>Three questions for the room, once a run is on screen:</b>
+    <ol>
+      <li>Point at the step where the invite was actually sent. Which column is it in?</li>
+      <li>Untick <i>run what the model asks for</i> and run it plain again. The model asks for
+          the same things. How many get run?</li>
+      <li>Run it with a gate. Count the lines in the model&rsquo;s column.</li>
+    </ol>
   </div>
 </main>
 
@@ -91,12 +180,30 @@ const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 
 async function boot(){
   const h=await (await fetch('/health')).json();
-  $('req').textContent=h.request;
-  $('meta').innerHTML=`model <b>${esc(h.model)}</b> · hosted API only — no GPU, no local model · temperature 0`;
+  const tools=h.tools.map(t=>`<code>${esc(t.name)}</code>${t.writes?' (changes the world)':''}`).join(', ');
+  $('meta').innerHTML=`model <b>${esc(h.model)}</b> &middot; temperature 0 &middot; hosted API only `
+    +`&mdash; no GPU, no local model<br>three tools, all of them ordinary Python functions: ${tools}`;
   $('total').textContent=h.invites_total;
-  $('tools').innerHTML=h.tools.map(t=>
-    `<div class="tool"><span class="badge ${t.writes?'w':''}">${t.writes?'CHANGES THE WORLD':'read'}</span>`
-    +`<b>${esc(t.name)}</b><p>${esc(t.description)}</p></div>`).join('');
+}
+
+function stepCard(s,i){
+  const lane = s.actor==='model' ? 2 : 1;
+  const tag  = s.actor==='person' ? 'person' : s.actor==='program' ? 'your program' : 'the model';
+  const arrow = s.crossing==='to-model'
+      ? '<span class="cross out" title="text crossing to the model">&#9654;</span>'
+      : s.crossing==='from-model'
+      ? '<span class="cross in" title="text crossing back from the model">&#9664;</span>' : '';
+  return `<div class="step ${s.actor}${s.writes?' writes':''}" `
+    +`style="grid-column:${lane};grid-row:${i+1}">`
+    +`<span class="n">${i+1}</span>${arrow}`
+    +`<div class="tag">${tag}</div>`
+    +`<div class="what">${esc(s.what)}</div>`
+    +(s.detail?`<div class="det">${esc(s.detail)}</div>`:'')
+    +(s.raw?`<pre>${esc(s.raw)}</pre><div class="caption">`
+            +`That is all the model sent. Text. Note that <code>arguments</code> is a string.</div>`:'')
+    +(s.result?`<div class="res">${esc(JSON.stringify(s.result))}</div>`:'')
+    +(s.ran?`<span class="ran">a real function ran here</span>`:'')
+    +`</div>`;
 }
 
 function render(r){
@@ -106,35 +213,45 @@ function render(r){
   let banner='';
   if(r.waiting)
     banner=`<div class="banner hold"><b>Stopped. Nothing has been sent.</b>`
-      +`This is the exact call that would run:<br><code>${esc(r.waiting.tool)}(${esc(JSON.stringify(r.waiting.args))})</code>`
-      +`<div style="margin-top:10px"><button class="ok" id="yes">Approve</button> `
-      +`<button class="no" id="no">Reject</button></div></div>`;
+      +`Your program holds the arguments and could call it on the very next line. It does not.`
+      +`<br><code>send_invite(${esc(JSON.stringify(r.waiting.args))})</code>`
+      +`<div style="margin-top:10px"><button class="ok" id="yes">A person approves</button> `
+      +`<button class="no" id="no">A person rejects</button></div></div>`;
   else if(r.engine==='plain' && r.invites_this_run>0)
-    banner=`<div class="banner bad"><b>The invite was sent. Nobody was asked.</b>`
-      +`The model chose the order and chose to send. Run it again — same result. `
-      +`Nothing in the loop separates <i>reading the weather</i> from <i>writing to the world</i>.</div>`;
+    banner=`<div class="banner bad"><b>The invite was sent, and nobody was asked.</b>`
+      +`The model asked for it in step `
+      +`${r.steps.findIndex(s=>s.actor==='model'&&s.what.includes('send_invite'))+1}, `
+      +`and your program ran it in step `
+      +`${r.steps.findIndex(s=>s.actor==='program'&&s.writes&&s.ran)+1}, with no question in between. `
+      +`Both of those lines are yours to change. Neither of them is the model&rsquo;s.</div>`;
   else if(r.invites_this_run>0)
-    banner=`<div class="banner good"><b>Sent, after a person said yes.</b>${esc(r.answer)}</div>`;
+    banner=`<div class="banner good"><b>Sent &mdash; after a person said yes.</b>${esc(r.answer)}</div>`;
   else
-    banner=`<div class="banner good"><b>Nothing was sent.</b>${esc(r.answer||'The run ended without a write.')}</div>`;
+    banner=`<div class="banner good"><b>Nothing was sent.</b>`
+      +`${esc(r.answer||'The run ended without any function changing the world.')}</div>`;
 
-  const tally=`<div class="tally">Steps decided by <b>the model: ${r.model_steps}</b> · `
-    +`by <b>code: ${r.code_steps}</b> &nbsp;—&nbsp; call order: <b>${esc(r.order.join(' → ')||'none')}</b></div>`;
+  const lanes=`<div class="lanes">`
+    +`<div class="lane-heads"><div class="xline">ONLY TEXT CROSSES THIS LINE</div>`
+    +`<div class="lh-left"><h2>You and your program</h2>`
+    +`<p>Everything that actually happened, happened in this column.</p></div>`
+    +`<div class="lh-right"><h2>The model</h2>`
+    +`<p>Every box here is text that came back. Nothing else.</p></div></div>`
+    +`<div class="track">`
+    +r.steps.map(stepCard).join('')
+    +`</div></div>`;
 
-  const steps=r.steps.map(s=>
-    `<div class="step ${s.writes?'w':''}"><span class="who ${s.who}">${s.who}</span><div>`
-    +`<div class="what">${esc(s.what)}</div>`
-    +(s.detail?`<div class="det">${esc(s.detail)}</div>`:'')
-    +(s.result?`<div class="res">${esc(JSON.stringify(s.result))}</div>`:'')
-    +`</div></div>`).join('');
+  const tally=`<div class="tally">`
+    +`<div><div class="v">${r.person_steps}</div><div class="k">steps by a person</div></div>`
+    +`<div><div class="v">${r.program_steps}</div><div class="k">steps by your program</div></div>`
+    +`<div><div class="v">${r.model_steps}</div><div class="k">steps by the model<br>(all of them text)</div></div>`
+    +`<div><div class="v zero">${r.functions_run_by_the_model}</div>`
+    +`<div class="k">functions run <b>by the model</b><br>(of ${r.functions_actually_run} run in total)</div></div>`
+    +`</div>`;
 
-  $('out').innerHTML=banner+tally+steps
-    +(r.answer&&!r.waiting?`<pre>${esc(r.answer)}</pre>`:'');
+  $('out').innerHTML=banner+lanes+tally
+    +(r.answer&&!r.waiting?`<pre class="answer">${esc(r.answer)}</pre>`:'');
 
-  if(r.waiting){
-    $('yes').onclick=()=>decide(true);
-    $('no').onclick=()=>decide(false);
-  }
+  if(r.waiting){ $('yes').onclick=()=>decide(true); $('no').onclick=()=>decide(false); }
 }
 
 async function go(engine){
@@ -142,7 +259,7 @@ async function go(engine){
   $('out').innerHTML='<p class="empty">Running…</p>';
   try{
     const r=await (await fetch('/run',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({engine, broken:$('broken').checked})})).json();
+      body:JSON.stringify({engine, broken:$('broken').checked, obey:$('obey').checked})})).json();
     render(r);
   }catch(e){ $('out').innerHTML=`<div class="banner bad"><b>Failed</b>${esc(e)}</div>`; }
   document.querySelectorAll('button').forEach(b=>b.disabled=false);

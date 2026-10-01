@@ -57,12 +57,127 @@ def test_reject_sends_nothing():
     assert held.waiting is None
 
 
-def test_the_plain_loop_stays_readable():
-    """The README calls it 26 lines. A loop nobody can read teaches nothing."""
+def _plain_loop_body():
     source = (REPO_ROOT / "apps" / "oq_agent" / "agent.py").read_text(encoding="utf-8")
-    body = source.split("def run_plain")[1].split("def run_gated")[0]
-    lines = [l for l in body.splitlines() if l.strip()]
-    assert len(lines) <= 35, f"the plain loop has grown to {len(lines)} lines"
+    return source.split("def run_plain")[1].split("def run_gated")[0]
+
+
+def _without_narration(body):
+    """Drop the run.steps.append(Step(...)) statements.
+
+    Those exist so the page can say who did what; they are not the mechanism. What
+    is left is the loop a person actually has to read to believe it.
+    """
+    kept, depth, dropping = [], 0, False
+    for line in body.splitlines():
+        if not dropping and "run.steps.append(" in line:
+            dropping, depth = True, 0
+        if dropping:
+            depth += line.count("(") - line.count(")")
+            dropping = depth > 0
+            continue
+        kept.append(line)
+    return [l for l in kept if l.strip()]
+
+
+def test_the_plain_loop_stays_readable():
+    """A loop nobody can read teaches nothing.
+
+    The step narration roughly doubled the line count when the page gained its
+    person / program / model columns. Both numbers are capped: the mechanism,
+    which is what goes on a slide, and the whole function, so narration cannot
+    balloon either.
+
+    The mechanism budget was 35 and went to 40 on 2026-10-01, when `obey` added
+    its branch. These are budgets, not measurements - raise one deliberately and
+    say so here, never to get a commit through.
+    """
+    body = _plain_loop_body()
+    mechanism = _without_narration(body)
+    assert len(mechanism) <= 40, f"the loop itself is now {len(mechanism)} lines"
+    whole = [l for l in body.splitlines() if l.strip()]
+    assert len(whole) <= 65, f"run_plain is now {len(whole)} lines in total"
+
+
+# ---------------------------------------------------------------------------
+# The claim the whole demo exists to make: the model never runs anything.
+# These drive the real engines with a stubbed _chat, so no key and no network.
+# ---------------------------------------------------------------------------
+
+ASK_READS = {"tool_calls": [
+    {"id": "c1", "function": {"name": "get_forecast",
+                              "arguments": '{"city": "Harbor City", "date": "2026-10-10"}'}},
+    {"id": "c2", "function": {"name": "check_calendar", "arguments": '{"date": "2026-10-10"}'}}]}
+ASK_WRITE = {"tool_calls": [
+    {"id": "c3", "function": {"name": "send_invite",
+                              "arguments": '{"date": "2026-10-10", "place": "Harbor Park lawn",'
+                                           ' "to": ["Sara", "Omar"]}'}}]}
+PLAIN_ANSWER = {"content": "I sent the invite."}
+GATED_VERDICT = {"content": '{"go": true, "why": "sunny and free"}'}
+
+
+def canned(*replies):
+    it = iter(replies)
+    return lambda messages, with_tools=True: next(it)
+
+
+def test_every_step_is_attributed_to_one_of_three_actors(monkeypatch):
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    assert {s.actor for s in run.steps} <= {agent.PERSON, agent.PROGRAM, agent.MODEL_ACTOR}
+    assert run.steps[0].actor == agent.PERSON, "a person starts every run"
+
+
+def test_the_model_never_runs_a_function(monkeypatch):
+    """The sentence on the page. If this test ever fails, the page is lying."""
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    ran = [s for s in run.steps if s.ran]
+    assert ran, "something should have run"
+    assert all(s.actor == agent.PROGRAM for s in ran), "only the program runs functions"
+    assert len(agent.SENT) == 1
+
+    agent.SENT.clear()
+    monkeypatch.setattr(agent, "_chat", canned(GATED_VERDICT))
+    gated = agent.run_gated()
+    agent.approve(gated)
+    assert all(s.actor == agent.PROGRAM for s in gated.steps if s.ran)
+
+
+def test_every_model_step_shows_the_text_it_returned(monkeypatch):
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    model_steps = [s for s in run.steps if s.actor == agent.MODEL_ACTOR]
+    assert len(model_steps) == 3
+    for step in model_steps:
+        assert step.raw, "a model step must show the literal text, or the claim is unproven"
+        assert not step.ran
+
+
+def test_a_tool_call_is_two_steps_the_asking_and_the_running(monkeypatch):
+    """Collapsing these into one line is what made the room think the model acts."""
+    monkeypatch.setattr(agent, "_chat", canned(ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    asked = next(i for i, s in enumerate(run.steps)
+                 if s.actor == agent.MODEL_ACTOR and "send_invite" in s.what)
+    did = next(i for i, s in enumerate(run.steps) if s.ran and s.writes)
+    assert asked < did, "the model asks first, the program runs after"
+
+
+def test_declining_to_obey_runs_nothing_at_all(monkeypatch):
+    """The proof that the program is in charge: same request, nothing happens."""
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain(obey=False)
+    assert not any(s.ran for s in run.steps)
+    assert agent.SENT == []
+    assert any("does NOT run" in s.what for s in run.steps)
+
+
+def test_the_gated_engine_asks_the_model_exactly_once(monkeypatch):
+    monkeypatch.setattr(agent, "_chat", canned(GATED_VERDICT))
+    run = agent.run_gated()
+    assert sum(1 for s in run.steps if s.actor == agent.MODEL_ACTOR) == 1
+    assert run.waiting and agent.SENT == [], "nothing is sent before a person says yes"
 
 
 def test_the_demo_needs_no_local_model():

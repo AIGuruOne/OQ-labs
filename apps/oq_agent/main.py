@@ -26,6 +26,7 @@ _pending: dict[str, agent.Run] = {}          # a gated run waiting for a person
 class RunRequest(BaseModel):
     engine: str = Field(default="plain", pattern="^(plain|gated)$")
     broken: bool = False
+    obey: bool = True          # plain only: run what the model asks for, or decline it
 
 
 class Decision(BaseModel):
@@ -33,12 +34,24 @@ class Decision(BaseModel):
 
 
 def _payload(run: agent.Run) -> dict:
+    """The three tallies are the whole argument, so they are computed here, not in JS.
+
+    `functions_actually_run` is the one that settles the room's question: it counts
+    program steps that called a real function, and it is never anything but a program
+    step, in either engine.
+    """
+    def count(actor):
+        return sum(1 for s in run.steps if s.actor == actor)
+
     return {"engine": run.engine, "order": run.order, "answer": run.answer,
             "waiting": run.waiting, "invites_this_run": run.invites,
             "invites_total": len(agent.SENT),
             "steps": [asdict(s) for s in run.steps],
-            "model_steps": sum(1 for s in run.steps if s.who == "model"),
-            "code_steps": sum(1 for s in run.steps if s.who == "code")}
+            "person_steps": count(agent.PERSON),
+            "program_steps": count(agent.PROGRAM),
+            "model_steps": count(agent.MODEL_ACTOR),
+            "functions_actually_run": sum(1 for s in run.steps if s.ran),
+            "functions_run_by_the_model": 0}
 
 
 @app.get("/")
@@ -57,7 +70,8 @@ def health():
 @app.post("/run")
 def run(req: RunRequest):
     try:
-        result = agent.run_plain(req.broken) if req.engine == "plain" else agent.run_gated(req.broken)
+        result = (agent.run_plain(req.broken, req.obey) if req.engine == "plain"
+                  else agent.run_gated(req.broken))
     except Exception as exc:
         return {"error": f"{type(exc).__name__}: {str(exc)[:200]}"}
     if result.waiting:
