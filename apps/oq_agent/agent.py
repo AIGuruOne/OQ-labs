@@ -35,6 +35,12 @@ from dataclasses import dataclass, field
 
 import requests
 
+# Importing this loads the repo-root .env into os.environ. Contract 3's module is
+# the one place that parsing lives, so the demo borrows it rather than keeping a
+# second copy. It still speaks raw HTTP below, because it needs to send `tools`,
+# which get_endpoint().chat() deliberately does not expose.
+from config import endpoints as _contract3  # noqa: F401
+
 MODEL = os.environ.get("OQ_AGENT_MODEL", "gpt-4.1-mini")
 BASE_URL = os.environ.get("HOSTED_BASE_URL", "https://api.openai.com/v1")
 
