@@ -99,6 +99,9 @@
   .step .ran{display:inline-block;margin-top:6px;font-size:11.5px;font-weight:800;letter-spacing:.5px;
              background:var(--ink);color:#fff;border-radius:999px;padding:2px 9px}
   .step .caption{font-size:12.5px;color:var(--mdl);font-weight:700;margin-top:5px}
+  .step.program pre{border-color:var(--prgln)}
+  .step .caption.out{color:var(--prg)}
+  .step pre b.new{background:#cfe0f7;font-weight:700;display:inline-block;min-width:100%}
 
   /* the arrow that sits on the divider: text is the only thing that crosses */
   .cross{position:absolute;top:14px;width:30px;height:30px;border-radius:999px;
@@ -186,6 +189,11 @@ async function boot(){
   $('total').textContent=h.invites_total;
 }
 
+// Escape first, then light up the NEW lines. Those are what this turn added;
+// everything above them is being resent, which is the point of showing it.
+const sentHtml=s=>esc(s).split('\n')
+  .map(l=>l.startsWith('NEW ')?`<b class="new">${l}</b>`:l).join('\n');
+
 function stepCard(s,i){
   const lane = s.actor==='model' ? 2 : 1;
   const tag  = s.actor==='person' ? 'person' : s.actor==='program' ? 'your program' : 'the model';
@@ -199,6 +207,9 @@ function stepCard(s,i){
     +`<div class="tag">${tag}</div>`
     +`<div class="what">${esc(s.what)}</div>`
     +(s.detail?`<div class="det">${esc(s.detail)}</div>`:'')
+    +(s.sent?`<pre>${sentHtml(s.sent)}</pre><div class="caption out">`
+             +`This is the whole request. Everything above the NEW lines went last turn too &mdash; `
+             +`the model remembers nothing, so your program resends the lot every time.</div>`:'')
     +(s.raw?`<pre>${esc(s.raw)}</pre><div class="caption">`
             +`That is all the model sent. Text. Note that <code>arguments</code> is a string.</div>`:'')
     +(s.result?`<div class="res">${esc(JSON.stringify(s.result))}</div>`:'')
@@ -233,7 +244,7 @@ function render(r){
   const lanes=`<div class="lanes">`
     +`<div class="lane-heads"><div class="xline">ONLY TEXT CROSSES THIS LINE</div>`
     +`<div class="lh-left"><h2>You and your program</h2>`
-    +`<p>Everything that actually happened, happened in this column.</p></div>`
+    +`<p>Everything that actually happened, happened here &mdash; and every request sent.</p></div>`
     +`<div class="lh-right"><h2>The model</h2>`
     +`<p>Every box here is text that came back. Nothing else.</p></div></div>`
     +`<div class="track">`

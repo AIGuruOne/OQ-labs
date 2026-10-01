@@ -97,6 +97,7 @@ class Step:
     writes: bool = False        # did this line change the world?
     crossing: str = ""          # "to-model" | "from-model" - text moved across the line
     raw: str = ""               # for a model step: the literal text the model returned
+    sent: str = ""              # for a program step that crosses: what we are sending
     ran: bool = False           # for a program step: a real function was called
 
 
@@ -140,6 +141,29 @@ def _as_text(reply: dict) -> str:
     return json.dumps({"content": reply.get("content") or ""})
 
 
+def _as_sent(messages: list[dict], with_tools: bool, new_from: int = 0) -> str:
+    """What we are about to send, one line per message.
+
+    This is the room's second surprise, after "the model does not act": the model
+    does not remember either. Every turn resends the WHOLE conversation. The NEW
+    marks show what this turn added - everything above them went last time too.
+    """
+    header = f"{len(messages)} messages"
+    header += f"  +  {len(TOOLS)} tool descriptions" if with_tools else "  +  no tools at all"
+    lines = [header, ""]
+    for position, message in enumerate(messages):
+        if message.get("tool_calls"):
+            body = "(no text - it asked for " + ", ".join(
+                c["function"]["name"] for c in message["tool_calls"]) + ")"
+        else:
+            body = (message.get("content") or "").replace("\n", " ")
+        if len(body) > 88:
+            body = body[:86] + "..."
+        mark = "NEW " if position >= new_from else "    "
+        lines.append(f"{mark}{message.get('role', 'assistant'):<9} {body}")
+    return "\n".join(lines)
+
+
 def _person_asks(run: Run) -> None:
     """Every run starts here. Nothing in this app ever starts itself."""
     run.steps.append(Step(PERSON, "a person types the request", REQUEST))
@@ -160,6 +184,7 @@ def run_plain(broken: bool = False, obey: bool = True, cap: int = 8) -> Run:
     messages = [{"role": "system", "content": "You are an assistant that can call tools to get a job done."},
                 {"role": "user", "content": REQUEST}]
 
+    sent_last_turn = 0
     for turn in range(cap):
         if turn == 0:
             # Only on the first turn. After that, the step that types a tool result back
@@ -167,7 +192,9 @@ def run_plain(broken: bool = False, obey: bool = True, cap: int = 8) -> Run:
             run.steps.append(Step(PROGRAM, "sends it all to the model",
                                   f"the conversation so far, plus the NAME and DESCRIPTION of "
                                   f"{len(TOOLS)} tools. Not their code.",
-                                  crossing="to-model"))
+                                  crossing="to-model",
+                                  sent=_as_sent(messages, True, sent_last_turn)))
+        sent_last_turn = len(messages)
         reply = _chat(messages)
         messages.append(reply)
         calls = reply.get("tool_calls") or []
@@ -212,7 +239,8 @@ def run_plain(broken: bool = False, obey: bool = True, cap: int = 8) -> Run:
                               "whatever the function returned goes back as an ordinary "
                               "message. The model cannot tell a real result from one we "
                               "made up.",
-                              crossing="to-model"))
+                              crossing="to-model",
+                              sent=_as_sent(messages, True, sent_last_turn)))
 
     run.steps.append(Step(PROGRAM, "safety stop", f"{cap} model calls and still going"))
     return run
@@ -249,15 +277,16 @@ def run_gated(broken: bool = False) -> Run:
         return run
 
     # The one judgement call worth a model: is this good enough to go ahead?
+    question = [{"role": "system",
+                 "content": 'Answer with JSON only: {"go": true|false, "why": "one line"}'},
+                {"role": "user",
+                 "content": f"Forecast: {json.dumps(forecast)}\nCalendar: {json.dumps(calendar)}\n"
+                            f"Should we go ahead with the picnic?"}]
     run.steps.append(Step(PROGRAM, "asks the model ONE question",
                           "both results, and no tools at all. There is nothing it could "
                           "ask for even if it wanted to.",
-                          crossing="to-model"))
-    decision = _chat([{"role": "system",
-                       "content": 'Answer with JSON only: {"go": true|false, "why": "one line"}'},
-                      {"role": "user",
-                       "content": f"Forecast: {json.dumps(forecast)}\nCalendar: {json.dumps(calendar)}\n"
-                                  f"Should we go ahead with the picnic?"}], with_tools=False)
+                          crossing="to-model", sent=_as_sent(question, False)))
+    decision = _chat(question, with_tools=False)
     try:
         verdict = json.loads(decision.get("content", "").strip().strip("`").removeprefix("json"))
     except Exception:

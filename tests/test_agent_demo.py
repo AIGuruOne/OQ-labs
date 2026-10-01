@@ -173,6 +173,47 @@ def test_declining_to_obey_runs_nothing_at_all(monkeypatch):
     assert any("does NOT run" in s.what for s in run.steps)
 
 
+def test_every_crossing_shows_what_went_over_it(monkeypatch):
+    """Both directions are visible, or the page only half-answers "who did what"."""
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    for step in run.steps:
+        if step.crossing == "to-model":
+            assert step.sent, f"step {step.what!r} crosses but shows no payload"
+        if step.crossing == "from-model":
+            assert step.raw, f"step {step.what!r} crosses but shows no reply"
+
+
+def test_the_whole_conversation_is_resent_every_turn(monkeypatch):
+    """The second misconception: that the model remembers. It does not.
+
+    Each send must carry every message of the one before it, so the room can see
+    the transcript growing rather than being told it does.
+    """
+    monkeypatch.setattr(agent, "_chat", canned(ASK_READS, ASK_WRITE, PLAIN_ANSWER))
+    run = agent.run_plain()
+    sends = [s.sent for s in run.steps if s.sent]
+    assert len(sends) >= 2, "a multi-turn run should send more than once"
+
+    counts = [int(text.split(" messages")[0]) for text in sends]
+    assert counts == sorted(counts) and counts[-1] > counts[0], counts
+
+    earlier = [l[4:] for l in sends[0].splitlines() if l.startswith(("NEW ", "    "))]
+    later = [l[4:] for l in sends[-1].splitlines() if l.startswith(("NEW ", "    "))]
+    for line in earlier:
+        assert line in later, f"{line!r} was dropped from a later send"
+    assert any(l.startswith("NEW ") for l in sends[-1].splitlines()), "nothing marked new"
+
+
+def test_the_gated_question_offers_no_tools_at_all(monkeypatch):
+    """The contrast that makes the gated engine's point in one glance."""
+    monkeypatch.setattr(agent, "_chat", canned(GATED_VERDICT))
+    run = agent.run_gated()
+    asked = next(s for s in run.steps if s.crossing == "to-model")
+    assert "no tools at all" in asked.sent
+    assert "tool descriptions" not in asked.sent
+
+
 def test_the_gated_engine_asks_the_model_exactly_once(monkeypatch):
     monkeypatch.setattr(agent, "_chat", canned(GATED_VERDICT))
     run = agent.run_gated()

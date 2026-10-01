@@ -48,6 +48,26 @@ room can see that a "tool call" is this:
 That is all the model did. Note that `arguments` is a **string** — characters someone
 still has to parse before anything can happen.
 
+Every step that crosses the other way shows **what we sent**, one line per message:
+
+```
+5 messages  +  3 tool descriptions
+
+    system    You are an assistant that can call tools to get a job done.
+    user      We want a picnic in Harbor City on Saturday 10 October...
+NEW assistant (no text - it asked for get_forecast, check_calendar)
+NEW tool      {"date": "2026-10-10", "condition": "sunny", "high_c": 31, "rain_pct": 10}
+NEW tool      {"date": "2026-10-10", "free": true, "conflicts": []}
+```
+
+The count climbs 2 → 5 → 7 across a plain run, and the greyed lines are being **resent**.
+That answers the other thing a room assumes: *the model does not remember*. There is no
+session. Your program keeps the transcript and hands the whole thing over every turn,
+which is also why a long agent run costs what it does.
+
+The gated engine's one question reads `2 messages + no tools at all` — there is nothing
+it could ask for even if it wanted to.
+
 Every tool call is therefore **two steps**, never one:
 
 | step | column | what |
