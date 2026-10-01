@@ -401,5 +401,9 @@ def test_inspector_script_passes():
     assert done.returncode == 0, done.stdout[-3000:] + done.stderr[-2000:]
     assert " 0 FAIL" in done.stdout
     for line in done.stdout.splitlines():
-        assert len(line) <= 100, line
+        # Everything the script composes itself must fit a cp1252 Windows console
+        # and a projector. An indented bare path is exempt: macOS hands out 50-char
+        # temp folders, and its width is the machine's business, not ours.
+        if not re.match(r"^\s+([/\\]|[A-Za-z]:[\\/])", line):
+            assert len(line) <= 100, line
         assert line.isascii(), line

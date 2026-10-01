@@ -8,6 +8,24 @@ OQ material anywhere in this repo (see `corpus/README.md`).
 **This repo sets up in 20 minutes.** If it takes longer, something is
 wrong — run the environment check (step 4) and read what it tells you.
 
+## Coming back to this after the week
+
+The program ran 27 Sept – 1 Oct 2026. Everything you used is here, and it still
+runs. Pick the door that suits what you want to do:
+
+| You want to… | Start here | Needs |
+|---|---|---|
+| Re-read what a session covered | `resources/` — all five slide decks and every working document | a PDF reader |
+| Remind yourself what each lab *taught* | `facilitator/skills_map.md` — one row per lab: the skill, how you check it landed, what uses it next | nothing |
+| Show someone else a concept in five minutes | `apps/` — three browser demos (below) | one API key |
+| Re-run a lab | `notebooks/` — see the session table below | the setup under *Setup (local)*, or Colab |
+| See a finished answer | `solutions/` for labs 01–06; for 07–15 the committed notebook already has its outputs | nothing |
+| Apply it to a real OQ system | `facilitator/production_engineering_handout.md`, `facilitator/deployment_checklist.md`, `facilitator/governance_pack/` | nothing |
+| Move it off Colab onto Azure | `resources/OQ_Colab_to_Azure.pdf` | nothing |
+
+If something no longer runs, `docs/failure_playbook.md` has the error text and
+the fix for every failure we actually hit, including on Colab.
+
 ## Setup (local)
 
 Requires Python **3.11 or 3.12** (3.13+ is not supported by the
@@ -36,10 +54,11 @@ python setup/setup_check.py
 `setup_check.py` prints a pass/fail table. Every row should be PASS or
 an explained WARN before Day 1. It needs no packages installed — you
 can run it before step 3 to check your machine. On the OQ network, also
-run `python setup/setup_check.py --network` and send the result to the
-facilitator: it says which of the hosts the week needs (Colab, Google
-sign-in, Drive, GitHub, PyPI, the model API, Ollama, Hugging Face) this
-network can reach, so a block is found before Sunday, not during it.
+run `python setup/setup_check.py --network`: it says which of the hosts
+this material needs (Colab, Google sign-in, Drive, GitHub, PyPI, the
+model API, Ollama, Hugging Face) the network can reach. **Run this first
+if something stops working at your desk** — a blocked host looks exactly
+like broken code, and that is the single most expensive hour to lose.
 
 **Day 2 on a laptop** also needs Ollama (a model server, not a Python
 package) and one pulled model. Install it and run
@@ -117,20 +136,58 @@ than relying on `requirements.txt`. That keeps them self-contained on Colab.
 Locally, run them in a **separate virtual environment** — a couple of their
 pins differ from `requirements.txt` and would disturb the Day 1/2/5 setup.
 
+## Three browser demos
+
+These are not notebooks. Each is one command and a web page, built because the
+concepts land faster when a room can watch them than when they read a cell. They
+need **one hosted API key and nothing else** — no GPU, no Ollama, no local model,
+no extra packages beyond `requirements.txt`.
+
+```bash
+uvicorn apps.oq_helpdesk.main:app --port 8200   # then open http://127.0.0.1:8200
+uvicorn apps.oq_vision.main:app   --port 8300
+uvicorn apps.oq_agent.main:app    --port 8400
+```
+
+| App | Shows | Pairs with |
+|---|---|---|
+| `apps/oq_helpdesk/` | Retrieval: answers only from a knowledgebase we wrote, and says so when it cannot | Day 3, S14–S15 |
+| `apps/oq_vision/` | What a model does when it cannot quite read the page, and how the prompt changes that | Day 3, S16 |
+| `apps/oq_agent/` | **Who actually runs a tool.** One job run two ways, in two columns: the model only ever writes text, your program is what acts | Day 4, S22–S24 |
+
+`apps/oq_agent/` is the one to open first if "the model called the tool" still
+sounds right to you — it is the misconception the whole page is built to remove.
+Each app has its own README with the demo script and the measured results.
+
 ## Slides and hand-outs
 
-Slide decks for all five days live in the program **Google Drive** folder, in
-its *slides* sub-folder — not in this repo. The Office versions of the Day 1
-working documents *are* in this repo, under `resources/`. Ask the facilitator
-for the Drive link.
+Both live in `resources/` — see `resources/README.md` for the full index.
+
+- **Slide decks, all five days:** `OQ_Day1_Architect.pdf`,
+  `OQ_Day2_Own_the_Model.pdf`, `OQ_Day3_Ground_It.pdf`, `OQ_Day4_Agents.pdf`,
+  `OQ_Day5_Integrate_and_Ship.pdf`, plus `OQ_Colab_to_Azure.pdf` for moving what
+  you built onto an Azure VM in the OQ tenant.
+- **Working documents:** the Office version of everything you filled in during
+  the week, under `resources/`, one folder per day — decision matrix, architecture spec,
+  cost model, review checklist, sizing worksheet, scorecards, RAG blueprint,
+  golden set, vision pack, agent design sheet, risk register, integration map,
+  governance templates, deployment checklist, peer scoring — with filled examples
+  for briefs 1, 2, 3 and 4.
+
+**No setup at all:** `resources/day5/OQ_Day5_Graph_Walkthrough.html` is the
+picnic agent walked through step by step in a single file. Double-click it.
+
+Where a document has a Markdown original, it is in `facilitator/`;
+`resources/README.md` says which.
 
 ## Layout
 
 | Path | What it is |
 |---|---|
 | `notebooks/` | Every lab notebook, `01`–`15`, in the order the week runs them |
+| `apps/` | Three small browser demos. No notebook, no Jupyter — run one and open a page |
 | `solutions/` | Completed Day 1/2/5 notebooks with outputs — the reference for `01`–`06` |
-| `resources/` | Office versions of the Day 1 working documents (Excel, Word, PDF) |
+| `resources/` | Slide decks, and the Office versions of every working document (PDF, Excel, Word) |
 | `corpus/` | Synthetic tickets, and the folders the Day 3 labs generate their documents and images into |
 | `data/` | Fine-tuning datasets and eval sets |
 | `config/endpoints.py` | One switch for local Ollama / hosted API / tuned adapter |

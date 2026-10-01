@@ -524,7 +524,8 @@ def main():
     env = {"MOCK_ERP_URL": f"http://127.0.0.1:{args.erp_port}", "MOCK_ERP_API_KEY": erp_key}
     print("=" * WIDTH)
     print(f"Testing {args.module}")
-    print(f"Scratch folder (logs, audit files): {workdir}")
+    print("Scratch folder (logs, audit files):")
+    print(f"  {workdir}")
     print("=" * WIDTH)
 
     started = time.monotonic()
