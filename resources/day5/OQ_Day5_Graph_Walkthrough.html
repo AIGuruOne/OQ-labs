@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Picnic agent walkthrough</title>
+<style>
+:root{
+  --blue:#2f35f5; --navy:#1f1f6b; --green:#8ed34b; --greend:#2e5e1e; --orange:#f58220;
+  --lav:#e8ebfa; --peach:#fdebdd; --mint:#e3f1dd; --grey:#f2f3f5; --text:#222; --muted:#555b66; --red:#b42318;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Calibri,"Segoe UI",system-ui,sans-serif;color:var(--text);background:#fff;border:6px solid var(--green);min-height:100vh}
+header{padding:12px 22px 6px}
+h1{margin:0;font-size:26px;color:var(--blue)}
+.banner{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:14px;background:var(--orange);color:#fff;font-weight:700;font-size:13px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 22px 10px}
+.seg{display:inline-flex;border:2px solid var(--navy);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;color:var(--navy);padding:9px 16px;font-size:16px;font-weight:700;cursor:pointer}
+.seg button.on{background:var(--navy);color:#fff}
+select,.btn{font-size:16px;padding:9px 14px;border-radius:10px;border:2px solid var(--navy);background:#fff;color:var(--navy);font-weight:700;cursor:pointer}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+label.chk{font-size:15px;color:var(--navy);font-weight:700;display:flex;gap:6px;align-items:center}
+main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;padding:0 22px 12px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.card{background:var(--grey);border-radius:14px;padding:12px 14px}
+.diagram{background:#fff;border:2px solid var(--lav);border-radius:14px;padding:6px}
+svg{width:100%;height:auto;display:block}
+.node rect{stroke:#c9cde8;stroke-width:1.5;rx:12;ry:12}
+.node text{font-size:18px;font-weight:700;fill:var(--navy);text-anchor:middle;dominant-baseline:middle}
+.node .sub{font-size:14px;font-weight:600;fill:var(--muted)}
+.node.model rect{fill:var(--peach)} .node.code rect{fill:var(--mint)} .node.person rect{fill:var(--lav)} .node.grey rect{fill:var(--grey)}
+.node.active rect{stroke:var(--orange);stroke-width:5}
+.node.dim{opacity:.35}
+.node.write rect{stroke:var(--red);stroke-dasharray:6 3}
+.edge{stroke:#9aa0b8;stroke-width:3;fill:none;marker-end:url(#ah)}
+.edge.active{stroke:var(--orange);stroke-width:5;marker-end:url(#aho)}
+.elabel{font-size:13px;font-weight:700;fill:var(--orange)}
+.note rect{fill:#fff;stroke:#b9bdd0;stroke-dasharray:5 4;stroke-width:2;rx:12}
+.note text{font-size:14px;fill:var(--muted);font-weight:600}
+.panel h3{margin:0 0 6px;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--greend)}
+.chip{display:inline-block;padding:3px 12px;border-radius:12px;font-weight:800;font-size:14px;color:#fff;margin-right:8px}
+.chip.model{background:#c25b00}.chip.code{background:var(--greend)}.chip.person{background:var(--blue)}.chip.tool{background:var(--muted)}
+.what{background:#fff;border:2px solid var(--lav);border-radius:14px;padding:12px 14px;margin-bottom:12px;min-height:150px}
+.what .t{font-size:22px;font-weight:800;color:var(--navy);margin:8px 0 4px}
+.what .x{font-size:18px;line-height:1.35}
+.meters{display:flex;gap:10px;margin-bottom:12px}
+.meter{flex:1;background:#fff;border:2px solid var(--lav);border-radius:12px;padding:8px 10px}
+.meter b{display:block;font-size:22px;color:var(--navy)}
+.meter span{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.meter.bad b{color:var(--red)}
+pre{margin:0;font-family:"Courier New",monospace;font-size:13.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.log{background:var(--navy);color:#fff;border-radius:10px;padding:10px 12px;min-height:110px;max-height:230px;overflow:auto}
+.log .none{color:#c9cde8;font-style:italic}
+.log .new{color:#ffd9b0}
+.state{background:#fff;border:2px solid var(--lav);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+.result{display:none;margin:0 22px 10px;padding:12px 16px;border-radius:12px;background:var(--mint);font-size:20px;font-weight:800;color:var(--navy)}
+.result.bad{background:var(--peach)}
+.who{background:#fff;border:2px solid var(--lav);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:15px;line-height:1.45}
+.gate{display:none;margin-top:8px;padding:10px;background:var(--lav);border-radius:10px;font-weight:700}
+.gate button{margin-left:8px}
+.table{display:none;margin:0 22px 14px}
+table{border-collapse:collapse;width:100%;font-size:18px}
+th{background:var(--navy);color:#fff;text-align:left;padding:10px 12px}
+td{padding:10px 12px;border-bottom:1px solid #dfe2f3}
+tr:nth-child(even) td{background:var(--lav)}
+footer{padding:6px 22px 16px;color:var(--muted);font-size:13px}
+.progress{height:6px;background:var(--lav);margin:0 22px 10px;border-radius:4px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--orange);width:0;transition:width .2s}
+.help{font-size:13px;color:var(--muted);margin:0 22px 8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>The picnic agent, step by step</h1>
+  <span class="banner">SCRIPTED REPLAY &nbsp;|&nbsp; not a live model run &nbsp;|&nbsp; costs are illustrative</span>
+</header>
+
+<div class="controls">
+  <div class="seg" id="modeSeg">
+    <button data-m="loop" class="on">1  Plain loop</button>
+    <button data-m="graph">2  With a graph</button>
+    <button data-m="compare">3  Side by side</button>
+  </div>
+  <select id="scen" aria-label="Scenario">
+    <option value="good">Good day: sunny, calendar free</option>
+    <option value="timeout">Forecast service times out</option>
+    <option value="conflict">Calendar conflict (busy)</option>
+    <option value="hiccup">Invite service hiccups (runs twice)</option>
+  </select>
+  <button class="btn" id="back">&larr; Back</button>
+  <button class="btn primary" id="next">Next step &rarr;</button>
+  <button class="btn" id="reset">Reset</button>
+  <button class="btn" id="play">Auto-play</button>
+  <label class="chk"><input type="checkbox" id="predict"> Predict first</label>
+</div>
+<div class="help">Keys: &rarr; or Space = next, &larr; = back, R = reset. With &ldquo;Predict first&rdquo; on, each step shows only a question until you press Next again.</div>
+<div class="progress"><i id="bar"></i></div>
+
+<main id="mainArea">
+  <section>
+    <div class="diagram"><svg id="svg" viewBox="0 0 960 440" role="img" aria-label="Diagram of the agent"></svg></div>
+    <div class="card" style="margin-top:12px">
+      <div class="panel"><h3 id="logTitle">Log</h3>
+        <div class="log"><pre id="log"></pre></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="what" id="what"></div>
+    <div class="meters">
+      <div class="meter"><b id="mSteps">0</b><span id="mStepsL">steps</span></div>
+      <div class="meter" id="mCostBox"><b id="mCost">$0.000</b><span id="mCostL">spent (illustrative)</span></div>
+    </div>
+    <div class="state"><div class="panel"><h3 id="stTitle">State notebook</h3></div><pre id="state"></pre></div>
+    <div class="who" id="who"></div>
+    <div class="gate" id="gate">A person is asked: send the invite to Sara and Omar? <button class="btn primary" id="approve">Approve</button></div>
+  </section>
+</main>
+
+<div class="result" id="result"></div>
+
+<div class="table" id="cmp">
+  <table>
+    <tr><th></th><th>Plain loop</th><th>Graph</th></tr>
+    <tr><td><b>Who picks the next step?</b></td><td>The model</td><td>Your code. The model thinks inside boxes.</td></tr>
+    <tr><td><b>Forecast times out</b></td><td>Retries forever, or guesses</td><td>Retries twice, then asks a person</td></tr>
+    <tr><td><b>Calendar is busy</b></td><td>Depends on the run</td><td>No invite. The report says why.</td></tr>
+    <tr><td><b>Invite runs twice</b></td><td>Two invites sent</td><td>Second one ignored (same key)</td></tr>
+    <tr><td><b>Where did the money go?</b></td><td>Nobody knows</td><td>Capped. Every step logged.</td></tr>
+    <tr><td><b>Best for</b></td><td>Tiny, harmless jobs</td><td>Anything that changes something</td></tr>
+  </table>
+  <p style="font-size:18px;font-weight:700;color:var(--navy)">A graph is a set of fixes, not a rule. Pick the lightest one that is safe.</p>
+</div>
+
+<footer>
+  This page is a scripted replay: no model is called and nothing is sent. Real models vary in wording and sometimes in order, and the failures shown are possible outcomes, not guaranteed ones.
+  The request: &ldquo;We want a picnic in Harbor City on Saturday 10 October. Go ahead only if the weather is good and I am free. If yes, send an invite to Sara and Omar for the Harbor Park lawn. Tell me what you did.&rdquo;
+  Everything is invented. Works offline; no key needed.
+</footer>
+
+<script>
+(function(){
+"use strict";
+var MODEL_COST = 0.004;
+
+/* ---------- event scripts ---------- */
+function ev(node, who, title, text, o){ o=o||{}; o.node=node; o.who=who; o.title=title; o.text=text; return o; }
+
+
+function Y(){ return ev("you","person","You type the request","The request goes to your program, not to the model. Your program is ordinary software, and it starts everything. Nothing has called the model yet.",{msg:"you: picnic in Harbor City, Sat 10 Oct. Only if weather good and I am free. If yes, invite Sara and Omar. Tell me what you did.",edge:"e_u_p"}); }
+function PK(){ return ev("program","code","Your program packs the first message","It puts three things together: the instructions, your request, and the list of tools the model is allowed to ask for (get_forecast, check_calendar, send_invite). No tool has run. The model has not been called yet.",{msg:"program: package = instructions + request + tool list"}); }
+function CALL(){ return ev(["program","llm"],"code","Your program calls the model","Your code decides to call the model, every time. The model never wakes up by itself. It reads the text and sends text back.",{msg:"program -> model: here is everything so far",edge:"e_p_l"}); }
+function ASK(tool,args,extra,text){ return ev("llm","model","The model asks: please call "+tool,text||"The model cannot run anything. It can only ASK. Which tool, and in what order, is the model's decision.",Object.assign({msg:"model -> program: call "+tool+"("+args+")",steps:1,cost:1,edge:"e_l_p"},extra||{})); }
+function RUN(tool,title,text,msg,extra){ return ev(["program","tool:"+tool],"code","Your program runs "+tool+": "+title,text,Object.assign({msg:"program ran "+tool+": "+msg,edge:"e_p_t"},extra||{})); }
+function FIN(text,extra){ return [ ev("llm","model","The model says it is done: the final answer",text,{msg:"model -> program: final answer",steps:1,cost:1,edge:"e_l_p"}),
+  ev(["program","you"],"code","Your program shows you the answer","The loop ends because the model said so. Your program hands the text back to you.",Object.assign({msg:"program -> you: answer",edge:"e_p_u",end:true},extra)) ]; }
+var NEXT=" Then your program calls the model again with this result.";
+var LOOP = {
+ good: [Y(),PK(),CALL(),
+  ASK("get_forecast","Harbor City, Sat 10 Oct"),
+  RUN("get_forecast","sunny, 31°C","Your program does the work. The model only asked."+NEXT,"sunny 31C"),
+  ASK("check_calendar","Sat 10 Oct"),
+  RUN("check_calendar","free all day","Another tool, run by your program."+NEXT,"free all day"),
+  ASK("send_invite","Sara, Omar, Harbor Park lawn",{},"This is the one tool that changes something in the world. The model picked it. Nothing stopped it and nothing asked a person."),
+  RUN("send_invite","invite sent","Two inboxes now have an invite. It cannot be unsent."+NEXT,"invite sent to Sara and Omar")
+ ].concat(FIN("“Invite sent. Here is what I did…”",{outcome:"It worked. But nothing in the loop made it work. The model happened to choose well."})),
+ timeout: [Y(),PK(),CALL(),
+  ASK("get_forecast","Harbor City, Sat 10 Oct"),
+  RUN("get_forecast","TIMEOUT","No answer from the forecast service. Your program has no rule for this, so it just tells the model."+NEXT,"ERROR timeout",{bad:true}),
+  ASK("get_forecast","again",{bad:true},"No rule says how many times to try. The model is free to ask again."),
+  RUN("get_forecast","TIMEOUT again","Same failure."+NEXT,"ERROR timeout",{bad:true}),
+  ASK("get_forecast","again",{bad:true},"Nothing counts the attempts. Nothing says stop."),
+  RUN("get_forecast","TIMEOUT again","Same failure."+NEXT,"ERROR timeout",{bad:true}),
+  ev("llm","model","…the same again, 9 more times","(Compressed.) Each round costs money and time.",{msg:"... 9 more rounds ...",steps:9,cost:9,edge:"e_l_p",bad:true}),
+  ev("program","code","Possible: nothing stops it until a demo limit of 12 model calls","Your program has no rule for failures. Only this stop, which we added for the demo, ends it. No answer, no invite, no explanation.",{msg:"STOPPED by demo safety limit (12 calls)",end:true,bad:true,
+     outcome:"A possible outcome, not a typical one: with the model we tested, the plain loop stopped after two retries and explained itself. The point: nothing in your code promised it would."})],
+ conflict: [Y(),PK(),CALL(),
+  ASK("get_forecast","Harbor City, Sat 10 Oct"),
+  RUN("get_forecast","sunny, 31°C","."+NEXT,"sunny 31C"),
+  ASK("check_calendar","Sat 10 Oct"),
+  RUN("check_calendar","BUSY 11:00 to 15:00","The request said: go ahead only if I am free. You are not."+NEXT,"BUSY 11:00-15:00",{bad:true}),
+  ASK("send_invite","Sara, Omar",{bad:true},"One possible choice, not a guaranteed one. The request said ‘only if free’, but that is a sentence in a prompt, not a rule in code. Nothing stops it."),
+  RUN("send_invite","invite sent","Sara and Omar have an invite for a day you are busy."+NEXT,"invite sent",{bad:true})
+ ].concat(FIN("“Invite sent.”",{bad:true,outcome:"A prompt is a request. Code is a rule. Nothing here enforced ‘only if I am free’."})),
+ hiccup: [Y(),PK(),CALL(),
+  ASK("get_forecast","Harbor City, Sat 10 Oct"),
+  RUN("get_forecast","sunny, 31°C","."+NEXT,"sunny 31C"),
+  ASK("check_calendar","Sat 10 Oct"),
+  RUN("check_calendar","free all day","."+NEXT,"free all day"),
+  ASK("send_invite","Sara, Omar"),
+  RUN("send_invite","TIMEOUT (but it was delivered)","The invite service was slow and answered with an error, but the invite did go out. Nothing remembers that."+NEXT,"ERROR timeout (but delivered)",{bad:true}),
+  ASK("send_invite","Sara, Omar again",{bad:true},"The model does not know the first one arrived."),
+  RUN("send_invite","sent again","A second invite lands in both inboxes."+NEXT,"invite sent",{bad:true})
+ ].concat(FIN("“Invite sent.”",{bad:true,outcome:"Two invites in two inboxes. Nothing remembered the first."}))
+};
+
+var G0 = {forecast:null,calendar:null,retries:0,invite_sent:false,key:null};
+var GRAPH = {
+ good: [
+  ev("forecast","code","Start: the code runs the first box","The code, not the model, decides to look at the forecast first.",{log:"start  run=picnic-001  caps: 12 steps, $0.05, 60 s",patch:{},edge:null}),
+  ev("forecast","code","get_forecast: sunny, 31°C","The result is written in the notebook.",{log:"step 1  get_forecast  ok  sunny 31C  chosen_by=code",steps:1,patch:{forecast:"sunny 31C"}}),
+  ev("calendar","code","check_calendar: free all day","",{log:"step 2  check_calendar  ok  free  chosen_by=code",steps:1,patch:{calendar:"free"},edge:"e_f_c"}),
+  ev("decide","code","Decide: good weather and free? Yes","This is code: if forecast is good and calendar is free. The model is not asked.",{log:"step 3  decide  yes  chosen_by=code",steps:1,edge:"e_c_d"}),
+  ev("gate","person","Wait for a person's yes","The invite changes the world, so the graph stops here and asks. Press Approve.",{log:"step 4  approval requested: send_invite",steps:1,edge:"e_d_g",gate:true}),
+  ev("invite","code","send_invite, with a unique key","The key means that if this runs twice, the second one is ignored.",{log:"step 5  send_invite  key=picnic-2026-10-10  sent  approved_by=person",steps:1,patch:{invite_sent:true,key:"picnic-2026-10-10"},edge:"e_g_i"}),
+  ev("report","model","The model writes the report","The only model call in the whole run. Your program calls it to write up what happened. It picks nothing.",{log:"step 6  report  model call  $0.004",steps:1,cost:1,edge:"e_i_rep",end:true,
+     outcome:"Same job. Every route was chosen by code. The model wrote one message. Six steps, six log lines."})
+ ],
+ timeout: [
+  ev("forecast","code","Start: the code runs the first box","",{log:"start  run=picnic-002  caps: 12 steps, $0.05, 60 s",edge:null}),
+  ev("forecast","code","get_forecast: timeout","A rule you wrote: failed step, try again.",{log:"step 1  get_forecast  ERROR timeout  chosen_by=code",steps:1,bad:true,patch:{retries:0}}),
+  ev("retry","code","Retry 1: timeout again","The notebook counts the retries.",{log:"step 2  get_forecast  ERROR timeout  retry 1 of 2",steps:1,bad:true,patch:{retries:1},edge:"e_f_r"}),
+  ev("retry","code","Retry 2: timeout again","Two retries used. The rule says: no more.",{log:"step 3  get_forecast  ERROR timeout  retry 2 of 2",steps:1,bad:true,patch:{retries:2}}),
+  ev("ask","person","Ask a person for help","“The forecast service is down. I tried 3 times. Do you want to wait, or tell me the weather?”",{log:"step 4  ask_human  forecast unavailable after 3 tries",steps:1,edge:"e_r_a"}),
+  ev("report","model","Report: nothing was sent","“I did not send the invite because I could not get the forecast. Waiting for you.”",{log:"step 5  report  no invite sent  $0.004",steps:1,cost:1,edge:"e_a_rep",end:true,
+     outcome:"It stopped, said why, and sent nothing. Five steps. About $0.004. Same every time."})
+ ],
+ conflict: [
+  ev("forecast","code","Start","",{log:"start  run=picnic-003  caps: 12 steps, $0.05, 60 s",edge:null}),
+  ev("forecast","code","get_forecast: sunny, 31°C","",{log:"step 1  get_forecast  ok  sunny 31C",steps:1,patch:{forecast:"sunny 31C"}}),
+  ev("calendar","code","check_calendar: busy 11:00 to 15:00","",{log:"step 2  check_calendar  ok  BUSY 11:00-15:00",steps:1,bad:true,patch:{calendar:"busy 11:00-15:00"},edge:"e_f_c"}),
+  ev("decide","code","Decide: good weather and free? No","Code, not the model. The route to the invite is closed.",{log:"step 3  decide  no  chosen_by=code  invite skipped",steps:1,edge:"e_c_d"}),
+  ev("report","model","Report: why there is no invite","“I did not send an invite: you are busy 11:00 to 15:00 on Saturday.”",{log:"step 4  report  no invite sent  $0.004",steps:1,cost:1,edge:"e_d_rep",end:true,
+     outcome:"No invite. The report says why. Same every time."})
+ ],
+ hiccup: [
+  ev("forecast","code","Start","",{log:"start  run=picnic-004  caps: 12 steps, $0.05, 60 s",edge:null}),
+  ev("forecast","code","get_forecast: sunny, 31°C","",{log:"step 1  get_forecast  ok",steps:1,patch:{forecast:"sunny 31C"}}),
+  ev("calendar","code","check_calendar: free","",{log:"step 2  check_calendar  ok  free",steps:1,patch:{calendar:"free"},edge:"e_f_c"}),
+  ev("decide","code","Decide: yes","",{log:"step 3  decide  yes",steps:1,edge:"e_c_d"}),
+  ev("gate","person","Wait for a person's yes","Press Approve.",{log:"step 4  approval requested: send_invite",steps:1,edge:"e_d_g",gate:true}),
+  ev("invite","code","send_invite (key picnic-2026-10-10): timeout","The invite was delivered but the answer was lost. The notebook does not yet know.",{log:"step 5  send_invite  key=picnic-2026-10-10  ERROR timeout",steps:1,bad:true,patch:{key:"picnic-2026-10-10"},edge:"e_g_i"}),
+  ev("invite","code","Retry with the same key: ignored","The server sees the same key: ‘already sent, ignoring’. Only one invite exists.",{log:"step 6  send_invite  key=picnic-2026-10-10  DUPLICATE ignored",steps:1,patch:{invite_sent:true}}),
+  ev("report","model","The model writes the report","",{log:"step 7  report  model call  $0.004",steps:1,cost:1,edge:"e_i_rep",end:true,
+     outcome:"One invite, even though the tool was called twice. The key made the second call harmless."})
+ ]
+};
+
+
+(function(){
+  var you = function(){ return ev("you","person","You type the request","The request goes to your program. Same as before: the model has not been called.",{log:"you: picnic request received",edge:"e_u_s"}); };
+  Object.keys(GRAPH).forEach(function(k){
+    var a=GRAPH[k]; var st=a[0];
+    st.title="Your program starts the graph"; st.text="Your program (plain code) sets up the notebook and the caps and runs the first box itself. It does not ask the model what to do first. The route was decided when we drew the graph.";
+    a.unshift(you());
+  });
+})();
+
+/* ---------- diagrams ---------- */
+function defs(){return '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9aa0b8"/></marker><marker id="aho" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f58220"/></marker></defs>';}
+function node(id,cls,x,y,w,h,label,sub){
+  return '<g class="node '+cls+'" data-n="'+id+'"><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"/><text x="'+(x+w/2)+'" y="'+(y+h/2-(sub?9:0))+'">'+label+'</text>'+(sub?'<text class="sub" x="'+(x+w/2)+'" y="'+(y+h/2+14)+'">'+sub+'</text>':'')+'</g>';
+}
+function edge(id,d,label,lx,ly){
+  return '<path class="edge" data-e="'+id+'" d="'+d+'"/>'+(label?'<text class="elabel" x="'+lx+'" y="'+ly+'">'+label+'</text>':'');
+}
+var DIAG = {
+ loop: defs()+
+  node("you","person",20,170,150,100,"You","type the request")+
+  node("program","code",270,110,220,230,"Your program","plain code, not AI")+
+  node("llm","model",620,15,300,110,"The model","can only ASK or ANSWER")+
+  '<rect x="620" y="165" width="300" height="265" rx="16" fill="#fff" stroke="#c9cde8" stroke-width="2" stroke-dasharray="5 4"/><text x="770" y="190" text-anchor="middle" font-size="15" font-weight="700" fill="#555b66">Tools (your program runs them)</text>'+
+  node("tool:get_forecast","code",645,205,250,60,"get_forecast","")+
+  node("tool:check_calendar","code",645,282,250,60,"check_calendar","")+
+  node("tool:send_invite","code write",645,359,250,60,"send_invite","WRITES. cannot be unsent")+
+  edge("e_u_p","M172,205 L268,205","request",185,196)+
+  edge("e_p_u","M268,248 L172,248","answer",190,272)+
+  edge("e_p_l","M492,150 L618,70","call the model",470,112)+
+  edge("e_l_p","M618,100 L492,185","its reply",560,172)+
+  edge("e_p_t","M492,285 L643,320","run the tool",495,318),
+ graph: defs()+
+  node("you","person",20,4,150,42,"You","the request")+
+  edge("e_u_s","M95,46 L95,100","",0,0)+
+  '<g transform="translate(0,55)">'+
+  node("forecast","code",20,50,150,80,"Get the forecast","")+
+  node("calendar","code",205,50,150,80,"Check calendar","")+
+  node("decide","code",390,50,150,80,"Decide","good weather and free?")+
+  node("gate","person",575,50,150,80,"A person says yes?","")+
+  node("invite","code write",760,50,160,80,"Send the invite","with a unique key")+
+  node("retry","grey",20,250,150,80,"Retry","at most 2 times")+
+  node("ask","person",205,250,150,80,"Ask a person","still failing")+
+  node("report","model",390,330,530,80,"Report: what I did and why","the only place the model is called")+
+  edge("e_f_c","M172,90 L203,90")+edge("e_c_d","M357,90 L388,90")+edge("e_d_g","M542,90 L573,90")+edge("e_g_i","M727,90 L758,90")+
+  edge("e_f_r","M95,132 L95,248","fails",104,195)+
+  edge("e_r_a","M172,290 L203,290","",0,0)+
+  edge("e_a_rep","M280,332 L280,370 L388,370","",0,0)+
+  edge("e_d_rep","M465,132 L465,328","no",474,230)+
+  edge("e_g_rep","M650,132 L650,328","no",659,230)+
+  edge("e_i_rep","M840,132 L840,328","",0,0)+
+  '<g class="note"><rect x="20" y="388" width="340" height="48"/><text x="190" y="405" text-anchor="middle">Every arrow is chosen by your program.</text><text x="190" y="424" text-anchor="middle">The model only writes the report.</text></g>'+
+  '</g>'
+};
+
+
+/* ---------- state ---------- */
+var mode="loop", scen="good", idx=-1, pending=false, timer=null;
+var $=function(i){return document.getElementById(i)};
+function evs(){ return (mode==="loop"?LOOP:GRAPH)[scen]; }
+
+function compute(upto){
+  var st={steps:0,cost:0,logs:[],state:Object.assign({},G0),last:null,end:false};
+  var E=evs();
+  for(var i=0;i<=upto;i++){
+    var e=E[i];
+    if(e.steps) st.steps+=e.steps;
+    if(e.cost) st.cost+=e.cost*MODEL_COST;
+    if(e.patch) Object.assign(st.state,e.patch);
+    var line = mode==="loop"? e.msg : e.log;
+    if(line) st.logs.push(line);
+    st.last=e;
+    if(e.end) st.end=true;
+  }
+  return st;
+}
+
+function render(){
+  var svg=$("svg"); svg.innerHTML=DIAG[mode]; svg.setAttribute("viewBox", mode==="graph"?"0 0 960 500":"0 0 960 440");
+  var E=evs();
+  var showDetail = !(pending);
+  var st = idx>=0 ? compute(idx) : {steps:0,cost:0,logs:[],state:Object.assign({},G0),last:null,end:false};
+  // diagram highlights
+  var nodes=svg.querySelectorAll(".node");
+  for(var k=0;k<nodes.length;k++) nodes[k].classList.remove("active");
+  if(idx>=0 && st.last && showDetail){
+    [].concat(st.last.node).forEach(function(id){var n=svg.querySelector('[data-n="'+id+'"]'); if(n) n.classList.add("active");});
+    if(st.last.edge){var ed=svg.querySelector('[data-e="'+st.last.edge+'"]'); if(ed) ed.classList.add("active");}
+  }
+  // what panel
+  var w=$("what");
+  if(idx<0){
+    w.innerHTML='<div class="t">Ready</div><div class="x">'+(mode==="loop"?
+      'The plain loop. Four players: you, your program, the model, the tools. Press <b>Next step</b> and watch who does what.':
+      'The same job as a graph: your program picks every step by rules and the model writes one message. Press <b>Next step</b>.')+'</div>';
+  } else if(pending){
+    w.innerHTML='<div class="t">What happens next?</div><div class="x">Guess first. Who decides the next step, and what will it do? Press <b>Next step</b> to reveal.</div>';
+  } else {
+    var e=st.last, chipTxt={model:"The model decides",code:"YOUR PROGRAM (code)",person:"A PERSON",tool:"Tool ran"}[e.who];
+    w.innerHTML='<span class="chip '+e.who+'">'+chipTxt+'</span><span style="color:var(--muted);font-weight:700">step '+(idx+1)+' of '+E.length+'</span><div class="t">'+e.title+'</div><div class="x">'+(e.text||"")+'</div>';
+  }
+  // meters
+  $("mSteps").textContent = st.steps + (mode==="graph"?" / 12":"");
+  $("mStepsL").textContent = mode==="graph" ? "steps used (cap 12)" : (st.steps>=12?"model calls (demo stop)":"model calls (no cap)");
+  $("mCost").textContent = "$"+st.cost.toFixed(3);
+  $("mCostL").textContent = mode==="graph" ? "spent of $0.05 cap (illustrative)" : "spent (illustrative, no cap)";
+  $("mCostBox").className="meter"+((mode==="loop" && st.steps>=8)?" bad":"");
+  // log
+  $("logTitle").textContent = mode==="loop" ? "What exists afterwards: just the chat history. No log." : "Log, written by the code (one line per step)";
+  var lg=$("log");
+  if(!st.logs.length){ lg.innerHTML='<span class="none">'+(mode==="loop"?"(empty)":"(no steps yet)")+'</span>'; }
+  else { lg.innerHTML=st.logs.map(function(l,i){return (i===st.logs.length-1&&showDetail?'<span class="new">':'<span>')+esc(l)+'</span>';}).join("\n"); lg.parentNode.scrollTop=lg.parentNode.scrollHeight; }
+  // state
+  if(mode==="loop"){ $("stTitle").textContent="State notebook"; $("state").innerHTML='<span style="color:var(--muted);font-style:italic">None. Only the chat history. Nothing remembers that an invite went out.</span>'; }
+  else { $("stTitle").textContent="State notebook (owned by the code)";
+    var s=st.state; $("state").textContent="forecast:     "+(s.forecast||"None")+"\ncalendar:     "+(s.calendar||"None")+"\nretries:      "+s.retries+" / 2\ninvite_sent:  "+s.invite_sent+"\ninvite key:   "+(s.key||"None"); }
+  // who card
+  $("who").innerHTML = mode==="loop" ?
+    "<b>Who does what</b><br><b>You:</b> type the request, read the answer.<br><b>Your program:</b> always calls the model, runs whatever tool it asks for, repeats.<br><b>The model:</b> picks the next tool. It can only ask; it runs nothing.<br><b>Who decides the next step?</b> The model." :
+    "<b>Who does what</b><br><b>You:</b> type the request, say yes at the gate.<br><b>Your program:</b> picks every step by rules, runs the tools, writes the log.<br><b>The model:</b> called once, to write the report. It picks nothing.<br><b>Who decides the next step?</b> Your program.";
+  // gate
+  var showGate = mode==="graph" && idx>=0 && !pending && st.last && st.last.gate && idx===curGateIdx();
+  $("gate").style.display = showGate ? "block":"none";
+  // result
+  var r=$("result");
+  if(st.end && !pending){ r.style.display="block"; r.className="result"+(st.last.bad?" bad":""); r.textContent=st.last.outcome; } else r.style.display="none";
+  // progress
+  $("bar").style.width = ((idx+1)/E.length*100)+"%";
+  $("back").disabled = idx<0 && !pending;
+  $("next").disabled = idx>=E.length-1 && !pending;
+  // compare view
+  var cmp = mode==="compare";
+  $("cmp").style.display = cmp?"block":"none";
+  $("mainArea").style.display = cmp?"none":"grid";
+  if(cmp){ r.style.display="none"; }
+}
+function curGateIdx(){ var E=evs(); for(var i=0;i<E.length;i++) if(E[i].gate) return i; return -1; }
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+function next(){
+  var E=evs(); if(mode==="compare") return;
+  var predict=$("predict").checked;
+  if(predict && !pending && idx<E.length-1){ pending=true; render(); return; }
+  if(pending){ pending=false; idx++; render(); return; }
+  if(idx<E.length-1){ idx++; render(); }
+}
+function back(){ pending=false; if(idx>=0){ idx--; } render(); }
+function reset(){ stop(); pending=false; idx=-1; render(); }
+function stop(){ if(timer){clearInterval(timer);timer=null;} $("play").textContent="Auto-play"; }
+function play(){
+  if(timer){ stop(); return; }
+  $("play").textContent="Pause";
+  timer=setInterval(function(){ var E=evs(); if(idx>=E.length-1){ stop(); return; } var p=$("predict").checked; $("predict").checked=false; next(); $("predict").checked=p; },1800);
+}
+
+$("next").onclick=next; $("back").onclick=back; $("reset").onclick=reset; $("play").onclick=play;
+$("approve").onclick=function(){ next(); };
+$("scen").onchange=function(){ scen=this.value; reset(); };
+$("predict").onchange=function(){ pending=false; render(); };
+var segs=document.querySelectorAll("#modeSeg button");
+for(var i=0;i<segs.length;i++) segs[i].onclick=function(){
+  for(var j=0;j<segs.length;j++) segs[j].classList.remove("on"); this.classList.add("on");
+  mode=this.getAttribute("data-m"); $("scen").disabled=(mode==="compare"); reset();
+};
+document.addEventListener("keydown",function(e){
+  if(e.target && (e.target.tagName==="SELECT")) return;
+  if(e.key==="ArrowRight"||e.key===" "){ e.preventDefault(); next(); }
+  else if(e.key==="ArrowLeft"){ back(); }
+  else if(e.key==="r"||e.key==="R"){ reset(); }
+});
+render();
+})();
+</script>
+</body>
+</html>
